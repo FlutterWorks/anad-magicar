@@ -241,11 +241,13 @@ class _MyAppState extends State<MyApp>
  {
    String title=message['notification']['title'];
    String messageBody=message['notification']['body'];
-
-   /*FlushbarHelper.createInformation(title: title,message: messageBody,duration: Duration(milliseconds: 2000));
-*/
-  // _showTopFlash(title, messageBody);
-   RxBus.post(new ChangeEvent(type: 'FCM',message: messageBody));
+   messageBody+='\n'+title;
+  String data=message['data']['body'];
+   if(data!=null && data.isNotEmpty){
+     RxBus.post(new ChangeEvent(type: 'FCM_STATUS',message: data));
+   }else {
+     RxBus.post(new ChangeEvent(type: 'FCM', message: messageBody));
+   }
  }
    @override
   void initState() {
@@ -488,12 +490,12 @@ class _MyAppState extends State<MyApp>
                                               );
                                             case '/messageapp':
                                               return new MyCustomRoute(
-                                                builder: (_) => new MessageAppPage(),
+                                                builder: (_) => new MessageAppPage(carId: settings.arguments,),
                                                 settings: settings,
                                               );
                                             case '/servicepage':
                                               return new MyCustomRoute(
-                                                builder: (_) => new ServicePage(carId: settings.arguments,),
+                                                builder: (_) => new ServicePage(serviceVM: settings.arguments,),
                                                 settings: settings,
                                               );
                                             case '/registerservicepage':

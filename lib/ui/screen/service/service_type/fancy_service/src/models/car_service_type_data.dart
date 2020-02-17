@@ -7,6 +7,7 @@ class CarServiceTypeData {
   int durationType;
   int serviceType;
   int durationCountValue;
+ // int durationTypeConstId;
   int alarmDurationDay;
   String alarmCount;
   bool automationInsert;

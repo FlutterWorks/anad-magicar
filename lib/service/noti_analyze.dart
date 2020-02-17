@@ -1,5 +1,6 @@
 
 import 'dart:collection';
+import 'dart:typed_data';
 
 import 'package:anad_magicar/common/actions_constants.dart';
 import 'package:anad_magicar/model/viewmodel/car_state.dart';
@@ -12,6 +13,7 @@ class NotiAnalyze {
 
  String noti;
  int carId;
+ Uint8List data;
 
  static HashMap<int,CarStateVM> actionCommandsNotiMap=new HashMap();
  static HashMap<carEnum.CarStatus,int> carNotiMap=new HashMap();
@@ -21,6 +23,7 @@ class NotiAnalyze {
  NotiAnalyze({
    @required this.noti,
    @required this.carId,
+   @required this.data
  });
 
  static int getCarIdFromNoty(String noti) {
@@ -34,73 +37,91 @@ class NotiAnalyze {
    }
  }
 
-  StatusNotiVM decodeStatus(String statusBits, int index) {
+ List<List<int>> decodeStatusIntoBytes(){
+    List<List<int>> status=new List();
+    for(var i=0;i<=7;i++){
+      for(var j=0;j<=7;j++){
+        status[i][7-j]=getBit(data, i, j);
+      }
+    }
+    return status;
+  }
+
+ int  getBit(Uint8List data,int posByte,int posBit){
+   int valByte=data[posByte];
+   int valInt=(valByte >> ((8 - (posBit+1)) & 0x0001));
+   return valInt;
+  }
+
+  StatusNotiVM decodeStatus(List<List<int>> statusBits, int index) {
    statusNotiVM=new StatusNotiVM();
    if(index==1)
      {
-       decodeStatus1(statusBits);
+       decodeStatus1(statusBits[0]);
 
      }
    if(index==2)
    {
-     decodeStatus2(statusBits);
+     decodeStatus2(statusBits[1]);
 
    }
    if(index==3)
    {
-     decodeStatus3(statusBits);
+     decodeStatus3(statusBits[2]);
 
    }
 
    if(index==4)
    {
-     decodeFeature1(statusBits);
+     decodeFeature1(statusBits[3]);
 
    }
    if(index==5)
    {
-     decodeFeature2(statusBits);
+     decodeFeature2(statusBits[4]);
 
    }
    if(index==6)
    {
-     decodeFeature3(statusBits);
+     decodeFeature3(statusBits[5]);
    }
    if(index==7)
    {
-     decodeData6(statusBits);
+     decodeData6(statusBits[6]);
 
    }
    if(index==8)
    {
-     decodeData7(statusBits);
+     decodeData7(statusBits[7]);
    }
   return statusNotiVM;
  }
 
 
- static decodeStatus1(String statusBits) {
+ static decodeStatus1(List<int> statusBits) {
    String statusNoti='';
 
      for(var i=0;i<statusBits.length;i++) {
-       String bitItem = statusBits.substring(i,i);
-       if(i==0) statusNotiVM.arm=bitItem=='1' ? true : false  ;
-       if(i==1) statusNotiVM.door=bitItem=='1' ? true : false  ;
-       if(i==2) statusNotiVM.trunk=bitItem=='1' ? true : false  ;
-       if(i==3) statusNotiVM.hood=bitItem=='1' ? true : false  ;
-       if(i==4) statusNotiVM.engine=bitItem=='1' ? true : false  ;
-       if(i==5) statusNotiVM.ignitionStatus=bitItem=='1' ? true : false  ;
-       if(i==6) statusNotiVM.manualTransmission=bitItem=='1' ? true : false  ;
+       //int bitItem = statusBits.substring(i,i);
+       int bitItem=statusBits[i];
+       if(i==0) statusNotiVM.arm=bitItem==1 ? true : false  ;
+       if(i==1) statusNotiVM.door=bitItem==1 ? true : false  ;
+       if(i==2) statusNotiVM.trunk=bitItem==1 ? true : false  ;
+       if(i==3) statusNotiVM.hood=bitItem==1 ? true : false  ;
+       if(i==4) statusNotiVM.engine=bitItem==1 ? true : false  ;
+       if(i==5) statusNotiVM.ignitionStatus=bitItem==1 ? true : false  ;
+       if(i==6) statusNotiVM.manualTransmission=bitItem==1 ? true : false  ;
        //if(i==7) statusNotiVM.arm=bitItem=='1' ? true : false  ;
      }
    }
 
- static decodeStatus2(String statusBits) {
+ static decodeStatus2(List<int> statusBits) {
    for(var i=0;i<statusBits.length;i++) {
-     String bitItem = statusBits.substring(i,i);
+     //'String bitItem = statusBits.substring(i,i);
+     int bitItem=statusBits[i];
     // if(i==0) statusNotiVM.arm=bitItem=='1' ? true : false  ;
     // if(i==1) statusNotiVM.door=bitItem=='1' ? true : false  ;
-     if(i==2) statusNotiVM.parkingLights=bitItem=='1' ? true : false  ;
+     if(i==2) statusNotiVM.parkingLights=bitItem==1 ? true : false  ;
     /* if(i==3) statusNotiVM.hood=bitItem=='1' ? true : false  ;
      if(i==4) statusNotiVM.engine=bitItem=='1' ? true : false  ;
      if(i==5) statusNotiVM.ignitionStatus=bitItem=='1' ? true : false  ;
@@ -109,12 +130,13 @@ class NotiAnalyze {
    }
  }
 
- static decodeStatus3(String statusBits) {
+ static decodeStatus3(List<int> statusBits) {
    for(var i=0;i<statusBits.length;i++) {
-     String bitItem = statusBits.substring(i,i);
+     //String bitItem = statusBits.substring(i,i);
+     int bitItem=statusBits[i];
     /* if(i==0) statusNotiVM.arm=bitItem=='1' ? true : false  ;
      if(i==1) statusNotiVM.door=bitItem=='1' ? true : false  ;*/
-     if(i==2) statusNotiVM.manual=bitItem=='1' ? true : false  ;
+     if(i==2) statusNotiVM.manual=bitItem==1 ? true : false  ;
     /* if(i==3) statusNotiVM.hood=bitItem=='1' ? true : false  ;
      if(i==4) statusNotiVM.engine=bitItem=='1' ? true : false  ;
      if(i==5) statusNotiVM.ignitionStatus=bitItem=='1' ? true : false  ;
@@ -123,24 +145,26 @@ class NotiAnalyze {
    }
  }
 
- static decodeFeature1(String statusBits) {
+ static decodeFeature1(List<int> statusBits) {
    for(var i=0;i<statusBits.length;i++) {
-     String bitItem = statusBits.substring(i,i);
-      if(i==0) statusNotiVM.timerStart=bitItem=='1' ? true : false  ;
-     if(i==1) statusNotiVM.siren=bitItem=='1' ? true : false  ;
-     if(i==2) statusNotiVM.shockSensor=bitItem=='1' ? true : false  ;
-      if(i==3) statusNotiVM.turbo=bitItem=='1' ? true : false  ;
-     if(i==4) statusNotiVM.passiveArming=bitItem=='1' ? true : false  ;
-     if(i==5) statusNotiVM.valet=bitItem=='1' ? true : false  ;
+     //String bitItem = statusBits.substring(i,i);
+     int bitItem=statusBits[i];
+      if(i==0) statusNotiVM.timerStart=bitItem==1 ? true : false  ;
+     if(i==1) statusNotiVM.siren=bitItem==1 ? true : false  ;
+     if(i==2) statusNotiVM.shockSensor=bitItem==1 ? true : false  ;
+      if(i==3) statusNotiVM.turbo=bitItem==1 ? true : false  ;
+     if(i==4) statusNotiVM.passiveArming=bitItem==1 ? true : false  ;
+     if(i==5) statusNotiVM.valet=bitItem==1 ? true : false  ;
      //if(i==6) statusNotiVM.manualTransmission=bitItem=='1' ? true : false  ;
-     if(i==7) statusNotiVM.driveLocked=bitItem=='1' ? true : false  ;
+     if(i==7) statusNotiVM.driveLocked=bitItem==1 ? true : false  ;
    }
  }
- static decodeFeature2(String statusBits) {
+ static decodeFeature2(List<int> statusBits) {
    for(var i=0;i<statusBits.length;i++) {
-     String bitItem = statusBits.substring(i,i);
+     //String bitItem = statusBits.substring(i,i);
+     int bitItem=statusBits[i];
      //if(i==0) statusNotiVM.arm=bitItem=='1' ? true : false  ;
-     if(i==1) statusNotiVM.lowBattery=bitItem=='1' ? true : false  ;
+     if(i==1) statusNotiVM.lowBattery=bitItem==1 ? true : false  ;
    /*  if(i==2) statusNotiVM.manual=bitItem=='1' ? true : false  ;
       if(i==3) statusNotiVM.hood=bitItem=='1' ? true : false  ;
      if(i==4) statusNotiVM.engine=bitItem=='1' ? true : false  ;
@@ -149,58 +173,69 @@ class NotiAnalyze {
      //if(i==7) statusNotiVM.arm=bitItem=='1' ? true : false  ;
    }
  }
- static decodeFeature3(String statusBits) {
+ static decodeFeature3(List<int> statusBits) {
 
-     String bitItem1 = statusBits.substring(0,0);
-     String bitItem2 = statusBits.substring(1,1);
-     if(bitItem1=='0' && bitItem2=='0')
+     //String bitItem1 = statusBits.substring(0,0);
+     //String bitItem2 = statusBits.substring(1,1);
+     int bitItem1=statusBits[0];
+     int bitItem2=statusBits[1];
+     if(bitItem1==0 && bitItem2==0)
        statusNotiVM.minuteTurbo=0;
-     if(bitItem1=='1' && bitItem2=='0')
+     if(bitItem1==1 && bitItem2==0)
        statusNotiVM.minuteTurbo=2;
-     if(bitItem1=='0' && bitItem2=='1')
+     if(bitItem1==0 && bitItem2==1)
        statusNotiVM.minuteTurbo=1;
 
-      bitItem1 = statusBits.substring(2,2);
+     /* bitItem1 = statusBits.substring(2,2);
       bitItem2 = statusBits.substring(3,3);
+*/
+     bitItem1=statusBits[2];
+     bitItem2=statusBits[3];
 
-     if(bitItem1=='0' && bitItem2=='0')
+     if(bitItem1==0 && bitItem2==0)
        statusNotiVM.lowBatteryStartValue=0;
-     if(bitItem1=='1' && bitItem2=='0')
+     if(bitItem1==1 && bitItem2==0)
        statusNotiVM.lowBatteryStartValue=11.5;
-     if(bitItem1=='0' && bitItem2=='1')
+     if(bitItem1==0 && bitItem2==1)
        statusNotiVM.lowBatteryStartValue=12;
-     if(bitItem1=='1' && bitItem2=='1')
+     if(bitItem1==1 && bitItem2==1)
        statusNotiVM.lowBatteryStartValue=12.3;
 
-     bitItem1 = statusBits.substring(4,4);
-     bitItem2 = statusBits.substring(5,5);
-     if(bitItem1=='0' && bitItem2=='0')
+     /*bitItem1 = statusBits.substring(4,4);
+     bitItem2 = statusBits.substring(5,5);*/
+     bitItem1=statusBits[4];
+     bitItem2=statusBits[5];
+
+     if(bitItem1==0 && bitItem2==0)
        statusNotiVM.startEngineMinute=0;
-     if(bitItem1=='1' && bitItem2=='0')
+     if(bitItem1==1 && bitItem2==0)
        statusNotiVM.startEngineMinute=25;
-     if(bitItem1=='0' && bitItem2=='1')
+     if(bitItem1==0 && bitItem2==1)
        statusNotiVM.startEngineMinute=3;
-     if(bitItem1=='1' && bitItem2=='1')
+     if(bitItem1==1 && bitItem2==1)
        statusNotiVM.startEngineMinute=5;
 
 
-     bitItem1 = statusBits.substring(6,6);
-     bitItem2 = statusBits.substring(7,7);
-     if(bitItem1=='0' && bitItem2=='0')
+    /* bitItem1 = statusBits.substring(6,6);
+     bitItem2 = statusBits.substring(7,7);*/
+     bitItem1=statusBits[6];
+     bitItem2=statusBits[7];
+
+     if(bitItem1==0 && bitItem2==0)
        statusNotiVM.coldStart=0;
-     if(bitItem1=='1' && bitItem2=='0')
+     if(bitItem1==1 && bitItem2==0)
        statusNotiVM.startEngineMinute=0;
-     if(bitItem1=='0' && bitItem2=='1')
+     if(bitItem1==0 && bitItem2==1)
        statusNotiVM.startEngineMinute=-5;
-     if(bitItem1=='1' && bitItem2=='1')
+     if(bitItem1==1 && bitItem2==1)
        statusNotiVM.startEngineMinute=-10;
  }
 
- static decodeData6(String data){
-   statusNotiVM.temp=int.tryParse(data);
+ static decodeData6(List<int> data){
+  // statusNotiVM.temp=int.tryParse(data);
  }
- static decodeData7(String data){
-   statusNotiVM.batteryValue=int.tryParse(data);
+ static decodeData7(List<int> data){
+  // statusNotiVM.batteryValue=int.tryParse(data);
  }
 
   StatusNotiVM analyzeStatusNoti() {
@@ -210,8 +245,11 @@ class NotiAnalyze {
      {
        for(var i=0;i<notiItemSize;i++) {
            String statusTemp=noti.substring(i*8,((i+1)*8-1));
-           decodeStatus(statusTemp, i);
-         }
+           //decodeStatus(statusTemp, i);
+           List<List<int>> state=decodeStatusIntoBytes();
+           decodeStatus(state, i);
+
+       }
        return statusNotiVM;
      }
    return null;

@@ -2,6 +2,7 @@
 import 'package:anad_magicar/bloc/values/notify_value.dart';
 import 'package:anad_magicar/components/no_data_widget.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
+import 'package:anad_magicar/date/helper/shamsi_date.dart';
 import 'package:anad_magicar/model/apis/car_action_log.dart';
 import 'package:anad_magicar/model/change_event.dart';
 import 'package:anad_magicar/ui/screen/message/message_history_form_item.dart';
@@ -31,18 +32,22 @@ class MessageHistoryFormState extends State<MessageHistoryForm> {
 
   Future<List<CarActionLog>> getCarActionLog(String fromDate,
       String toDate) async {
-    var result = await restDatasource.GetCarLog(widget.carId, fromDate, toDate);
+  /*String mfDate=  DateTimeUtils.convertIntoDateObject(DateTimeUtils.convertIntoDateTime(fromDate)).toIso8601String();
+  String mtDate= DateTimeUtils.convertIntoDateObject(DateTimeUtils.convertIntoDateTime(toDate)).toIso8601String();
+  */  //Jalali fj=Jalali()
+    var result = await restDatasource.GetCarLog(widget.carId, DateTimeUtils.convertIntoDateTime(fromDate),DateTimeUtils.convertIntoDateTime( toDate));
     if (result != null && result.length>0)
       return result;
     return null;
   }
-  
+
   @override
   void initState() {
-    super.initState();
-    fromDate=DateTimeUtils.getDateJalali();
+
+    fromDate=DateTimeUtils.getDateJalaliWithAddDays(-3);
     toDate=DateTimeUtils.getDateJalali();
     fcarActionLogs=getCarActionLog(fromDate, toDate);
+    super.initState();
   }
 
   @override
@@ -55,8 +60,8 @@ class MessageHistoryFormState extends State<MessageHistoryForm> {
     // TODO: implement build
     return StreamBuilder<ChangeEvent>(
       initialData: new ChangeEvent(
-          fromDate:DateTimeUtils.getDateJalali(),
-          toDate: DateTimeUtils.getDateJalali()),
+          fromDate:fromDate,
+          toDate: toDate),
       stream: widget.notyDateFilterBloc.noty ,
       builder: (context,snapshot) {
         if(snapshot.hasData && snapshot.data!=null) {
@@ -70,11 +75,9 @@ class MessageHistoryFormState extends State<MessageHistoryForm> {
               if (snapshot.hasData &&
                   snapshot.data != null) {
                 carActionLogs = snapshot.data;
-                return Material(
-                  color: Color(0xfffefefe),
-                  child: new Card(
+                return  new Card(
                     margin: new EdgeInsets.only(
-                        left: 5.0, right: 5.0, top: 78.0, bottom: 5.0),
+                        left: 5.0, right: 5.0, top: 80.0, bottom: 5.0),
                     shape: RoundedRectangleBorder(
                       side: BorderSide(color: Colors.black54,width: 0.5),
                         borderRadius: BorderRadius.circular(8.0)),
@@ -98,7 +101,6 @@ class MessageHistoryFormState extends State<MessageHistoryForm> {
                           }
                       ),
                     ),
-                  ),
                 );
               } else {
                 return NoDataWidget(noCarCount: false,);
@@ -108,11 +110,10 @@ class MessageHistoryFormState extends State<MessageHistoryForm> {
         }
         else
         {
-          //fcarActionLogs=getCarActionLog(fromDate, toDate)
           return NoDataWidget(noCarCount: false,);
         }
       },
     );
   }
- 
+
 }

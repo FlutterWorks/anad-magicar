@@ -43,7 +43,7 @@ class _RegisterCarScreenState extends State<RegisterCarScreen>
   InitDataVM _initDataVM;
   Future<InitDataVM> loadInitData() async {
     centerRepository.showProgressDialog(context, Translations.current.plzWaiting());
-    if(widget.addCarVM!=null && !widget.addCarVM.fromMainApp)
+    if(widget.addCarVM!=null && widget.addCarVM.fromMainApp!=null && !widget.addCarVM.fromMainApp)
         initDataVM= centerRepository.loadInitData(true);
       else
         initDataVM=Future.value(new InitDataVM(
@@ -129,6 +129,8 @@ class _RegisterCarScreenState extends State<RegisterCarScreen>
 
   @override
   void dispose() {
+    registerCarBloc.close();
+    _changeFormNotyBloc.dispose();
     super.dispose();
   }
 

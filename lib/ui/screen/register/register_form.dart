@@ -59,7 +59,7 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
   Animation buttonAnimation;
   Animation<Offset> pulseAnimation;
 
-  RegisterBloc registerBloc;
+  //RegisterBloc registerBloc;
   int index=1;
   User user;
   bool isRegisterBtnDisabled=false;
@@ -517,10 +517,10 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
         //BlocProvider.of<RegisterBloc>(context).dispatch(new LoadRegisterEvent(user,context));
         if(widget.isEdit!=null &&
         widget.isEdit){
-          registerBloc.add(new LoadRegisterEvent(user, context,true));
+          widget.bloc.add(new LoadRegisterEvent(user, context,true));
         }
         else {
-          registerBloc.add(new LoadRegisterEvent(user, context,false));
+          widget.bloc.add(new LoadRegisterEvent(user, context,false));
         }
 
         //isRegisterBtnDisabled=true;
@@ -534,13 +534,32 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
   }
 
 
+  Future<Widget> loadNextScreen() async{
+    var result=await centerRepository.loadInitData(true);
+   if(result!=null) {
+     centerRepository.dismissDialog(context);
+     return RegisterCarScreen(fromMainApp: false, addCarVM: new AddCarVM(
+         notyBloc: null,
+         fromMainApp: false));
+   }
+   else {
+     return centerRepository.showProgressDialog(context, Translations.current.loadingdata());
+   }
+  }
+  @override
+  void dispose() {
+    //registerBloc.close();
+    formAnimationController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
 
     super.initState();
     user=new User();
-    FlashHelper.init(context);
-    registerBloc=new RegisterBloc();
+   // FlashHelper.init(context);
+    //registerBloc=new RegisterBloc();
     formAnimationController = new AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 3000),
@@ -574,7 +593,7 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
         ),
       ),
     );
-   // formAnimationController.forward();
+    formAnimationController.forward();
 
   }
 
@@ -582,102 +601,53 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
   Widget build(BuildContext context) {
     double w=MediaQuery.of(context).size.width;
     double h=MediaQuery.of(context).size.height;
-    return /*OfflineBuilder(
-    debounceDuration: Duration.zero,
-        connectivityBuilder: (
-        BuildContext context,
-        ConnectivityResult connectivity,
-        Widget child,
-    ) {
-      if (connectivity == ConnectivityResult.none) {
-        centerRepository.loadInitData(false);
-        return child;
-      }
-      else {
-          centerRepository.loadInitData(true);
-          return child;
-      }
-        },
-    child:*/
-      BlocBuilder<RegisterBloc, RegisterState>(
-        bloc: registerBloc,
+    return BlocBuilder<RegisterBloc, RegisterState>(
+        bloc: widget.bloc,
         builder: (
             BuildContext context,
             RegisterState currentState,
             ) {
-          if(currentState is UnRegisterState) {
-            return FancyRegisterForm(
-              isEdit: widget.isEdit,
-              mobile: widget.mobile,
-                      authUser: _addUser,
-                      recoverPassword: null,
-                      onSubmit: () { /*gotoAddCar();*/ },
-                    );
-          }
           if(currentState is InRegisterState ||
           currentState is LoadRegisterState)
           {
             isRegisterBtnDisabled=true;
             centerRepository.showProgressDialog(context, Translations.current.plzWaiting());
-            RxBus.post(new ChangeEvent(type: 'REGISTER_LOADING',message: ''));
+            //RxBus.post(new ChangeEvent(type: 'REGISTER_LOADING',message: ''));
 
-           // return  showLoading();
           }
-          if(currentState is InRegisterSMSAuthState)
+          else if(currentState is InRegisterSMSAuthState)
             {
               _modalBottomSheet(new User());
-             // return  showLoading();
             }
-          if(currentState is RegisteredState)
-          {
+         else if(currentState is RegisteredState) {
             isRegisterBtnDisabled=false;
             centerRepository.dismissDialog(context);
             if(widget.isEdit==null || (widget.isEdit!=null && !widget.isEdit)) {
-            centerRepository.loadInitData(true);
-            return RegisterCarScreen(fromMainApp: false, addCarVM: new AddCarVM(
-            notyBloc: null,
-            fromMainApp: false));
+                  return RegisterCarScreen(
+                      fromMainApp: false, addCarVM: new AddCarVM(
+                      notyBloc: null,
+                      fromMainApp: false));
             }
             else{
-             FlashHelper.successBar(context, message: Translations.current.editProfileSuccessful());
+            // FlashHelper.successBar(context, message: Translations.current.editProfileSuccessful());
+             centerRepository.showFancyToast(Translations.current.editProfileSuccessful());
             }
           }
-          if(currentState is ErrorRegisterState)
+        else  if(currentState is ErrorRegisterState)
           {
             centerRepository.dismissDialog(context);
             isRegisterBtnDisabled=false;
-            RxBus.post(new ChangeEvent(type: 'REGISTER_FAILED',message: currentState.errorMessage));
-            return new Container(
-                child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    new Center(
-                      child: new Text(currentState.errorMessage ?? Translations.current.hasErrors() ),
-                    ),
-                    new SlideButton(
-                      height: 64,
-                      backgroundChild: Center(
-                        child: Text(Translations.current.goBack()),
-                      ),
-                      backgroundColor: Colors.amber,
-                      slidingBarColor: Colors.blue,
-                      slideDirection: SlideDirection.RIGHT,
-                      onButtonOpened: () {
-                        goBack();
-                      },
-                      onButtonClosed: () {
-
-                      },
-                      onButtonSlide: (value) {
-
-                      },
-                    )
-                  ],
-                ),
-                );
+            //RxBus.post(new ChangeEvent(type: 'REGISTER_FAILED',message: currentState.errorMessage));
+           // FlashHelper.errorBar(context, message: currentState.errorMessage);
+            centerRepository.showFancyToast(currentState.errorMessage);
           }
-          return showLoading();
+          return  FancyRegisterForm(
+            isEdit: widget.isEdit,
+            mobile: widget.mobile,
+            authUser: _addUser,
+            recoverPassword: null,
+            onSubmit: () { /*gotoAddCar();*/ },
+          );
         }
      // ),
     );

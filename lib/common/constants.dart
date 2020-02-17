@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:anad_magicar/common/actions_constants.dart';
 import 'package:anad_magicar/model/viewmodel/car_state.dart' as mat;
+import 'package:anad_magicar/translation_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 class Constants {
@@ -9,6 +10,31 @@ class Constants {
   static final int ROWSTATE_TYPE_INSERT=1;
   static final int ROWSTATE_TYPE_UPDATE=2;
   static final int ROWSTATE_TYPE_DELETE=4;
+
+  static final int SERVICE_DONE=152364;
+  static final int SERVICE_FAILD=152374;
+  static final int SERVICE_NEAR=152375;
+  static final int SERVICE_NOTDONE=152376;
+  static final int SERVICE_CANCEL=152377;
+
+  static final int SERVICE_DURATION_YEAR=152368;
+  static final int SERVICE_DURATION_MONTH=152350;
+  static final int SERVICE_DURATION_DAY=152351;
+
+  static final int SERVICE_TYPE_FUNCTIONALITY=152353;
+  static final int SERVICE_TYPE_DURATIONALITY=152354;
+  static final int SERVICE_TYPE_BOTH=152365;
+
+  static final String SERVICE_TYPE_FUNCTIONALITY_TITLE=Translations.current.functional();
+  static final String SERVICE_TYPE_DURATIONALITY_TITLE=Translations.current.durational();
+  static final String SERVICE_TYPE_BOTH_TITLE=Translations.current.both();
+
+
+  static final String SERVICE_DURATION_YEAR_TITLE=Translations.current.durationDay();
+  static final String SERVICE_DURATION_MONTH_TITLE=Translations.current.durationMonth();
+  static final String SERVICE_DURATION_DAY_TITLE=Translations.current.durationDay();
+
+  static final int SMS_STATUS_AS_READ=12354;
 
   static RegExp _pelak =new RegExp(r'^[0-9]{2}-[a-zA-Z]{1}-3[0-9]{3}-[0-9]{2}$');
   static String  POWER_ENGINE_START_SOUND='start_power.mp3';

@@ -89,6 +89,7 @@ class ActionsCommand {
   static String LockAndArm_Nano_CODE='LockAndArm_Nano';
   static String UnlockAndDisArm_Nano_CODE='UnlockAndDisArm_Nano';
   static String DriveLock_ONOrOFF_Nano_CODE='DriveLock_ONOrOFF_Nano';
+  static String SIREN_Nano_CODE='Siren_Nano';
 
   static final String CAR_ID_TAG='CARId';
   static final String CAR_PAGE_TAG='CAR_PAGE';
@@ -174,10 +175,11 @@ class ActionsCommand {
     actionCommandsMap.putIfAbsent(RemoteStartOn_Nano_CODE, ()=> 12);
     actionCommandsMap.putIfAbsent(RemoteStartOff_Nano_CODE, ()=> 13);
     actionCommandsMap.putIfAbsent(RemoteTrunk_Release_CODE, ()=> 14);
-    actionCommandsMap.putIfAbsent(AUX1_Output_ON_CODE, ()=> 17);
-    actionCommandsMap.putIfAbsent(AUX1_Output_OFF_CODE, ()=> 18);
-    actionCommandsMap.putIfAbsent(AUX2_Output_ON_CODE, ()=> 19);
-    actionCommandsMap.putIfAbsent(AUX2_Output_OFF_CODE, ()=> 20);
+    actionCommandsMap.putIfAbsent(AUX1_Output_ON_CODE, ()=> 19);
+    actionCommandsMap.putIfAbsent(AUX1_Output_OFF_CODE, ()=> 19);
+    actionCommandsMap.putIfAbsent(AUX2_Output_ON_CODE, ()=> 21);
+    actionCommandsMap.putIfAbsent(AUX2_Output_OFF_CODE, ()=> 21);
+    actionCommandsMap.putIfAbsent(SIREN_Nano_CODE, ()=> 23);
 
 
     actionCommandsMap.putIfAbsent(TurboMode_ON_TAG, ()=> TurboMode_ON);

@@ -1,18 +1,10 @@
 import 'dart:math';
 
-import 'package:anad_magicar/bloc/values/notify_value.dart';
+import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/components/flutter_form_builder/flutter_form_builder.dart';
 import 'package:anad_magicar/components/flutter_form_builder/src/form_builder_custom_field.dart';
-import 'package:anad_magicar/model/apis/api_brand_model.dart';
-import 'package:anad_magicar/model/apis/api_car_color.dart';
 import 'package:anad_magicar/model/apis/service_type.dart';
-import 'package:anad_magicar/model/cars/car.dart';
-import 'package:anad_magicar/model/cars/car_model.dart';
-import 'package:anad_magicar/model/cars/car_model_detail.dart';
-import 'package:anad_magicar/model/message.dart';
-import 'package:anad_magicar/repository/center_repository.dart';
-import 'package:anad_magicar/ui/screen/car/fancy_car/src/models/car_data.dart';
-import 'package:anad_magicar/ui/screen/service/fancy_service/src/models/car_service_data.dart';
+import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/service/service_type/fancy_service/src/models/car_service_type_data.dart';
 import 'package:anad_magicar/ui/screen/service/service_type/fancy_service/src/providers/car_service_type_messages.dart';
 import 'package:flutter/material.dart';
@@ -291,8 +283,6 @@ class AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
         pageController: _pageController,
         itemCount: 2,
 
-        /// Need to keep track of page index because soft keyboard will
-        /// make page view rebuilt
         index: _pageIndex,
         transformer: CustomPageTransformer(),
         itemBuilder: (BuildContext context, int index) {
@@ -424,22 +414,42 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   bool get buttonEnabled => !_isLoading && !_isSubmitting;
   int serviceTypeId=0;
   int durationTypeId=0;
+  bool isDurational=false;
+  bool isBoth=false;
 
-  ServiceType _valueCarServiceType;
+  var _valueCarServiceType;
+  var _valueDurationType;
+
   List<ServiceType> serviceTypes=new List();
+
+  var durationTypes=[{
+    'Title':Constants.SERVICE_DURATION_YEAR_TITLE,
+    'Id':Constants.SERVICE_DURATION_YEAR,},{
+    'Title':Constants.SERVICE_DURATION_MONTH_TITLE,
+    'Id':Constants.SERVICE_DURATION_MONTH,
+  },{
+    'Title':Constants.SERVICE_DURATION_DAY_TITLE,
+    'Id':Constants.SERVICE_DURATION_DAY,
+  }];
+
+  var serviceTypes2=[{
+    'Title':Constants.SERVICE_TYPE_FUNCTIONALITY_TITLE,
+    'Id':Constants.SERVICE_TYPE_FUNCTIONALITY,
+  },{
+    'Title':Constants.SERVICE_TYPE_DURATIONALITY_TITLE,
+    'Id':Constants.SERVICE_TYPE_DURATIONALITY,
+  },{
+    'Title':Constants.SERVICE_TYPE_BOTH_TITLE,
+    'Id':Constants.SERVICE_TYPE_BOTH,
+  }];
 
   @override
   void initState() {
 
-    serviceTypes=List.from( centerRepository.getServiceTypes());
+    _valueCarServiceType=serviceTypes2[0];
+   // _valueDurationType=durationTypes[0];
 
-    if(serviceTypes!=null && serviceTypes.length>0)
-      {
-        _valueCarServiceType=serviceTypes[0];
-      }
-
-    _authData['serviceTypeId']=_valueCarServiceType!=null ? _valueCarServiceType.ServiceTypeId : '0';
-
+    _authData['serviceTypeId']=_valueCarServiceType!=null ? _valueCarServiceType['Id'] : '0';
 
     _loadingController = widget.loadingController ??
         (AnimationController(
@@ -535,12 +545,12 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       error = await auth.onConfirm( CarServiceTypeData(
         alarmCount: _authData['alarmCount'],
         description: _authData['description'],
-        alarmDurationDay: int.tryParse( _authData['alarmDurationDay']),
+        alarmDurationDay: int.tryParse( (_authData['alarmDurationDay']!=null && _authData['alarmDurationDay'].toString().isNotEmpty) ? _authData['alarmDurationDay'] : '0'),
         automationInsert:_authData['automationInsert'] ,
-        durationCountValue: int.tryParse( _authData['durationCountValue']),
-        durationType: int.tryParse( _authData['durationType']),
-        durationValue: int.tryParse( _authData['durationValue']),
-        serviceType: int.tryParse( _authData['serviceType']),
+        durationCountValue: int.tryParse( (_authData['durationCountValue']!=null && _authData['durationCountValue'].toString().isNotEmpty) ? _authData['durationCountValue'] : '0'),
+        durationType: int.tryParse( (_authData['durationTypeId']!=null && _authData['durationTypeId']!=null.toString().isNotEmpty) ? _authData['durationTypeId'] : '0' ),
+        durationValue: int.tryParse(( _authData['durationValue']!=null &&   _authData['durationValue'].toString().isNotEmpty )? _authData['durationValue'] : '0'),
+        serviceType: int.tryParse( _authData['serviceTypeId']),
         serviceTypeCode: _authData['serviceTypeCode'],
         serviceTypeTitle: _authData['serviceTypeTitle'],
         cancel: false,
@@ -592,8 +602,8 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       loadingController: _loadingController,
       interval: _nameTextFieldLoadingAnimationInterval,
       labelText: messages.serviceTypeCodeHint,
-      prefixIcon: Icon(FontAwesomeIcons.code),
-      keyboardType: TextInputType.text ,
+      prefixIcon: Icon(Icons.code),
+      keyboardType: TextInputType.number ,
       textInputAction: TextInputAction.next,
       onFieldSubmitted: (value) {
         if(auth.isConfirm)
@@ -609,7 +619,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
 
              return null;
            },
-      onSaved: (value) => _authData['serviceDate'] = value,
+      onSaved: (value) => _authData['serviceTypeCode'] = value,
     );
   }
 
@@ -617,13 +627,13 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     return
        FormBuilderCustomField(
         initialValue: _valueCarServiceType,
-        attribute: "ServiceTypeTitle",
+        attribute: "Title",
         validators: [
           FormBuilderValidators.required(),
         ],
         formField: FormField(
           enabled: true,
-          builder: (FormFieldState<ServiceType> field) {
+          builder: (FormFieldState<dynamic> field) {
             return InputDecorator(
               decoration: InputDecoration(
 
@@ -637,9 +647,9 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
               child:
                       DropdownButton(
                         isExpanded: true,
-                        items: serviceTypes.map((md) {
+                        items: serviceTypes2.map((md) {
                           return DropdownMenuItem(
-                            child: Text(md.ServiceTypeTitle),
+                            child: Text(md['Title']),
                             value: md,
                           );
                         }).toList(),
@@ -647,9 +657,13 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
                           onChanged: (value) {
                           setState(() {
                             _valueCarServiceType=value;
-                            _authData['serviceTypeId'] = value.ServiceTypeId.toString();
+                            _authData['serviceTypeId'] = value['Id'].toString();
+                            isDurational=value['Id']==Constants.SERVICE_TYPE_DURATIONALITY;
+                            isBoth=value['Id']==Constants.SERVICE_TYPE_BOTH;
+                            if(isDurational){
+                              _valueDurationType=durationTypes[0];
+                            }
                           });
-
                           //field.didChange(_valueCarModelDetail);
                         },
                       ),
@@ -664,18 +678,17 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   Widget _buildDurationTypesField(double width, CarServiceTypeMessages messages,int typeId) {
     return
       FormBuilderCustomField(
-        initialValue: _valueCarServiceType,
-        attribute: "DurationTypeTitle",
+        initialValue: _valueDurationType,
+        attribute: "Title",
         validators: [
           FormBuilderValidators.required(),
         ],
         formField: FormField(
             enabled: true,
-            builder: (FormFieldState<ServiceType> field) {
+            builder: (FormFieldState<dynamic> field) {
               return InputDecorator(
                 decoration: InputDecoration(
-
-                  labelText: "لطفا نوع زمنی را انتخاب کنید",
+                  labelText: "لطفا نوع زمانی را انتخاب کنید",
                   errorText: field.errorText,
                   contentPadding:
                   EdgeInsets.only(
@@ -685,17 +698,17 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
                 child:
                 DropdownButton(
                   isExpanded: true,
-                  items: serviceTypes.map((md) {
+                  items: durationTypes.map((md) {
                     return DropdownMenuItem(
-                      child: Text(md.ServiceTypeTitle),
+                      child: Text(md['Title']),
                       value: md,
                     );
                   }).toList(),
-                  value: _valueCarServiceType,
+                  value: _valueDurationType,
                   onChanged: (value) {
                     setState(() {
-                      _valueCarServiceType=value;
-                      _authData['durationTypeId'] = value.DurationTypeConstId.toString();
+                      _valueDurationType=value;
+                      _authData['durationTypeId'] = value['Id'].toString();
                     });
 
                     //field.didChange(_valueCarModelDetail);
@@ -736,7 +749,11 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         _submit();
           //FocusScope.of(context).requestFocus(_confirmPasswordFocusNode);
       },
-      validator: null,
+      validator: (value) {
+        if( auth.isConfirm )
+          widget.fieldValidator;
+        return null;
+      },
       onSaved: (value) => _authData['serviceTypeTitle'] = value,
     );
   }
@@ -748,7 +765,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       width: width,
       loadingController: _loadingController,
       interval: _passTextFieldLoadingAnimationInterval,
-      labelText: messages.durationValueHint,
+      labelText: isDurational ? messages.durationValueHint : Translations.current.durationFunctionalValue(),
       //controller: _passwordController,
       inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
@@ -760,7 +777,13 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         _submit();
         //FocusScope.of(context).requestFocus(_confirmPasswordFocusNode);
       },
-      validator: null,
+      validator:(value) {
+        if(isDurational) {
+          if (auth.isConfirm)
+            widget.fieldValidator;
+        }
+        return null;
+      },
       onSaved: (value) => _authData['durationValue'] = value,
     );
   }
@@ -771,7 +794,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       width: width,
       loadingController: _loadingController,
       interval: _passTextFieldLoadingAnimationInterval,
-      labelText: messages.durationCountValueHint,
+      labelText: isDurational ? messages.durationCountValueHint : Translations.current.durationFunctionalCountValue(),
       controller: _passwordController,
       //inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
@@ -783,7 +806,13 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         _submit();
         //FocusScope.of(context).requestFocus(_confirmPasswordFocusNode);
       },
-      validator: null,
+      validator: (value) {
+        if(isDurational) {
+          if (auth.isConfirm)
+            widget.fieldValidator;
+        }
+        return null;
+      },
       onSaved: (value) => _authData['durationCountValue'] = value,
     );
   }
@@ -794,7 +823,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       width: width,
       loadingController: _loadingController,
       interval: _passTextFieldLoadingAnimationInterval,
-      labelText: messages.alarmDurationDayHint,
+      labelText:  messages.alarmDurationDayHint ,
       //controller: _passwordController,
       //inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
@@ -806,7 +835,13 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         _submit();
         //FocusScope.of(context).requestFocus(_confirmPasswordFocusNode);
       },
-      validator: null,
+      validator:(value) {
+        if(isDurational) {
+          if (auth.isConfirm)
+            widget.fieldValidator;
+        }
+        return null;
+      },
       onSaved: (value) => _authData['alarmDurationDay'] = value,
     );
   }
@@ -829,7 +864,13 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         _submit();
         //FocusScope.of(context).requestFocus(_confirmPasswordFocusNode);
       },
-      validator: null,
+      validator: (value) {
+        if(!isDurational) {
+          if (auth.isConfirm)
+            widget.fieldValidator;
+        }
+        return null;
+      },
       onSaved: (value) => _authData['alarmCount'] = value,
     );
   }
@@ -938,13 +979,20 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
                 SizedBox(height: 5),
                 _buildServiceTypeCodeField(textFieldWidth, messages),
                 SizedBox(height: 5),
-                _buildDurationValueField(textFieldWidth, messages),
+                _buildServiceTypesField(textFieldWidth, messages, 0),
                 SizedBox(height: 5),
-                _buildDurationCountValueField(textFieldWidth, messages),
+                (isDurational || isBoth) ?   _buildDurationTypesField(textFieldWidth, messages, 0) :
+                    Container(width: 0.0,height: 0.0,),
                 SizedBox(height: 5),
-                _buildAlarmCountField(textFieldWidth, messages),
+                (isDurational || isBoth) ? _buildDurationValueField(textFieldWidth, messages) : Container(),
                 SizedBox(height: 5),
-                _buildAlarmDurationDayField(textFieldWidth, messages),
+              !isDurational  ? _buildDurationCountValueField(textFieldWidth, messages) :
+                Container(),
+                SizedBox(height: 5),
+             !isDurational ?  _buildAlarmCountField(textFieldWidth, messages) : Container(),
+                SizedBox(height: 5),
+                (isDurational || isBoth) ?  _buildAlarmDurationDayField(textFieldWidth, messages) :
+                Container(),
                 SizedBox(height: 5),
                 _buildAutoInsertField(textFieldWidth, messages),
                 SizedBox(height: 5),

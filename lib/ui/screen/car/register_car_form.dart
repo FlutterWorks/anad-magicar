@@ -39,6 +39,7 @@ import 'package:anad_magicar/ui/screen/home/index.dart';
 import 'package:anad_magicar/ui/screen/login/confirm_login.dart';
 import 'package:anad_magicar/utils/dart_helper.dart';
 import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
+import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
 import 'package:anad_magicar/widgets/flutter_offline/flutter_offline.dart';
 import 'package:anad_magicar/widgets/forms_appbar.dart';
 import 'package:anad_magicar/widgets/magicar_appbar.dart';
@@ -148,7 +149,8 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
           data.pelak!=null &&
           data.tip>0) &&
       !data.cancel) {
-        if(widget.addCarVM!=null && widget.addCarVM.editMode){
+        if(widget.addCarVM!=null && widget.addCarVM.editMode!=null &&
+            widget.addCarVM.editMode ){
           SaveCarModel carModel = new SaveCarModel(
             carId: widget.addCarVM.editCarModel.carId,
              /* brandId: data.brandId,
@@ -164,7 +166,7 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
             result.then((value){
               if(value.IsSuccessful){
                 centerRepository.showFancyToast(Translations.current.editCarSuccessful());
-                Navigator.pushReplacementNamed(context, CarPageState.route);
+                CenterRepository.onCarPageTap(context, userId);
               }
               else{
                 centerRepository.showFancyToast(Translations.current.editCarUnSuccessful());
@@ -1268,7 +1270,9 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
 
     _showPopUpSearchcar(context,resultWidget);
 
-       }
+       } else{
+       FlashHelper.errorBar(context, message: Translations.current.carNotFound());
+    }
   }
 
   showExitDialog()

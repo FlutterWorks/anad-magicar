@@ -3,6 +3,7 @@
 import 'package:anad_magicar/date/helper/shamsi_date.dart';
 import 'package:anad_magicar/utils/dart_helper.dart';
 import 'package:intl/intl.dart';
+import 'dart:math' as mat;
 
 class DateTimeUtils{
 
@@ -10,6 +11,20 @@ class DateTimeUtils{
  {
    try {
      DateTime dateTimeObj = new DateFormat("yyyy-MM-dd hh:mm:ss", "en-US")
+         .parse(dateTime);
+     if (dateTimeObj != null)
+       return dateTimeObj;
+   }
+   catch(e){
+     print(e.toString());
+     return null;
+   }
+   return null;
+ }
+ static DateTime convertIntoDateObject(String dateTime)
+ {
+   try {
+     DateTime dateTimeObj = new DateFormat("yyyy-MM-dd", "en-US")
          .parse(dateTime);
      if (dateTimeObj != null)
        return dateTimeObj;
@@ -48,10 +63,59 @@ class DateTimeUtils{
    DateTime fdt= fromJ.toDateTime();
    DateTime tdt= toJ.toDateTime();
 
-   Duration duration= fdt.difference(tdt);
+   Duration duration= tdt.difference(fdt);
    int result= duration.inDays;
+      if(result<0)
+        result=result*-1;
+     var nowDate=Jalali.now();
+     DateTime nDate=nowDate.toDateTime();
+     Duration newDiff=tdt.difference(nDate);
+     int resDiff=newDiff.inDays;
+     if(result > 0)
+      return ((resDiff / result));
+     else
+       return 0;
 
-   return (result / 365).roundToDouble();
+ }
+ static int diffDaysFromDateToDate2(String fromDate,String toDate)
+ {
+   String fromDate_temp=DartHelper.isNullOrEmptyString(fromDate);
+   String toDate_temp=DartHelper.isNullOrEmptyString(toDate);
+   if(fromDate_temp==null || fromDate_temp.isEmpty)
+     fromDate_temp='0/0/0';
+   if(toDate_temp==null || toDate_temp.isEmpty)
+     toDate_temp='0/0/0';
+
+   var fDate=fromDate_temp.split('/');
+   var tDate=toDate_temp.split('/');
+
+   int fy=int.tryParse( DartHelper.isNullOrEmpty( fDate[0]) ? 0 : fDate[0]);
+   int ty=int.tryParse(DartHelper.isNullOrEmpty( tDate[0]) ? 0 : tDate[0]);
+
+   int fm=int.tryParse( DartHelper.isNullOrEmpty( fDate[1]) ? 0 : fDate[1]);
+   int tm=int.tryParse( DartHelper.isNullOrEmpty( tDate[1]) ? 0 : tDate[1]);
+
+   int fd=int.tryParse( DartHelper.isNullOrEmpty( fDate[2]) ? 0 : fDate[2]);
+   int td=int.tryParse( DartHelper.isNullOrEmpty( tDate[2]) ? 0 : tDate[2]);
+
+   Jalali fromJ=Jalali(fy,fm,fd);
+   Jalali toJ=Jalali(ty,tm,td);
+
+   DateTime fdt= fromJ.toDateTime();
+   DateTime tdt= toJ.toDateTime();
+
+   Duration duration= tdt.difference(fdt);
+   int result= duration.inDays;
+   if(result<0)
+     result=result*-1;
+   var nowDate=Jalali.now();
+   if(result>0 && result<366) {
+     DateTime nDate = nowDate.toDateTime();
+     Duration newDiff = tdt.difference(nDate);
+     int resDiff = newDiff.inDays;
+     return ((resDiff));
+   }
+   return 0;
 
  }
 
@@ -59,6 +123,40 @@ class DateTimeUtils{
    Jalali fromJ=Jalali.now();
    String result=fromJ.year.toString()+'/'+fromJ.month.toString()+'/'+fromJ.day.toString();
    return result;
+ }
+
+ static String getTimeNow(){
+   DateTime fromJ=DateTime.now();
+   String result=fromJ.hour.toString()+':'+fromJ.minute.toString()+':'+fromJ.second.toString();
+   return result;
+ }
+ static String getDateJalaliThis(Jalali now){
+
+   String result=now.year.toString()+'/'+now.month.toString()+'/'+now.day.toString();
+   return result;
+ }
+ static String getDateJalaliWithAddDays(int addDays){
+
+   Jalali fromJ=Jalali.now().addDays(addDays);
+   String result=fromJ.year.toString()+'/'+fromJ.month.toString()+'/'+fromJ.day.toString();
+   return result;
+ }
+ static String convertIntoDateTime(String date){
+   String newDate='';
+  // PersianDateTime perdate=PersianDateTime();
+   if(date!=null && date.isNotEmpty) {
+     var fDate = date.split('/');
+     if (fDate != null && fDate.length == 3) {
+       Jalali j = Jalali(int.tryParse(fDate[0]),
+           int.tryParse(fDate[1]),
+           int.tryParse(fDate[2]));
+       var temp = Gregorian.fromJalali(j);
+       newDate = DateTime.parse(temp.toDateTime().toString()).toString();
+       return newDate;
+     }
+     return '';
+   }
+   return '';
  }
 
 }

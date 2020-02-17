@@ -4,10 +4,6 @@ import 'package:anad_magicar/ui/screen/service/service_type/fancy_service/flutte
 import 'package:flutter/material.dart';
 
 
-const users = const {
-  'dribbble@gmail.com': '12345',
-  'hunter@gmail.com': 'hunter',
-};
 
 class FancyRegisterServiceTypeForm extends StatelessWidget {
 

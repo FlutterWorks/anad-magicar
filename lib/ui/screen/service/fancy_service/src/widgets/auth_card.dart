@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:anad_magicar/bloc/values/notify_value.dart';
+import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/components/flutter_form_builder/flutter_form_builder.dart';
 import 'package:anad_magicar/components/flutter_form_builder/src/form_builder_custom_field.dart';
 import 'package:anad_magicar/date/helper/shamsi_date.dart';
@@ -13,8 +14,10 @@ import 'package:anad_magicar/model/cars/car_model.dart';
 import 'package:anad_magicar/model/cars/car_model_detail.dart';
 import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
+import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/car/fancy_car/src/models/car_data.dart';
 import 'package:anad_magicar/ui/screen/service/fancy_service/src/models/car_service_data.dart';
+import 'package:anad_magicar/utils/date_utils.dart';
 import 'package:anad_magicar/widgets/persian_datepicker/persian_datepicker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -393,11 +396,11 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   final _alarmDateFocusNode = FocusNode();
   final _alarmCountFocusNode = FocusNode();
   final _serviceCostFocusNode = FocusNode();
-
+  final _descriptionFocusNode = FocusNode();
   final _confirmPasswordFocusNode = FocusNode();
   final _passwordController = TextEditingController();
 
-  var _authData = {'serviceId':'', 'serviceDate': '', 'alarmDate': '','actionDate': '', 'serviceCost': '','distance': '','alarmCount':'', 'serviceTypeId':'','cancel':''};
+  var _authData = {'serviceId':'', 'serviceDate': '', 'alarmDate': '','actionDate': '', 'serviceCost': '','distance': '','alarmCount':'', 'serviceTypeId':'','cancel':'','description':''};
   var _isLoading = false;
   var _isSubmitting = false;
   var _showShadow = true;
@@ -416,6 +419,9 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   final TextEditingController textEditingController = TextEditingController();
   final TextEditingController textEditingController2 = TextEditingController();
   final TextEditingController textEditingController3 = TextEditingController();
+  final TextEditingController distanceController = TextEditingController();
+  final TextEditingController costController = TextEditingController();
+  //final TextEditingController Controller = TextEditingController();
 
   PersianDatePickerWidget persianDatePicker;
   /// switch between login and signup
@@ -438,6 +444,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   String seDate;
   String actDate;
   String alarmDate;
+  bool isDurational=false;
 
   initDatePicker(TextEditingController controller){
     persianDatePicker = PersianDatePicker(
@@ -501,13 +508,19 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       parent: _loadingController,
       curve: Interval(.4, 1.0, curve: Curves.easeOutBack),
     ));
-    super.initState();
+
 
 
     //mobileEditingController=new TextEditingController();
-  if(widget.editMode!=null && widget.editMode) {
-    _authData['serviceId']=widget.service.ServiceId.toString();
 
+  if(widget.editMode!=null && widget.editMode) {
+    //isDurational=widget.service.ServiceTypeId==Constants.SERVICE_TYPE_DURATIONALITY;
+
+    _authData['serviceId']=widget.service.ServiceId.toString();
+    var sType=serviceTypes.where((s)=>s.ServiceTypeId==widget.service.ServiceTypeId).toList();
+    if(sType!=null && sType.length>0){
+      _valueCarServiceType=sType.first;
+    }
     String seDate = widget.service.ServiceDate;
     textEditingController.value = textEditingController.value.copyWith(
       text: seDate,
@@ -518,7 +531,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
 
     String actDate = widget.service.ActionDate;
     if(actDate!=null && actDate.isNotEmpty) {
-      textEditingController.value = textEditingController.value.copyWith(
+      textEditingController2.value = textEditingController3.value.copyWith(
         text: actDate,
         selection:
         TextSelection(baseOffset: actDate.length, extentOffset: actDate.length),
@@ -527,7 +540,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     }
     String alrmDate = widget.service.AlarmDate;
     if(alrmDate!=null && alrmDate.isNotEmpty) {
-      textEditingController.value = textEditingController.value.copyWith(
+      textEditingController3.value = textEditingController3.value.copyWith(
         text: alrmDate,
         selection:
         TextSelection(
@@ -535,16 +548,30 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         composing: TextRange.empty,
       );
     }
-    /*controller1.addListener(() {
-      final text = controller1.text.toLowerCase();
-      controller1.value = controller1.value.copyWith(
-        text: text,
-        selection:
-        TextSelection(baseOffset: text.length, extentOffset: text.length),
-        composing: TextRange.empty,
-      );
-    });*/
+    String count=widget.service.AlarmCount.toString();
+    distanceController.value = distanceController.value.copyWith(
+      text: count,
+      selection:
+      TextSelection(
+          baseOffset: count.length, extentOffset: count.length),
+      composing: TextRange.empty,
+    );
+
+    String cost=widget.service.ServiceCost==null ? '0' : widget.service.ServiceCost.toString();
+    if(cost==null || cost.isEmpty || cost==''){
+      cost='0';
+    }
+    costController.value = costController.value.copyWith(
+      text: cost,
+      selection:
+      TextSelection(
+          baseOffset: cost.length, extentOffset: cost.length),
+      composing: TextRange.empty,
+    );
+
+
   }
+    super.initState();
   }
 
   void handleLoadingAnimationStatus(AnimationStatus status) {
@@ -611,7 +638,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         alarmDate: _authData['alarmDate'],
         cost: double.tryParse(_authData['serviceCost']),
         description: _authData['description'],
-        distance:int.tryParse( _authData['distance']),
+        distance:0,//int.tryParse( _authData['distance']),
         serviceDate: _authData['serviceDate'],
         serviceTypeId:int.tryParse( _authData['serviceTypeId']),
         cancel: false,
@@ -666,6 +693,26 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   Widget _buildServiceDateField(double width, CarServiceMessages messages) {
     final auth = Provider.of<Auth>(context);
     editMode=(widget.editMode!=null && widget.editMode);
+    String serviceDate='';
+    if(isDurational){
+      int dv=_valueCarServiceType.DurationValue;
+      if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_MONTH){
+          Jalali sj=Jalali.now().addMonths(dv);
+          serviceDate=DateTimeUtils.getDateJalaliThis(sj);
+      }else if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_YEAR){
+        Jalali sj=Jalali.now().addYears(dv);
+        serviceDate=DateTimeUtils.getDateJalaliThis(sj);
+      } else if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_DAY){
+        Jalali sj=Jalali.now().addDays(dv);
+        serviceDate=DateTimeUtils.getDateJalaliThis(sj);
+      }
+      textEditingController.value = textEditingController.value.copyWith(
+        text: serviceDate,
+        selection:
+        TextSelection(baseOffset: serviceDate.length, extentOffset: serviceDate.length),
+        composing: TextRange.empty,
+      );
+    }
     return AnimatedTextFormField(
       enableInteractiveSelection: false,
       width: width,
@@ -734,6 +781,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
                           setState(() {
                             _valueCarServiceType=value;
                             _authData['serviceTypeId'] = value.ServiceTypeId.toString();
+                            isDurational=_valueCarServiceType.ServiceTypeConstId==Constants.SERVICE_TYPE_DURATIONALITY;
                           });
 
                           //field.didChange(_valueCarModelDetail);
@@ -751,6 +799,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   Widget _buildDistanceField(double width, CarServiceMessages messages) {
     final auth = Provider.of<Auth>(context);
     return AnimatedTextFormField(
+
       enableInteractiveSelection: true,
       width: width,
       loadingController: _loadingController,
@@ -780,9 +829,9 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       loadingController: _loadingController,
       interval: _passTextFieldLoadingAnimationInterval,
       labelText: messages.serviceCostHint,
-      //controller: _passwordController,
+      controller: costController,
       inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
-      keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
+      keyboardType: TextInputType.numberWithOptions(decimal: true,signed: false),
       prefixIcon: Icon(Icons.money_off),
       textInputAction:
       auth.isConfirm ? TextInputAction.done : TextInputAction.next,
@@ -797,7 +846,26 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   }
   Widget _buildAlarmDateField(double width, CarServiceMessages messages) {
     final auth = Provider.of<Auth>(context);
-
+    String serviceDate='';
+    if(isDurational){
+      int dv=_valueCarServiceType.AlarmDurationDay;
+      if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_MONTH){
+        Jalali sj=Jalali.now().addMonths(dv);
+        serviceDate=DateTimeUtils.getDateJalaliThis(sj);
+      }else if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_YEAR){
+        Jalali sj=Jalali.now().addYears(dv);
+        serviceDate=DateTimeUtils.getDateJalaliThis(sj);
+      } else if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_DAY){
+        Jalali sj=Jalali.now().addDays(dv);
+        serviceDate=DateTimeUtils.getDateJalaliThis(sj);
+      }
+      textEditingController3.value = textEditingController3.value.copyWith(
+        text: serviceDate,
+        selection:
+        TextSelection(baseOffset: serviceDate.length, extentOffset: serviceDate.length),
+        composing: TextRange.empty,
+      );
+    }
     return AnimatedTextFormField(
       enableInteractiveSelection: false,
       onTap: (){showDatePicker('Alarm',textEditingController3);},
@@ -847,14 +915,24 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   }
   Widget _buildAlarmCountField(double width, CarServiceMessages messages) {
     final auth = Provider.of<Auth>(context);
+    String serviceDate='';
+    if(!isDurational){
+      int dv=_valueCarServiceType.AlarmCount;
 
+      distanceController.value = distanceController.value.copyWith(
+        text: dv.toString(),
+        selection:
+        TextSelection(baseOffset: dv.toString().length, extentOffset: dv.toString().length),
+        composing: TextRange.empty,
+      );
+    }
     return AnimatedTextFormField(
       enableInteractiveSelection: true,
       width: width,
       loadingController: _loadingController,
       interval: _passTextFieldLoadingAnimationInterval,
-      labelText: messages.alarmCountHint,
-      //controller: _passwordController,
+      labelText: isDurational ? messages.alarmCountHint : Translations.current.alarmDistance(),
+      controller: distanceController,
       inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
       prefixIcon: Icon(Icons.confirmation_number),
@@ -906,7 +984,30 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       ),
     );
   }
+  Widget _buildDescriptionField(double width, CarServiceMessages messages) {
+    final auth = Provider.of<Auth>(context);
 
+    return AnimatedTextFormField(
+      enableInteractiveSelection: true,
+      width: width,
+      loadingController: _loadingController,
+      interval: _passTextFieldLoadingAnimationInterval,
+      labelText: messages.descriptionHint,
+      //controller: _passwordController,
+      //inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
+      keyboardType: TextInputType.text,
+      prefixIcon: Icon(Icons.description),
+      textInputAction:
+      auth.isConfirm ? TextInputAction.done : TextInputAction.next,
+      focusNode: _descriptionFocusNode,
+      onFieldSubmitted: (value) {
+        _submit();
+        //FocusScope.of(context).requestFocus(_confirmPasswordFocusNode);
+      },
+      validator: null,
+      onSaved: (value) => _authData['description'] = value,
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final isConfirm = Provider.of<Auth>(context, listen: false).isConfirm;
@@ -942,9 +1043,12 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
                 SizedBox(height: 5),
                 _buildAlarmCountField(textFieldWidth, messages),
                 SizedBox(height: 5),
-                _buildServiceCostField(textFieldWidth, messages),
+                (widget.editMode!=null && widget.editMode) ?   _buildServiceCostField(textFieldWidth, messages) :
+                Container(),
                 SizedBox(height: 5),
-                _buildDistanceField(textFieldWidth, messages)
+               !isDurational ? _buildDistanceField(textFieldWidth, messages) : Container(),
+                SizedBox(height: 5),
+                _buildDescriptionField(textFieldWidth, messages),
               ],
             ),
           ),

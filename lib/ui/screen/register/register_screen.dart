@@ -73,12 +73,12 @@ class _RegisterState extends State<RegisterScreen>
 
       if(event.type=='REGISTER_LOADING')
       {
-        showSnackLogin(context, 'در حال ارسال اطلاعات', true);
+       // showSnackLogin(context, 'در حال ارسال اطلاعات', true);
       }
 
       if(event.type=='REGISTER_FAILED')
       {
-        showSnackLogin(context, event.message, false);
+       // showSnackLogin(context, event.message, false);
 
       }
     });
@@ -88,11 +88,7 @@ class _RegisterState extends State<RegisterScreen>
   @override
   Widget build(BuildContext context) {
 
-    return new WillPopScope(
-        onWillPop: () async {
-      return centerRepository.onWillPop(context);
-    },
-    child:
+    return
       Scaffold(
         key: _scaffoldKey,
       body:
@@ -100,7 +96,7 @@ class _RegisterState extends State<RegisterScreen>
        child:
           new RegisterForm(bloc: registerBloc,mobile: widget.mobile,isEdit: false,),
         ),
-    ),
+
     );
   }
 
@@ -113,7 +109,7 @@ class _RegisterState extends State<RegisterScreen>
 
   @override
   void dispose() {
-
+    registerBloc.close();
     super.dispose();
   }
 

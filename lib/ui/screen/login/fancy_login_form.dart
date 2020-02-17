@@ -3,10 +3,7 @@ import 'package:anad_magicar/ui/screen/login/fancy_login/flutter_login.dart';
 import 'package:flutter/material.dart';
 
 
-const users = const {
-  'dribbble@gmail.com': '12345',
-  'hunter@gmail.com': 'hunter',
-};
+
 
 class FancyLoginForm extends StatelessWidget {
 

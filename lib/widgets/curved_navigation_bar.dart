@@ -23,7 +23,7 @@ class CurvedNavigationBar extends StatefulWidget {
     this.backgroundColor = Colors.blueAccent,
     this.onTap,
     this.animationCurve = Curves.easeOut,
-    this.animationDuration = const Duration(milliseconds: 600),
+    this.animationDuration = const Duration(milliseconds: 900),
     this.height = 70.0,
   })  : assert(items != null),
         assert(items.length >= 1),

@@ -10,7 +10,7 @@ class CarActionLog {
   int PlanId;
   String PlanTitle;
   String ActionTitle;
-
+  String UserName;
   CarActionLog({
     @required this.CarActionLogId,
     @required this.CarId,
@@ -21,6 +21,7 @@ class CarActionLog {
     @required this.PlanId,
     @required this.PlanTitle,
     @required this.ActionTitle,
+    @required this.UserName,
   });
 
   Map<String, dynamic> toMap() {
@@ -34,6 +35,7 @@ class CarActionLog {
       'PlanId': this.PlanId,
       'PlanTitle': this.PlanTitle,
       'ActionTitle': this.ActionTitle,
+      'UserName': this.UserName
     };
   }
 
@@ -48,6 +50,7 @@ class CarActionLog {
       PlanId: map['PlanId'] ,
       PlanTitle: map['PlanTitle'] ,
       ActionTitle: map['ActionTitle'] ,
+      UserName: map['UserName'],
     );
   }
 
@@ -60,7 +63,8 @@ class CarActionLog {
       CostAmount: json["CostAmount"],
       PlanId: json["PlanId"],
       PlanTitle: json["PlanTitle"],
-      ActionTitle: json["ActionTitle"],);
+      ActionTitle: json["ActionTitle"],
+    UserName: json["UserName"]);
   }
 
   Map<String, dynamic> toJson() {
@@ -74,6 +78,7 @@ class CarActionLog {
       "PlanId": this.PlanId,
       "PlanTitle": this.PlanTitle,
       "ActionTitle": this.ActionTitle,
+      "UserName":this.UserName
     };
   }
 

@@ -49,18 +49,7 @@ class InRegisterEvent extends RegisterEvent{
 
   @override
   Future<RegisterState> applyAsync({RegisterState currentState, RegisterCarBloc bloc}) async{
-    if(currentState is UnRegisterState) {
-      try {
 
-            return new LoadRegisterState();
-
-      }
-
-      catch (_, stackTrace) {
-        return new ErrorRegisterState(_?.toString());
-      }
-    }
-    return new InRegisterState();
   }
 
 }
@@ -78,36 +67,8 @@ class LoadRegisterEvent extends RegisterEvent {
   @override
   Future<RegisterState> applyAsync({RegisterState currentState, RegisterCarBloc bloc}) async {
 
-   try {
-        if(carModel!=null)
-          {
-            CarDS carDS=new CarDS();
-            SaveCarModel result=await carDS.send(carModel);
-            if(result!=null) {
-              centerRepository.getCars()..add(new  Car(carId: result.carId ,
-                  carModelDetailId: result.tip,
-                  productDate: null,
-                  colorTypeConstId: result.colorId,
-                  pelaueNumber: result.pelak,
-                  deviceId: 1,
-                  totlaDistance: result.distance,
-                  carStatusConstId: null,
-                  description: null,
-                  isActive: null,
-                  brandTitle: 'brand title',
-                  businessUnitId: null, owner: null, version: null, createdDate: null));
-              prefRepository.setCarId(result.carId);
-              centerRepository.setCarId(result.carId);
-               prefRepository.addCarsCount();
-              return new RegisteredState();
-            }
-            else
-              return new ErrorRegisterState('خطا در ثبت خودرو');
-          }
-    } catch (_, stackTrace) {
-      return new ErrorRegisterState(_?.toString());
-    }
-    return new ErrorRegisterState('خطای نا معلوم');
+
+
   }
 }
 
@@ -122,12 +83,6 @@ class RegisteredEvent extends RegisterEvent {
   Future<RegisterState> applyAsync(
       {
         RegisterState currentState, RegisterCarBloc bloc}) async {
-    try {
 
-      return new RegisteredState();
-    } catch (_, stackTrace) {
-
-      return new ErrorRegisterState(_?.toString());
-    }
   }
 }

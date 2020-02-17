@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:anad_magicar/bloc/service_type/register.dart';
+import 'package:anad_magicar/data/rest_ds.dart';
+import 'package:anad_magicar/translation_strings.dart';
 import 'package:bloc/bloc.dart';
 
 
@@ -18,12 +20,31 @@ class RegisterServiceTypeBloc extends Bloc<RegisterServiceTypeEvent,RegisterServ
 
   @override
   Stream<RegisterServiceTypeState> mapEventToState(RegisterServiceTypeEvent event) async* {
-   try {
-      yield await event.applyAsync(currentState: state, bloc: this);
-    } catch (_, stackTrace) {
-      print('$_ $stackTrace');
-      yield state;
+   if(event is LoadRegisterServiceTypeEvent){
+     yield LoadRegisterServiceTypeState();
+     try{
+       if(event.serviceType!=null) {
+         var result=await restDatasource.saveServiceType(event.serviceType);
+         if(result!=null) {
+           if(result.IsSuccessful) {
+             yield RegisteredServiceTypeState();
+           }
+           yield ErrorRegisterServiceTypeState(result.Message);
+         }
+         else {
+           yield ErrorRegisterServiceTypeState(Translations.current.hasErrors());
+         }
+       }
+     } catch(_, stackTrace){
+       yield ErrorRegisterServiceTypeState(_?.toString());
     }
+   }
+   if(event is RegisteredServiceTypeEvent){
+     yield RegisteredServiceTypeState();
+   }
+   if(event is InRegisterServiceTypeEvent){
+     yield InRegisterServiceTypeState();
+   }
 
   }
 

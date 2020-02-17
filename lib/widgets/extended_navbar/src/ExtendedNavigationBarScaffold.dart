@@ -337,7 +337,7 @@ class _ExtendedNavigationBarScaffoldState
           Icon(Icons.payment, size: 30,color: Colors.indigoAccent,),
         ],
         onTap: (index) {
-          CenterRepository.onNavButtonTap(context, index);
+          CenterRepository.onNavButtonTap(context, index,carId: CenterRepository.getCurrentCarId());
         },
       ),
       appBar: widget.floatingAppBar ? null : widget.appBar,

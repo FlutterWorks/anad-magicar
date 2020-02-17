@@ -245,7 +245,7 @@ class _FlutterLoginState extends State<FlutterLogin>
   /// changes
   /// https://flutter.dev/docs/development/tools/hot-reload#previous-state-is-combined-with-new-code
   final GlobalKey<AuthCardState> authCardKey = GlobalKey();
-  static const loadingDuration = const Duration(milliseconds: 400);
+  static const loadingDuration = const Duration(milliseconds: 200);
   AnimationController _loadingController;
   AnimationController _logoController;
   AnimationController _titleController;

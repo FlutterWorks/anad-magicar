@@ -264,7 +264,7 @@ class _CarPanelWidgetState extends State<CarPanelWidget> with SingleTickerProvid
           listenerRepository.onPowerTap(context, temp_engineStatus);
           widget.carStateVM.isPowerOn=temp_engineStatus;
           //widget.carStateVM.setCarStatusImages();
-          centerRepository.setCarStateVMMap(widget.carStateVM);
+          centerRepository.updateCarStateVMMap(widget.carStateVM);
           widget.carStateNoty.updateValue(widget.carStateVM);
           _counter++ ;
           percentage=0.0;
@@ -384,7 +384,7 @@ class _CarPanelWidgetState extends State<CarPanelWidget> with SingleTickerProvid
                                       updateLockStatus(false);
                                       widget.carStateVM.isDoorOpen=true;
                                       widget.carStateVM.setCarStatusImages();
-                                      centerRepository.setCarStateVMMap(widget.carStateVM);
+                                      centerRepository.updateCarStateVMMap(widget.carStateVM);
                                       widget.carStateNoty.updateValue(widget.carStateVM);
                                       // play(Constants.DOOR_OPEN_SOUND);
                                       sendCommand(ActionsCommand.UnlockAndDisArm_Nano_CODE);
@@ -464,7 +464,7 @@ class _CarPanelWidgetState extends State<CarPanelWidget> with SingleTickerProvid
                                       updateLockStatus(true);
                                       widget.carStateVM.isDoorOpen=false;
                                       widget.carStateVM.setCarStatusImages();
-                                      centerRepository.setCarStateVMMap(widget.carStateVM);
+                                      centerRepository.updateCarStateVMMap(widget.carStateVM);
                                       widget.carStateNoty.updateValue(widget.carStateVM);
                                       sendCommand(ActionsCommand.LockAndArm_Nano_CODE);
                                       //play(Constants.DOOR_LOCK_SOUND,);
@@ -958,7 +958,7 @@ class _CarPanelWidgetState extends State<CarPanelWidget> with SingleTickerProvid
                                 context, trunk_status);*/
                                       widget.carStateVM.isTraunkOpen=trunk_status;
                                       widget.carStateVM.setCarStatusImages();
-                                      centerRepository.setCarStateVMMap(widget.carStateVM);
+                                      centerRepository.updateCarStateVMMap(widget.carStateVM);
                                       widget.carStateNoty.updateValue(widget.carStateVM);
                                       if(trunk_status) {
                                         //play(Constants.TRUNK_OPEN_SOUND);
@@ -1130,7 +1130,7 @@ class _CarPanelWidgetState extends State<CarPanelWidget> with SingleTickerProvid
                                 context, caput_status);*/
                                       widget.carStateVM.isCaputOpen=caput_status;
                                       widget.carStateVM.setCarStatusImages();
-                                      centerRepository.setCarStateVMMap(widget.carStateVM);
+                                      centerRepository.updateCarStateVMMap(widget.carStateVM);
                                       widget.carStateNoty.updateValue(widget.carStateVM);
                                     },
                                     child:

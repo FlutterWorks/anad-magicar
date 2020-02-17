@@ -141,7 +141,7 @@ class FlashHelper {
           controller: controller,
           style: flashStyle,
           horizontalDismissDirection: HorizontalDismissDirection.horizontal,
-          backgroundColor: Colors.black87,
+          backgroundColor: Colors.indigo,
           barrierDismissible: true,
           position: FlashPosition.top,
           child: FlashBar(

@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2020-02-07T20:21:32.983378",
+  "@@last_modified": "2020-02-16T22:43:48.439009",
   "confirm": "confirm",
   "@confirm": {
     "description": "Confirm Security Code",
@@ -1275,6 +1275,300 @@
   "selectForJoin": "Select to Join",
   "@selectForJoin": {
     "description": "selectForJoin",
+    "type": "text",
+    "placeholders": {}
+  },
+  "editCarSuccessful": "Edit Car Successful",
+  "@editCarSuccessful": {
+    "description": "editCarSuccessful",
+    "type": "text",
+    "placeholders": {}
+  },
+  "editCarUnSuccessful": "Edit Car UnSuccessful",
+  "@editCarUnSuccessful": {
+    "description": "editCarUnSuccessful",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageDate": "Message Date",
+  "@messageDate": {
+    "description": "messageDate",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageSubject": "Message Subject",
+  "@messageSubject": {
+    "description": "messageSubject",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageBody": "Message Body",
+  "@messageBody": {
+    "description": "messageBody",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageSentUnSuccessfull": "Message Sent UnSuccessfull",
+  "@messageSentUnSuccessfull": {
+    "description": "messageSentUnSuccessfull",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageHasSentSuccessfull": "Message Sent Successfull",
+  "@messageHasSentSuccessfull": {
+    "description": "messageHasSentSuccessfull",
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendMessage": "Sending Message",
+  "@sendMessage": {
+    "description": "sendMessage",
+    "type": "text",
+    "placeholders": {}
+  },
+  "noServiceTypes": "No ServiceTypes",
+  "@noServiceTypes": {
+    "description": "noServiceTypes",
+    "type": "text",
+    "placeholders": {}
+  },
+  "showDetails": "Show Details",
+  "@showDetails": {
+    "description": "showDetails",
+    "type": "text",
+    "placeholders": {}
+  },
+  "confimDelete": "Alarm to Delete!",
+  "@confimDelete": {
+    "description": "confimDelete",
+    "type": "text",
+    "placeholders": {}
+  },
+  "areYouSureToDelete": "Are You Sure To Delete?",
+  "@areYouSureToDelete": {
+    "description": "areYouSureToDelete",
+    "type": "text",
+    "placeholders": {}
+  },
+  "carNotFound": "Car Not Found",
+  "@carNotFound": {
+    "description": "carNotFound",
+    "type": "text",
+    "placeholders": {}
+  },
+  "serviceType": "Service Type",
+  "@serviceType": {
+    "description": "serviceType",
+    "type": "text",
+    "placeholders": {}
+  },
+  "serviceTypeIsDurational": "Durational",
+  "@serviceTypeIsDurational": {
+    "description": "serviceTypeIsDurational",
+    "type": "text",
+    "placeholders": {}
+  },
+  "serviceTypeIsFunctionality": "Functional",
+  "@serviceTypeIsFunctionality": {
+    "description": "serviceTypeIsFunctionality",
+    "type": "text",
+    "placeholders": {}
+  },
+  "functional": "Functional",
+  "@functional": {
+    "description": "functional",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durational": "Durational",
+  "@durational": {
+    "description": "durational",
+    "type": "text",
+    "placeholders": {}
+  },
+  "both": "Both",
+  "@both": {
+    "description": "both",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durationDay": "Day",
+  "@durationDay": {
+    "description": "durationDay",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durationMonth": "Month",
+  "@durationMonth": {
+    "description": "durationMonth",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durationYear": "Year",
+  "@durationYear": {
+    "description": "durationYear",
+    "type": "text",
+    "placeholders": {}
+  },
+  "remaind": "Remaind",
+  "@remaind": {
+    "description": "remaind",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durationFunctionalCountValue": "durationFunctionalCountValue",
+  "@durationFunctionalCountValue": {
+    "description": "durationFunctionalCountValue",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durationFunctionalValue": "durationFunctionalValue",
+  "@durationFunctionalValue": {
+    "description": "durationFunctionalValue",
+    "type": "text",
+    "placeholders": {}
+  },
+  "securityCodeWillSmsYou": "Your Password SMS you",
+  "@securityCodeWillSmsYou": {
+    "description": "securityCodeWillSmsYou",
+    "type": "text",
+    "placeholders": {}
+  },
+  "smsHasRead": "Read",
+  "@smsHasRead": {
+    "description": "smsHasRead",
+    "type": "text",
+    "placeholders": {}
+  },
+  "smsHasUnRead": "UnRead",
+  "@smsHasUnRead": {
+    "description": "smsHasUnRead",
+    "type": "text",
+    "placeholders": {}
+  },
+  "loginAndThenEditYourProfile": "Login And Then Edit Your Profile With Password: 1111",
+  "@loginAndThenEditYourProfile": {
+    "description": "loginAndThenEditYourProfile",
+    "type": "text",
+    "placeholders": {}
+  },
+  "passwordHasChanged": "PasswordHas Changed",
+  "@passwordHasChanged": {
+    "description": "passwordHasChanged",
+    "type": "text",
+    "placeholders": {}
+  },
+  "changePasswordError": "Change Password Has Error",
+  "@changePasswordError": {
+    "description": "changePasswordError",
+    "type": "text",
+    "placeholders": {}
+  },
+  "changePasswordTitle": "Change Password Title",
+  "@changePasswordTitle": {
+    "description": "changePasswordTitle",
+    "type": "text",
+    "placeholders": {}
+  },
+  "replyMessage": "Reply Message",
+  "@replyMessage": {
+    "description": "replyMessage",
+    "type": "text",
+    "placeholders": {}
+  },
+  "actionService": "Action Service",
+  "@actionService": {
+    "description": "actionService",
+    "type": "text",
+    "placeholders": {}
+  },
+  "done": "Done",
+  "@done": {
+    "description": "done",
+    "type": "text",
+    "placeholders": {}
+  },
+  "notDone": "Not Done",
+  "@notDone": {
+    "description": "notDone",
+    "type": "text",
+    "placeholders": {}
+  },
+  "fromDateToDate": "From Date by Date",
+  "@fromDateToDate": {
+    "description": "fromDateToDate",
+    "type": "text",
+    "placeholders": {}
+  },
+  "showReportBaseOnDate": "Show Report BaseOn Date",
+  "@showReportBaseOnDate": {
+    "description": "showReportBaseOnDate",
+    "type": "text",
+    "placeholders": {}
+  },
+  "showReportBaseOnDays": "Show Report Base On Last Days",
+  "@showReportBaseOnDays": {
+    "description": "showReportBaseOnDays",
+    "type": "text",
+    "placeholders": {}
+  },
+  "fromLastDays": "From Last Days",
+  "@fromLastDays": {
+    "description": "fromLastDays",
+    "type": "text",
+    "placeholders": {}
+  },
+  "alarmDistance": "Alarm Distance",
+  "@alarmDistance": {
+    "description": "alarmDistance",
+    "type": "text",
+    "placeholders": {}
+  },
+  "areYouSureToExitForBackTouchCancel": "Are You Sure To Exit ? For Back Touch Cancel",
+  "@areYouSureToExitForBackTouchCancel": {
+    "description": "areYouSureToExitForBackTouchCancel",
+    "type": "text",
+    "placeholders": {}
+  },
+  "carPairedCounts": "carPairedCounts",
+  "@carPairedCounts": {
+    "description": "carPairedCounts",
+    "type": "text",
+    "placeholders": {}
+  },
+  "carToRequestForPair": "carToRequestForPair",
+  "@carToRequestForPair": {
+    "description": "carToRequestForPair",
+    "type": "text",
+    "placeholders": {}
+  },
+  "addToPaired": "addToPaired",
+  "@addToPaired": {
+    "description": "addToPaired",
+    "type": "text",
+    "placeholders": {}
+  },
+  "masterCarId": "masterCarId",
+  "@masterCarId": {
+    "description": "masterCarId",
+    "type": "text",
+    "placeholders": {}
+  },
+  "thisCarPaired": "thisCarPaired",
+  "@thisCarPaired": {
+    "description": "thisCarPaired",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageRead": "Read",
+  "@messageRead": {
+    "description": "messageRead",
+    "type": "text",
+    "placeholders": {}
+  },
+  "errorinSignUp": "errorinSignUp",
+  "@errorinSignUp": {
+    "description": "errorinSignUp",
     "type": "text",
     "placeholders": {}
   },

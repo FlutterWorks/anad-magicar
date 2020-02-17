@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:anad_magicar/bloc/basic/bloc_provider.dart';
 import 'package:anad_magicar/bloc/basic/global_bloc.dart';
 import 'package:anad_magicar/bloc/shopcart/cart.dart';
@@ -29,6 +31,7 @@ import 'package:anad_magicar/model/viewmodel/accessable_action_vm.dart';
 import 'package:anad_magicar/model/viewmodel/car_page_vm.dart';
 import 'package:anad_magicar/model/viewmodel/car_state.dart';
 import 'package:anad_magicar/model/viewmodel/map_vm.dart';
+import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/notifiers/opacity.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/pref_repository.dart';
@@ -60,6 +63,7 @@ import 'package:anad_magicar/widgets/drawer/app_drawer.dart';
 import 'package:anad_magicar/widgets/drawer/circular_image.dart';
 import 'package:anad_magicar/widgets/drawer/drawer.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash.dart';
+import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
 import 'package:anad_magicar/widgets/flutter_offline/flutter_offline.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -70,6 +74,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:solid_bottom_sheet/solid_bottom_sheet.dart';
+import 'package:sqflite/utils/utils.dart';
 import 'styles.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/animation.dart';
@@ -78,6 +83,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:after_layout/after_layout.dart';
 import 'dart:math' as math;
+import 'dart:convert' as hx;
 //import 'package:assets_audio_player/assets_audio_player.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -158,7 +164,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin ,
   int _counter=0;
   User user;
   bool engineStatus=false;
-  bool lockStatus=false;
+  bool lockStatus=true;
   bool trunkStatus=false;
   bool caputStatus=false;
   bool isDark=false;
@@ -502,43 +508,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin ,
           left,
           carPageChangedNoty,
       opacityNotifier),
-     // buildLockPanelRow(context,carIndex,carPageChangedNoty),
-      //buildMapRow(context),
-     /* Container(
-          decoration: new BoxDecoration(
-            gradient: new LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-              stops: [0.1, 0.5, 0.7, 0.9],
-              colors: [
-                Colors.grey[50],
-                Colors.grey[50],
-                Colors.grey[50],
-                Colors.grey[50],
-              ],
-            ),
-          ),
-          child:
-             buildMapRow(context,carPageChangedNoty)
-      ),*/
-      /*Container(
-        decoration: new BoxDecoration(
-          gradient: new LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            stops: [0.1, 0.5, 0.7, 0.9],
-            colors: [
-              Colors.grey[50],
-              Colors.grey[50],
-              Colors.grey[50],
-              Colors.grey[50],
-            ],
-          ),
-        ),
-        child:
-            buildArrowRow(context,carIndex,left,carPageChangedNoty)
-        ),*/
-      //buildControlRow(context,startImg,startEnginChangedNoty,engineStatus,lockStatus),
+
      new EngineStatus(engineStatus: engineStatus,
          lockStatus: lockStatus,
          color: _currentColor,
@@ -842,18 +812,19 @@ void registerBus() {
                _solidBottomSheetController.hide();
              _solidBottomSheetController.show();
            }
-         if(event.type=='FCM')
-           {
-            // FlushbarHelper.createInformation(title: event.message,message: event.message,duration: Duration(milliseconds: 2000));
-              _showTopFlash('FCM',event.message);
+         if(event.type=='FCM_STATUS') {
+           String msg=event.message;
+           Uint8List fcmBody=hx.base64Decode(msg);//.toString();
+           NotiAnalyze notiAnalyze=new NotiAnalyze(noti: null, carId: _currentCarId);
+         }
+         else if(event.type=='FCM') {
+                FlashHelper.successBar(context, message: event.message);
               int carId=NotiAnalyze.getCarIdFromNoty(event.message);
               CarStateVM carStateVM=centerRepository.getCarStateVMByCarId(carId);
               if(carStateVM!=null)
                 carStateVM.fillNotiData(event.message,carId);
            }
-     /* setState(()  => {
 
-    });*/
     });
   }
 
@@ -1033,7 +1004,8 @@ void registerBus() {
          userName: userName,
        currentRoute: route,
        imageUrl: imageUrl,
-       carPageTap: onCarPageTap,),
+       carPageTap: onCarPageTap,
+       carId: _currentCarId,),
     body:  Stack(
       alignment: Alignment.topCenter,
       overflow: Overflow.visible,
@@ -1100,14 +1072,14 @@ void registerBus() {
                           child:
                           GestureDetector(
                             onTap: () {
-                              Navigator.pushNamed(context, MessageAppPageState.route);
+                              Navigator.pushNamed(context, MessageAppPageState.route,arguments: _currentCarId);
                             },
                             child: new Container(width: 24.0,height: 24.0,
                               child:
                               Image.asset('assets/images/message.png',color: Colors.indigoAccent,),
                             ),),), ),
                       Padding(
-                        padding: EdgeInsets.only(right: 80.0,top: 30.0),
+                        padding: EdgeInsets.only(right: 60.0,top: 30.0),
                         child:
                         Align(
                           alignment: Alignment(1,-1),
@@ -1345,7 +1317,6 @@ void registerBus() {
               itemCount: 1,
               itemBuilder: (BuildContext context, int index)
               {
-
                 return
                   AppBarCollaps(
                       _controller,
@@ -1426,13 +1397,13 @@ void registerBus() {
     }
     else if(index==0)
     {
-      Navigator.pushNamed(context, '/servicepage',arguments: _currentCarId);
+      Navigator.pushNamed(context, '/servicepage',arguments: new ServiceVM(carId: _currentCarId, editMode: null, service: null, refresh: false) );
     }
     else if(index==1)
     {
       Navigator.of(context).pushNamed(
           '/mappage',arguments: new MapVM(
-        carId: 0,
+        carId: _currentCarId,
         carCounts: centerRepository.getCarsToAdmin().length,
         cars: centerRepository.getCarsToAdmin(),
       ));
@@ -1539,7 +1510,7 @@ void registerBus() {
                   if (currentCarState != null) {
                     currentCarState.isDoorOpen = !message.status;
                     currentCarState.setCarStatusImages();
-                    centerRepository.setCarStateVMMap(currentCarState);
+                    centerRepository.updateCarStateVMMap(currentCarState);
                   }
                   setLockStatus(message.status);
                   lockStatus = message.status;
@@ -1563,7 +1534,7 @@ void registerBus() {
                   if (currentCarState != null) {
                     currentCarState.isTraunkOpen = message.status;
                     currentCarState.setCarStatusImages();
-                    centerRepository.setCarStateVMMap(currentCarState);
+                    centerRepository.updateCarStateVMMap(currentCarState);
                   }
                   //rotationController.forward();
                   trunkStatus = message.status;
@@ -1580,7 +1551,7 @@ void registerBus() {
                   if (currentCarState != null) {
                     currentCarState.isCaputOpen = message.status;
                     currentCarState.setCarStatusImages();
-                    centerRepository.setCarStateVMMap(currentCarState);
+                    centerRepository.updateCarStateVMMap(currentCarState);
                   }
                   // rotationController.forward();
                   caputStatus = message.status;

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 enum TextFieldInertiaDirection {
@@ -205,6 +206,9 @@ class _AnimatedTextFormFieldState extends State<AnimatedTextFormField> {
     final theme = Theme.of(context);
     Widget textField = TextFormField(
       controller: widget.controller,
+      inputFormatters: [
+        LengthLimitingTextInputFormatter(20),
+      ],
       focusNode: widget.focusNode,
       decoration: _getInputDecoration(theme),
       keyboardType: widget.keyboardType,

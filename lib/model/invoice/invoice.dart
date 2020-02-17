@@ -3,6 +3,10 @@ import 'package:anad_magicar/model/plan_model.dart';
 import 'package:flutter/material.dart';
 import 'package:anad_magicar/utils/dart_helper.dart';
 class InvoiceModel {
+
+  static final int InvoiceStatusConstId_Not_Paid=152338;
+  static final int InvoiceStatusConstId_Paid=152340;
+
   int InvoiceId;
   int UserId;
   int PlanId;

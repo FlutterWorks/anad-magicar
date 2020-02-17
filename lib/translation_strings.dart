@@ -483,15 +483,93 @@ class Translations {
   String messageBody() => Intl.message('Message Body',
       name: 'messageBody', desc: 'messageBody');
   String messageSentUnSuccessfull() => Intl.message('Message Sent UnSuccessfull',
-      name: 'messageSentUnSucceefull', desc: 'messageSentUnSucceefull');
+      name: 'messageSentUnSuccessfull', desc: 'messageSentUnSuccessfull');
   String messageHasSentSuccessfull() => Intl.message('Message Sent Successfull',
-      name: 'messageHasSentSucceefull', desc: 'messageHasSentSucceefull');
+      name: 'messageHasSentSuccessfull', desc: 'messageHasSentSuccessfull');
   String sendMessage() => Intl.message('Sending Message',
       name: 'sendMessage', desc: 'sendMessage');
   String noServiceTypes() => Intl.message('No ServiceTypes',
       name: 'noServiceTypes', desc: 'noServiceTypes');
   String showDetails() => Intl.message('Show Details',
       name: 'showDetails', desc: 'showDetails');
+  String confimDelete() => Intl.message('Alarm to Delete!',
+      name: 'confimDelete', desc: 'confimDelete');
+  String areYouSureToDelete() => Intl.message('Are You Sure To Delete?',
+      name: 'areYouSureToDelete', desc: 'areYouSureToDelete');
+  String carNotFound() => Intl.message('Car Not Found',
+      name: 'carNotFound', desc: 'carNotFound');
+  String serviceType() => Intl.message('Service Type',
+      name: 'serviceType', desc: 'serviceType');
+  String serviceTypeIsDurational() => Intl.message('Durational',
+      name: 'serviceTypeIsDurational', desc: 'serviceTypeIsDurational');
+  String serviceTypeIsFunctionality() => Intl.message('Functional',
+      name: 'serviceTypeIsFunctionality', desc: 'serviceTypeIsFunctionality');
+  String functional() => Intl.message('Functional',
+      name: 'functional', desc: 'functional');
+  String durational() => Intl.message('Durational',
+      name: 'durational', desc: 'durational');
+  String both() => Intl.message('Both',
+      name: 'both', desc: 'both');
+  String durationDay() => Intl.message('Day',
+      name: 'durationDay', desc: 'durationDay');
+  String durationMonth() => Intl.message('Month',
+      name: 'durationMonth', desc: 'durationMonth');
+  String durationYear() => Intl.message('Year',
+      name: 'durationYear', desc: 'durationYear');
+  String remaind() => Intl.message('Remaind',
+      name: 'remaind', desc: 'remaind');
+  String durationFunctionalCountValue() => Intl.message('durationFunctionalCountValue',
+      name: 'durationFunctionalCountValue', desc: 'durationFunctionalCountValue');
+  String durationFunctionalValue() => Intl.message('durationFunctionalValue',
+      name: 'durationFunctionalValue', desc: 'durationFunctionalValue');
+  String securityCodeWillSmsYou() => Intl.message('Your Password SMS you',
+      name: 'securityCodeWillSmsYou', desc: 'securityCodeWillSmsYou');
+  String smsHasRead() => Intl.message('Read',
+      name: 'smsHasRead', desc: 'smsHasRead');
+  String smsHasUnRead() => Intl.message('UnRead',
+      name: 'smsHasUnRead', desc: 'smsHasUnRead');
+  String loginAndThenEditYourProfile() => Intl.message('Login And Then Edit Your Profile With Password: 1111',
+      name: 'loginAndThenEditYourProfile', desc: 'loginAndThenEditYourProfile');
+  String passwordHasChanged() => Intl.message('PasswordHas Changed',
+      name: 'passwordHasChanged', desc: 'passwordHasChanged');
+  String changePasswordError() => Intl.message('Change Password Has Error',
+      name: 'changePasswordError', desc: 'changePasswordError');
+  String changePasswordTitle() => Intl.message('Change Password Title',
+      name: 'changePasswordTitle', desc: 'changePasswordTitle');
+  String replyMessage() => Intl.message('Reply Message',
+      name: 'replyMessage', desc: 'replyMessage');
+  String actionService() => Intl.message('Action Service',
+      name: 'actionService', desc: 'actionService');
+  String done() => Intl.message('Done',
+      name: 'done', desc: 'done');
+  String notDone() => Intl.message('Not Done',
+      name: 'notDone', desc: 'notDone');
+  String fromDateToDate() => Intl.message('From Date by Date',
+      name: 'fromDateToDate', desc: 'fromDateToDate');
+  String showReportBaseOnDate() => Intl.message('Show Report BaseOn Date',
+      name: 'showReportBaseOnDate', desc: 'showReportBaseOnDate');
+  String showReportBaseOnDays() => Intl.message('Show Report Base On Last Days',
+      name: 'showReportBaseOnDays', desc: 'showReportBaseOnDays');
+  String fromLastDays() => Intl.message('From Last Days',
+      name: 'fromLastDays', desc: 'fromLastDays');
+  String alarmDistance() => Intl.message('Alarm Distance',
+      name: 'alarmDistance', desc: 'alarmDistance');
+  String areYouSureToExitForBackTouchCancel() => Intl.message('Are You Sure To Exit ? For Back Touch Cancel',
+      name: 'areYouSureToExitForBackTouchCancel', desc: 'areYouSureToExitForBackTouchCancel');
+  String carPairedCounts() => Intl.message('carPairedCounts',
+      name: 'carPairedCounts', desc: 'carPairedCounts');
+  String carToRequestForPair() => Intl.message('carToRequestForPair',
+      name: 'carToRequestForPair', desc: 'carToRequestForPair');
+  String addToPaired() => Intl.message('addToPaired',
+      name: 'addToPaired', desc: 'addToPaired');
+  String masterCarId() => Intl.message('masterCarId',
+      name: 'masterCarId', desc: 'masterCarId');
+  String thisCarPaired() => Intl.message('thisCarPaired',
+      name: 'thisCarPaired', desc: 'thisCarPaired');
+  String messageRead() => Intl.message('Read',
+      name: 'messageRead', desc: 'messageRead');
+  String errorinSignUp() => Intl.message('errorinSignUp',
+      name: 'errorinSignUp', desc: 'errorinSignUp');
   String title() => Intl.message('MagiCar',
       name: 'title', desc: 'MagiCar Co.');
 }

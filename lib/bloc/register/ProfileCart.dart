@@ -10,7 +10,7 @@ import 'package:anad_magicar/repository/user/user_repo.dart';
 
 class ProfileCart {
   User user;
-  UserDetails userDetails;
+  //UserDetails userDetails;
   int studentId;
   Message message;
   UserRepository userRepository;

@@ -144,6 +144,7 @@ class SettingsScreenState extends State<SettingsScreen> {
         });
       }
   }
+
   onCarPageTap()
   {
     Navigator.of(context).pushNamed('/carpage',arguments: new CarPageVM(
@@ -176,7 +177,8 @@ class SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: AppDrawer(userName: userName,imageUrl: imageUrl,currentRoute: route,carPageTap: onCarPageTap,) ,//buildDrawer(context, route,userName,imageUrl,null,''),
+      key: _scaffoldKey,
+        drawer: AppDrawer(userName: userName,imageUrl: imageUrl,currentRoute: route,carPageTap: onCarPageTap,carId: CenterRepository.getCurrentCarId(),) ,//buildDrawer(context, route,userName,imageUrl,null,''),
     bottomNavigationBar: CurvedNavigationBar(
     index: 2,
     height: 60.0,
@@ -191,7 +193,7 @@ class SettingsScreenState extends State<SettingsScreen> {
     ],
     onTap: (index) {
     //Handle button tap
-    CenterRepository.onNavButtonTap(context, index);
+    CenterRepository.onNavButtonTap(context, index,carId: CenterRepository.getCurrentCarId());
     },
     ),
     /*appBar: (widget.fromMain==null || !widget.fromMain) ?
@@ -241,8 +243,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                 subtitle: 'فارسی',
                 leading: Icon(Icons.language),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (BuildContext context) => LanguagesScreen()));
+                 /* Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) => LanguagesScreen()));*/
                 },
               ),
               SettingsTile.switchTile(
@@ -282,11 +284,11 @@ class SettingsScreenState extends State<SettingsScreen> {
                   subtitle: mobile==null ? '' : mobile ,
                   leading: Icon(Icons.phone)),
               //SettingsTile(title: 'ایمیل', leading: Icon(Icons.email)),
-              SettingsTile(title: 'خروج از حساب کاربری',
+              /*SettingsTile(title: 'خروج از حساب کاربری',
                   leading: Icon(Icons.exit_to_app),
               onTap: () {
                 Navigator.of(context).pushNamed('/logout');
-              },),
+              },),*/
             ],
           ),
           /*SettingsSection(

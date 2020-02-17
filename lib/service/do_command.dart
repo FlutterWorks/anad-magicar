@@ -89,7 +89,7 @@ class DoCommand extends BaseCommands {
   updateCarState() {
     createSentCommand();
     carStateVM.setCarStatusImages();
-    centerRepository.setCarStateVMMap(carStateVM);
+    centerRepository.updateCarStateVMMap(carStateVM);
     carStateNoty.updateValue(carStateVM);
     return null;
   }

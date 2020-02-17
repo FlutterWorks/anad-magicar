@@ -128,7 +128,43 @@ class CurrentPlanFormState extends MainPage<CurrentPlanForm>
   }
 
 
+  _launchURL(String id) async {
+    String url = 'http://anadgps.com/payline/api/invoices/pay/$id';
+    if (await canLaunch(url)) {
+      launch(url).then((res){
+        var returnVal=res;
+      });
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 
+  _buyCurrentPlanSelected(int userId,int planId,double cost) async{
+    RestDatasource restDatasource=new RestDatasource();
+    Map<String,dynamic> reqBody={'meta': planId,
+      'amount': cost};
+    var result=await restDatasource.requestBuyUrl(body: reqBody);
+    if(result!=null) {
+      String id=result['id'];
+      if(id!=null && id.isNotEmpty){
+        _launchURL(id);
+      }
+    }
+    /*restDatasource.partialSaveInvoice(userId, planId).then((res) {
+       if(res!=null )
+         {
+           if(res.IsSuccessful)
+             {
+               centerRepository.showFancyToast(Translations.current.buyPlanSuccessful());
+               notyGetCurrentPlan.updateValue(new Message(type: 'GET_CURRENT_PLAN'));
+             }
+           else
+             {
+               centerRepository.showFancyToast(Translations.current.buyPlanUnSuccessful());
+             }
+         }
+     });*/
+  }
 
 
   List<Widget> getInvoiceDetailsTiles(BuildContext context, InvoiceModel invoiceModel) {
@@ -562,10 +598,48 @@ class Card1 extends StatelessWidget {
   RestDatasource restDS;
   bool isActive=false;
 
+  _launchURL(String id) async {
+    String url = 'http://anadgps.com/payline/api/invoices/pay/$id';
+    if (await canLaunch(url)) {
+      launch(url).then((res){
+        var returnVal=res;
+      });
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  _buyCurrentPlanSelected(int userId,int planId,double cost) async{
+    RestDatasource restDatasource=new RestDatasource();
+    Map<String,dynamic> reqBody={'meta': planId,
+      'amount': cost};
+    var result=await restDatasource.requestBuyUrl(body: reqBody);
+    if(result!=null) {
+      String id=result['id'];
+      if(id!=null && id.isNotEmpty){
+        _launchURL(id);
+      }
+    }
+    /*restDatasource.partialSaveInvoice(userId, planId).then((res) {
+       if(res!=null )
+         {
+           if(res.IsSuccessful)
+             {
+               centerRepository.showFancyToast(Translations.current.buyPlanSuccessful());
+               notyGetCurrentPlan.updateValue(new Message(type: 'GET_CURRENT_PLAN'));
+             }
+           else
+             {
+               centerRepository.showFancyToast(Translations.current.buyPlanUnSuccessful());
+             }
+         }
+     });*/
+  }
   activateInvoice(BuildContext context, InvoiceModel inv) async {
     restDS=new RestDatasource();
     String startDate=Jalali.now().toString();
-    restDS.invoicePlanActivation(inv.InvoiceId, startDate).then((res) {
+
+    restDS.invoicePlanActivation(inv.InvoiceId,DateTimeUtils.convertIntoDateTime( startDate)).then((res) {
       if (res.IsSuccessful) {
         centerRepository.showFancyToast(res.Message != null ? res.Message :
         Translations.current.activateSuccessful());
@@ -604,18 +678,27 @@ class Card1 extends StatelessWidget {
     });
   }
 
-  Widget remainDayProgress(double progressValue) {
+  Widget remainDayProgress(double progressValue,int diffDays) {
 
     var progress = Container(
        width:80.0,
-    height:80.0,
+       height:80.0,
     child:
-      ProgressCard(
-        width: 80.0,
-        isOn: false,
-        isOff: true,
-        progress:progressValue ,
+        Stack(
+          children: <Widget>[
+           diffDays!=null && diffDays >0 ? Center(
+              child: Text(Translations.current.remaind()+'\n'+diffDays.toString(),textAlign: TextAlign.center,style: TextStyle(fontSize: 10.0),)
+            ) :
+               Container(),
+       ProgressCard(
+            forRemain: true,
+            width: 80.0,
+            isOn: false,
+            isOff: false,
+            progress:progressValue ,
       ),
+      ],
+        ),
     );
 
     return progress;
@@ -628,9 +711,10 @@ class Card1 extends StatelessWidget {
       height:80.0,
       child:
       ProgressCard(
+        forRemain: true,
         width: 80.0,
         isOn: false,
-        isOff: true,
+        isOff: false,
         progress: progressValue,
       ),
     );
@@ -646,8 +730,8 @@ class Card1 extends StatelessWidget {
     return new Padding(
       padding: EdgeInsets.only(top: 10.0,bottom: 10.0),
       child: new Stack(
-                                        //overflow: Overflow.visible,
-                                        children: <Widget>[
+        //overflow: Overflow.visible,
+        children: <Widget>[
       new Container(
         height:48.0,
       decoration: BoxDecoration(
@@ -681,7 +765,7 @@ class Card1 extends StatelessWidget {
                                             ),
                                             constraints: new BoxConstraints.expand(
 
-                                              height: 420.0,
+                                              height: 340.0,
                                               width: MediaQuery.of(context).size.width*0.95,
                                             ),
                                             child: new Padding(
@@ -803,12 +887,14 @@ class Card1 extends StatelessWidget {
                                                   Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: <Widget>[
-                                                      remainDayProgress (DateTimeUtils.diffDaysFromDateToDate(invoiceModel.StartDate,invoiceModel.EndDate),),
+                                                      remainDayProgress (
+                                                        DateTimeUtils.diffDaysFromDateToDate(invoiceModel.StartDate,invoiceModel.EndDate),
+                                                          DateTimeUtils.diffDaysFromDateToDate2(invoiceModel.StartDate,invoiceModel.EndDate)),
                                                       remainAmountProgress((calcSumAmount(invoiceModel.invoiceDetailModel) / (invoiceModel.Amount!=null ? invoiceModel.Amount : calcSumAmount(invoiceModel.invoiceDetailModel)))),
                                                             ],
                                                   ),
                                                  new Padding(
-                                                   padding: EdgeInsets.only(top: 1.0,bottom: 10.0),
+                                                   padding: EdgeInsets.only(top: 5.0,bottom: 1.0),
                                                    child:
                                                   new Row(
                                                     mainAxisAlignment: MainAxisAlignment.end,
@@ -816,38 +902,57 @@ class Card1 extends StatelessWidget {
                                                     /*!isActive ?  Text(Translations.current.activatePlan(),style: TextStyle(color: Colors.pinkAccent),) :
                                                     Text(Translations.current.planIsActive() ,style: TextStyle(color: Colors.green),),
 */
-                                                      FlatButton(
+                                                      Button(
+                                                        title: Translations.current.showDetails(),
+                                                        color: Colors.indigoAccent.value,
+                                                        wid: 100,),
+                                              !isActive ?   FlatButton(
                                                         padding: EdgeInsets.only(left: 0, right: 0),
-                                                        child: !isActive ? Button(wid: 100.0, title: Translations.current.activatePlan(),color: Colors.indigoAccent.value) :
-                                                        Container(width: 0.0,height: 0.0,),
+                                                        child:  Button(wid: 100.0, title: Translations.current.activatePlan(),color: Colors.indigoAccent.value) ,
+
                                                         onPressed: () {
                                                           activateInvoice(context, invoiceModel);
                                                         },
 
-                                                      ),
+                                                      ) : Container(width: 0.0,height: 0.0,),
                                                     ],
                                                   ),
                                                  ),
+                                             invoiceModel.InvoiceStatusConstId==InvoiceModel.InvoiceStatusConstId_Not_Paid ?
+                                             new Row(
+                                               mainAxisAlignment: MainAxisAlignment.end,
+                                               children: <Widget>[
+                                             FlatButton(
+                                                padding: EdgeInsets.only(left: 0, right: 0),
+                                                onPressed: (){
+                                                      _buyCurrentPlanSelected(invoiceModel.UserId, invoiceModel.PlanId, invoiceModel.Amount);
+                                                },
+                                                child:
+                                                  Button(
+                                                    title: Translations.current.buyPlan(),
+                                                    color: Colors.lightGreen.value,
+                                                    wid: 100,),) ],) :
+                                                 Container(),
                                                 ],
                                             ),
                                             ),
                                           ),
 
-                                          new Positioned(
+                                          /*new Positioned(
                                             right: 10.0,
                                             bottom: 20.0,
                                             child: new Row(
                                                 mainAxisAlignment: MainAxisAlignment.end,
                                                 children: <Widget>[
-                                                /*isActive ?  new Icon(Icons.stars, color: Colors.greenAccent,
-                                                    size: 28.0,) :*/
+                                                *//*isActive ?  new Icon(Icons.stars, color: Colors.greenAccent,
+                                                    size: 28.0,) :*//*
                                               Button(
                                                 title: Translations.current.showDetails(),
                                                 color: Colors.indigoAccent.value,
                                                 wid: 100,)
                                                 ]
                                             ),
-                                          ),
+                                          ),*/
                                         ],
 
 
@@ -920,18 +1025,28 @@ class CurrentPlansForm extends StatelessWidget {
     }
     );
   }
-  _launchURL() async {
-    const url = 'http://anadgps.com/payline/invoices/pay/f771e16a-d681-42e4-b43d-57c1df500420';
+  _launchURL(String id) async {
+    String url = 'http://anadgps.com/payline/api/invoices/pay/$id';
     if (await canLaunch(url)) {
-      await launch(url);
+      launch(url).then((res){
+        var returnVal=res;
+      });
     } else {
       throw 'Could not launch $url';
     }
   }
 
-  _buyCurrentPlanSelected(int userId,int planId) async{
+  _buyCurrentPlanSelected(int userId,int planId,double cost) async{
     RestDatasource restDatasource=new RestDatasource();
-    _launchURL();
+    Map<String,dynamic> reqBody={'meta': planId,
+    'amount': cost};
+    var result=await restDatasource.requestBuyUrl(body: reqBody);
+    if(result!=null) {
+      String id=result['id'];
+      if(id!=null && id.isNotEmpty){
+        _launchURL(id);
+      }
+    }
      /*restDatasource.partialSaveInvoice(userId, planId).then((res) {
        if(res!=null )
          {
@@ -961,7 +1076,7 @@ class CurrentPlansForm extends StatelessWidget {
         new Container(
           margin: EdgeInsets.only(top: 10.0,right: 5.0,left: 5.0),
           constraints: new BoxConstraints.expand(
-            height: 230.0,
+            height: 260.0,
             width: MediaQuery.of(context).size.width*0.95,
           ),
           decoration: BoxDecoration(
@@ -1076,7 +1191,7 @@ class CurrentPlansForm extends StatelessWidget {
                     SizedBox(width: 10.0,),
                     GestureDetector(
                       onTap: () {
-                        _buyCurrentPlanSelected(userId,plnModel.PlanId);
+                        _buyCurrentPlanSelected(userId,plnModel.PlanId,plnModel.Cost);
                         },
                       child: Container(
                         decoration: BoxDecoration(

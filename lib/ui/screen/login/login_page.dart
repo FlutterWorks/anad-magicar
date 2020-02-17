@@ -140,7 +140,8 @@ void _showBasicsFlash({
       if(event.type=='SIGNUP_FAILD')
       {
         //this.securityCode=event.message;
-        centerRepository.showFancyToast( event.message);
+        //centerRepository.showFancyToast( event.message);
+        FlashHelper.errorBar(context, message: event.message);
       }
     });
   }

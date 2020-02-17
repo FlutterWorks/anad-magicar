@@ -13,10 +13,11 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:name=".Application"
-        android:label="anad_magicar"
-        android:icon="@mipmap/ic_launcher">
+        android:label="AnadMagicar"
+        android:icon="@drawable/app_icon">
         <meta-data android:name="com.mapbox.token" android:value="@string/mapbox_access_token" />
 
         <activity
@@ -33,18 +34,24 @@
             <meta-data
                 android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
                 android:value="true" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="returnApp"/>
+                <data android:scheme="anadapp" />
+                <data android:pathPattern=".*"></data>
             </intent-filter>
             <intent-filter>
                 <action android:name="FLUTTER_NOTIFICATION_CLICK" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <intent-filter>
-                <data android:host="returnApp" android:scheme="anadapp" android:pathPattern=".*"></data>
-            </intent-filter>
+
         </activity>
 
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
@@ -53,5 +60,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>
         </receiver>
+
     </application>
 </manifest>

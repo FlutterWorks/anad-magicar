@@ -21,7 +21,7 @@ abstract class RegisterServiceEvent {
 
 }
 
-class UnRegisterServiceEvent extends RegisterServiceEvent{
+class UnRegisterServiceEvent extends RegisterServiceEvent {
 
   String token;
   String typeId;
@@ -44,18 +44,7 @@ class InRegisterServiceEvent extends RegisterServiceEvent{
 
   @override
   Future<RegisterServiceState> applyAsync({RegisterServiceState currentState, RegisterCarServiceBloc bloc}) async{
-    if(currentState is UnRegisterServiceState) {
-      try {
 
-            return new LoadRegisterServiceState();
-
-      }
-
-      catch (_, stackTrace) {
-        return new ErrorRegisterServiceState(_?.toString());
-      }
-    }
-    return new InRegisterServiceState();
   }
 
 }
@@ -73,21 +62,7 @@ class LoadRegisterServiceEvent extends RegisterServiceEvent {
   @override
   Future<RegisterServiceState> applyAsync({RegisterServiceState currentState, RegisterCarServiceBloc bloc}) async {
 
-   try {
-        if(serviceModel!=null) {
-          var result = await restDatasource.saveCarService(serviceModel);
-          if (result != null) {
-            if (result.IsSuccessful)
-              return new RegisteredServiceState();
-            else
-              return ErrorRegisterServiceState(result.Message);
-          }
-          else
-            return new ErrorRegisterServiceState('خطا در ثبت سرویس خودرو');
-        }
-    } catch (_, stackTrace) {
-      return new ErrorRegisterServiceState(_?.toString());
-    }
+
   }
 }
 
@@ -102,13 +77,6 @@ class RegisteredServiceEvent extends RegisterServiceEvent {
   Future<RegisterServiceState> applyAsync(
       {
         RegisterServiceState currentState, RegisterCarServiceBloc bloc}) async {
-    try {
 
-
-      return new RegisteredServiceState();
-    } catch (_, stackTrace) {
-
-      return new ErrorRegisterServiceState(_?.toString());
-    }
   }
 }

@@ -16,6 +16,10 @@ class CarInfoVM{
   String brandTitle;
   String modelTitle;
   String modelDetailTitle;
+  int brandId;
+  int moddelId;
+  int modelDetailId;
+  int colorId;
   String pelak;
   String distance;
   String color;
@@ -28,6 +32,10 @@ class CarInfoVM{
   SaveCarModel editModel;
   String imageUrl;
   CarInfoVM({
+    @required this.colorId,
+    @required this.brandId,
+    @required this.moddelId,
+    @required this.modelDetailId,
     @required this.brandModel,
     @required this.car,
     @required this.carColor,

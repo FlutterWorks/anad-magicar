@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:io';
 import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/components/custom_progress_dialog.dart';
+import 'package:anad_magicar/components/pull_refresh/src/internals/indicator_wrap.dart';
 import 'package:anad_magicar/data/base_rest_ds.dart';
 import 'package:anad_magicar/data/ds/action_ds.dart';
 import 'package:anad_magicar/data/ds/car_brands_ds.dart';
@@ -39,12 +40,15 @@ import 'package:anad_magicar/model/user/role.dart';
 import 'package:anad_magicar/model/user/user.dart';
 import 'package:anad_magicar/model/user/user_data.dart';
 import 'package:anad_magicar/model/viewmodel/add_car_vm.dart';
+import 'package:anad_magicar/model/viewmodel/car_page_vm.dart';
 import 'package:anad_magicar/model/viewmodel/car_state.dart';
 import 'package:anad_magicar/model/viewmodel/init_data_vm.dart';
 import 'package:anad_magicar/model/viewmodel/map_vm.dart';
+import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/fake_server.dart';
 import 'package:anad_magicar/repository/pref_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
+import 'package:anad_magicar/ui/screen/home/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -53,8 +57,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:anad_magicar/model/viewmodel/car_state.dart' as mat;
 import 'package:anad_magicar/bloc/theme/change_theme_bloc.dart';
 import 'package:anad_magicar/components/date_picker/flutter_datetime_picker.dart' as dtpicker;
+import 'package:anad_magicar/widgets/animated_dialog_box.dart';
 
 enum CarStatus { ONLYDOOROPEN, ONLYTRUNKOPEN, BOTHOPEN, BOTHCLOSED}
+typedef VoidFutureConfirmCallBack = Future<void> Function(int);
 //enum MaterialColor {RED,BLUE,YELLOW,GREEN,BLACK,WHITE}
 class CenterRepository{
 
@@ -180,6 +186,15 @@ class CenterRepository{
   }
   CenterRepository._internal();
 
+
+  static onCarPageTap(BuildContext context,int userId) {
+    Navigator.of(context).pushNamed('/carpage',
+        arguments: new CarPageVM(
+        userId: userId,
+        isSelf: true,
+        carAddNoty: valueNotyModelBloc));
+  }
+
   static int onNavButtonTap(BuildContext context, int index,{int carId}) {
    int currentBottomNaviSelected=index;
     if (index == 4) {
@@ -187,7 +202,7 @@ class CenterRepository{
     }
     else if(index==0)
     {
-      Navigator.pushReplacementNamed(context, '/servicepage',arguments: carId );
+      Navigator.pushReplacementNamed(context, '/servicepage',arguments: new ServiceVM(carId: carId, editMode: null, service: null, refresh: false) );
     }
     else if(index==1)
     {
@@ -246,11 +261,17 @@ class CenterRepository{
    setCarStateVMMap(CarStateVM stateVM)
    {
      if(carStateVMMap.containsKey(stateVM.carIndex)){
-       carStateVMMap.remove(stateVM.carIndex);
+      // carStateVMMap.remove(stateVM.carIndex);
      }
      carStateVMMap.putIfAbsent(stateVM.carIndex, () => stateVM);
    }
-
+  updateCarStateVMMap(CarStateVM stateVM)
+  {
+    if(carStateVMMap.containsKey(stateVM.carIndex)){
+       carStateVMMap.remove(stateVM.carIndex);
+    }
+    carStateVMMap.putIfAbsent(stateVM.carIndex, () => stateVM);
+  }
    setInvoices(List<InvoiceModel> invs)
    {
      if(invoices==null)
@@ -613,6 +634,40 @@ class CenterRepository{
   List<ApiDeviceModel> getDevices()
   {
     return this.carDevices;
+  }
+
+  showConfirmDialog(BuildContext context,String bodyTitle,String bodyText,
+      VoidFutureConfirmCallBack  onConfirm,Function onCancel,int carId) async {
+    await animated_dialog_box.showScaleAlertBox(
+        title:Center(child: Text(bodyTitle)) ,
+        context: context,
+        firstButton: MaterialButton(
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40),
+          ),
+          color: Colors.white,
+          child: Text(Translations.current.yes()),
+          onPressed: () async => onConfirm(carId),
+        ),
+        secondButton: MaterialButton(
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40),
+          ),
+          color: Colors.white,
+          child: Text(Translations.current.no()),
+          onPressed: () {
+            if(onCancel==null)
+              Navigator.of(context).pop();
+            else
+              onCancel();
+          },
+        ),
+        icon: Icon(Icons.info_outline,color: Colors.red,),
+        yourWidget: Container(
+          child: Text(bodyText),
+        ));
   }
 
   int getCarIdByIndex(int index)

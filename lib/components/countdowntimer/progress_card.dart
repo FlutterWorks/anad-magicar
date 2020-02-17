@@ -9,6 +9,7 @@ class ProgressCard extends StatefulWidget {
   bool isOn;
   bool isOff;
   double progress;
+  bool forRemain;
   @override
   _ProgressCardState createState() => _ProgressCardState();
 
@@ -17,6 +18,7 @@ class ProgressCard extends StatefulWidget {
     @required this.isOn,
     @required this.isOff,
     this.progress,
+    this.forRemain=false
   });
 }
 
@@ -56,8 +58,18 @@ class _ProgressCardState extends State<ProgressCard> {
 
     if (progressPercent >= 0.8) {
       foreground = Colors.green;
+      if(widget.forRemain!=null && widget.forRemain){
+        foreground = Colors.indigo;
+      }
     } else if (progressPercent >= 0.4) {
       foreground = Colors.orange;
+      if(widget.forRemain!=null && widget.forRemain){
+        foreground = Colors.indigo;
+      }
+    }else {
+      if(widget.forRemain!=null && widget.forRemain){
+        foreground = Colors.indigo;
+      }
     }
     if(widget.isOn)
       {
@@ -66,7 +78,11 @@ class _ProgressCardState extends State<ProgressCard> {
     if(widget.isOff)
       foreground = Colors.redAccent;
 
+
     Color background = foreground.withOpacity(0.2);
+    if(widget.forRemain!=null && widget.forRemain){
+      background=Colors.pinkAccent.withOpacity(0.8);
+    }
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[

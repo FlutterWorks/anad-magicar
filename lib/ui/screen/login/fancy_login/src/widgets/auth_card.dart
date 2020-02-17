@@ -402,12 +402,12 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
     RxBus.register<ChangeEvent>().listen((ChangeEvent event)  {
 
 
-      if(event.message=='LOGIN_CHANGED')
+      if(event.type=='SIGNUP_FAILD_FOR_RELOGIN')
       {
-       // if(event.type=='LOGIN')
-         // _switchAuthMode2(event.type);
-        /*if(event.type=='REGISTER')
-          _switchAuthMode();*/
+        setState(() {
+          _isSubmitting=false;
+        });
+
       }
 
 
@@ -473,11 +473,9 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
   @override
   void dispose() {
 
-
     _loadingController?.removeStatusListener(handleLoadingAnimationStatus);
     _passwordFocusNode.dispose();
     _confirmPasswordFocusNode.dispose();
-
     _switchAuthController.dispose();
     _switchAuthLoginController.dispose();
     _postSwitchAuthController.dispose();
@@ -491,10 +489,12 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
     final newAuthMode = auth.switchAuth();
 
     if (newAuthMode == AuthMode.Signup) {
+      RxBus.post(new ChangeEvent(type: 'LOGIN_PAGE_SELECT'));
       _switchAuthLoginController.reverse();
       _switchAuthController.forward();
 
     } else {
+      RxBus.post(new ChangeEvent(type: 'SIGNUP_PAGE_SELECT'));
       _switchAuthController.reverse();
       _switchAuthLoginController.forward();
     }
@@ -557,7 +557,7 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
     _submitController.reverse();
 
     if (!DartHelper.isNullOrEmpty(error)) {
-      showErrorToast(context, error);
+     // showErrorToast(context, error);
       Future.delayed(const Duration(milliseconds: 271), () {
         setState(() => _showShadow = true);
       });
@@ -613,6 +613,7 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
       loadingController: _loadingController,
       interval: _nameTextFieldLoadingAnimationInterval,
       labelText: messages.usernameHint,
+
       prefixIcon: Icon(FontAwesomeIcons.solidUserCircle),
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.next,
@@ -870,30 +871,7 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
      // _buildConfirmPasswordField(textFieldWidth, messages),
         _buildMobileField(textFieldWidth, messages),
       ),
-   /* Container(
-    padding: EdgeInsets.symmetric(
-   // horizontal: cardPadding,
-    vertical: 10,
-    ),
-    child:
-      _buildFirstNameField(textFieldWidth, messages),
-    ),
-    Container(
-    padding: EdgeInsets.symmetric(
-    //horizontal: cardPadding,
-    vertical: 10,
-    ),
-    child:
-      _buildLastNameField(textFieldWidth, messages),
-    ),
-    Container(
-    padding: EdgeInsets.symmetric(
-    //horizontal: cardPadding,
-    vertical: 10,
-    ),
-    child:
-      _buildMobileField(textFieldWidth, messages),
-    ),*/
+
     ],
     )
 
@@ -974,12 +952,12 @@ class _RecoverCardState extends State<_RecoverCard>
     final error = await auth.onRecoverPassword(_name);
 
     if (error != null) {
-      showErrorToast(context, error);
+      //showErrorToast(context, error);
       setState(() => _isSubmitting = false);
       _submitController.reverse();
       return false;
     } else {
-      showSuccessToast(context, messages.recoverPasswordSuccess);
+      //showSuccessToast(context, messages.recoverPasswordSuccess);
       setState(() => _isSubmitting = false);
       _submitController.reverse();
       return true;
@@ -991,7 +969,7 @@ class _RecoverCardState extends State<_RecoverCard>
       width: width,
       labelText: messages.usernameHint,
       prefixIcon: Icon(FontAwesomeIcons.solidUserCircle),
-      keyboardType: TextInputType.phone,
+      keyboardType: TextInputType.text,
       textInputAction: TextInputAction.done,
       onFieldSubmitted: (value) => _submit(),
       validator:null,// widget.emailValidator,

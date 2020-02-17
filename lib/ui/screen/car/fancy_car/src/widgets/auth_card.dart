@@ -220,6 +220,7 @@ class AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
       _forwardChangeRouteAnimation();
     }
   }
+
   int modelId=0;
   void runChangePageAnimation() {
     final auth = Provider.of<Auth>(context, listen: false);
@@ -395,6 +396,9 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   };
 
   var controller = new MaskedTextController(mask: '00-A-000-00'/*, translator: translator*/);
+  var distanceController=new TextEditingController();
+  var pelakController=new TextEditingController();
+
   /// switch between login and signup
   AnimationController _loadingController;
   AnimationController _switchAuthController;
@@ -515,18 +519,26 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       parent: _loadingController,
       curve: Interval(.4, 1.0, curve: Curves.easeOutBack),
     ));
-    super.initState();
 
-    if(widget.addCarVM!=null && widget.addCarVM.editMode) {
+
+    if(widget.addCarVM!=null &&
+        widget.addCarVM.editMode!=null &&
+        widget.addCarVM.editMode) {
+
+      /*_valueBrand=brands.where((b)=>b.brandId==widget.addCarVM.editCarModel.brandId).toList().first;
+      _valueCarModel=cmodels.where((c)=>c.carModelId==widget.addCarVM.editCarModel.modelId).toList().first;
+      _valueCarColor=colors.where((c)=>c.colorId==widget.addCarVM.editCarModel.colorId).toList().first;
+      _valueCarModelDetail=modelDetails.where((c)=>c.carModelDetailId==widget.addCarVM.editCarModel.tip).toList().first;*/
+
       String seDate = widget.addCarVM.editCarModel.pelak;
       if (seDate != null && seDate.isNotEmpty) {
-        controller.value = controller.value.copyWith(
+        pelakController.value = pelakController.value.copyWith(
           text: seDate,
           selection:
           TextSelection(baseOffset: seDate.length, extentOffset: seDate.length),
           composing: TextRange.empty,
         );
-        controller.addListener(() {
+    /*    controller.addListener(() {
           final text = controller.text.toLowerCase();
           controller.value = controller.value.copyWith(
             text: text,
@@ -534,9 +546,17 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
             TextSelection(baseOffset: text.length, extentOffset: text.length),
             composing: TextRange.empty,
           );
-        });
+        });*/
       }
+      String dist= widget.addCarVM.editCarModel.distance!=null ? widget.addCarVM.editCarModel.distance.toString() : '';
+      distanceController.value = distanceController.value.copyWith(
+        text: dist,
+        selection:
+        TextSelection(baseOffset: dist.length, extentOffset: dist.length),
+        composing: TextRange.empty,
+      );
     }
+    super.initState();
   }
 
   void handleLoadingAnimationStatus(AnimationStatus status) {
@@ -638,13 +658,13 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     final auth = Provider.of<Auth>(context);
     return AnimatedTextFormField(
       width: width,
-     controller: controller,
-      //inputFormatters: [ ],
+     controller: pelakController,
+      inputFormatters: [BlacklistingTextInputFormatter(RegExp("[,@#%^&*()+=!.`~\"';:?؟و/\\\\]")) ],
       loadingController: _loadingController,
       interval: _nameTextFieldLoadingAnimationInterval,
       labelText: messages.pelakHint,
       prefixIcon: Icon(FontAwesomeIcons.idCard),
-      //keyboardType: TextInputType. ,
+      keyboardType: TextInputType.text ,
       textInputAction: TextInputAction.next,
       onFieldSubmitted: (value) {
         if(auth.isConfirm) {
@@ -654,8 +674,8 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
           FocusScope.of(context).requestFocus(_pelakFocusNode);
       },
       validator: (value) {
-       if( auth.isConfirm )
-          widget.pelakValidator;
+       /*if( auth.isConfirm )
+          widget.pelakValidator;*/
 
              return null;
            },
@@ -922,7 +942,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       loadingController: _loadingController,
       interval: _passTextFieldLoadingAnimationInterval,
       labelText: messages.distanceHint,
-      controller: _passwordController,
+      controller: distanceController,
       inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
       prefixIcon: Icon(Icons.directions_car),

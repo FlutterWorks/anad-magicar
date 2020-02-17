@@ -92,9 +92,10 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
   bool isDark=false;
   bool trunk_status=false;
   bool caput_status=false;
-  bool lock_status=false;
+  bool lock_status=true;
   bool aux1=false;
   bool aux2=false;
+  bool siren=false;
   bool _buttonPressed = false;
   bool _loopActive = false;
   int _counter=0;
@@ -167,6 +168,12 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
       aux2=status;
     });
   }
+  void updateSirenStatus(bool status)
+  {
+    setState(() {
+    siren=status;
+    });
+  }
   void updateTrunkStatus(bool status)
   {
     setState(() {
@@ -182,9 +189,8 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
 
   updateCarStatusAfterCommands()
   {
-
     widget.carStateVM.setCarStatusImages();
-    centerRepository.setCarStateVMMap(widget.carStateVM);
+    centerRepository.updateCarStateVMMap(widget.carStateVM);
     widget.carStateNoty.updateValue(widget.carStateVM);
   }
   sendCommand(String actionCode) async {
@@ -206,21 +212,25 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
           if (result != null) {
             if (result.IsSuccessful) {
               //centerRepository.dismissDialog(context);
+
               widget.sendCommandNoty.updateValue(
                   new SendingCommandVM(sending: false,
                       sent: true, hasError: false));
               play('', actionCode);
               updateCarStatusAfterCommands();
+
             }
             else {
               widget.sendCommandNoty.updateValue(
                   new SendingCommandVM(sending: false,
                       sent: false, hasError: true));
+
             }
           } else {
             widget.sendCommandNoty.updateValue(
                 new SendingCommandVM(sending: false,
                     sent: false, hasError: true));
+
           }
         }
         else {
@@ -303,8 +313,9 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
         if(percentage>=1.0)
         {
           _buttonPressed=false;
+          //تصویر اگر موتور روشن است باید خاموش باشد اگر موتور خاموش است با ید تصویر روشن باشد
           if(temp_engineStatus) {
-            engineImageUrl='assets/images/start_engine.png';
+            engineImageUrl='assets/images/stop_engine.png';
             /*BlocProvider
                 .of<GlobalBloc>(context)
                 .messageBloc
@@ -315,7 +326,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                 status: false));*/
           }
           else {
-            engineImageUrl='assets/images/stop_engine.png';
+            engineImageUrl='assets/images/start_engine.png';
            /* BlocProvider
                 .of<GlobalBloc>(context)
                 .messageBloc
@@ -333,11 +344,10 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
           listenerRepository.onPowerTap(context, temp_engineStatus);
           widget.carStateVM.isPowerOn=temp_engineStatus;
           //widget.carStateVM.setCarStatusImages();
-          centerRepository.setCarStateVMMap(widget.carStateVM);
+          centerRepository.updateCarStateVMMap(widget.carStateVM);
           widget.carStateNoty.updateValue(widget.carStateVM);
 
           _counter++ ;
-        //  percentage=0.0;
           percentage_compeleted=1.0;
           if(temp_engineStatus) {
             isEngineOn=true;
@@ -360,7 +370,6 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
       });
       RxBus.post(new ChangeEvent(message: 'UPDATE_PROGRESS',amount:percentage));
 
-     // }
       // wait a bit
       await Future.delayed(Duration(milliseconds: 1000));
     }
@@ -460,7 +469,8 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                             centerRepository.setCarStateVMMap(widget.carStateVM);
                             widget.carStateNoty.updateValue(widget.carStateVM);*/
                            // play(Constants.DOOR_OPEN_SOUND);
-                            sendCommand(ActionsCommand.UnlockAndDisArm_Nano_CODE);
+                           sendCommand(ActionsCommand.UnlockAndDisArm_Nano_CODE);
+
                           },
                           child:
                           AvatarGlow(
@@ -485,25 +495,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                                   imageUrl: 'assets/images/unlock_22.png',
                                   counter: _counter,
                                   color: _currentColor,),
-                                /*Container(
-                                key: ValueKey(_counter),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(50),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Color(0xFF76ff03).withAlpha(60),
-                                        blurRadius: 6.0,
-                                        spreadRadius: 0.0,
-                                        offset: Offset(
-                                          0.0,
-                                          3.0,
-                                        ),
-                                      ),
-                                    ]),
-                                child:
-                              Image.asset(
-                                'assets/images/unlock_22.png', scale: 1.0,),
-                              ),*/
+
                                 radius: 24.0,
                                 //shape: BoxShape.circle
                               ),
@@ -532,11 +524,12 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                         margin: EdgeInsets.only(right: 25.0, top: 10),
                         child:
                         new GestureDetector(
-                          onTap: () {
+                          onTap: ()  {
                             //listenerRepository.onLockTap(context, true);
                             updateLockStatus(true);
                             widget.carStateVM.isDoorOpen=false;
-                            sendCommand(ActionsCommand.LockAndArm_Nano_CODE);
+                           sendCommand(ActionsCommand.LockAndArm_Nano_CODE);
+
                             //play(Constants.DOOR_LOCK_SOUND,);
                           },
                           child:
@@ -669,35 +662,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                               message: 'UPDATE_PROGRESS',
                               amount: percentage));
                         }
-                        /* if (_controllerA.isCompleted) {
-                        _controllerA.reverse();
-                      } else {
-                        _controllerA.forward(from: 0.0);
-                      }*/
 
-
-                        /* if (engineStatus) {
-                        // engineImageUrl='assets/images/car_start_3_1.png';
-                        BlocProvider
-                            .of<GlobalBloc>(context)
-                            .messageBloc
-                            .addition
-                            .add(new Message(
-                            text: 'assets/images/car_start_3_1.png',
-                            status: false));
-                      }
-                      else {
-                        // engineImageUrl='assets/images/car_start_3.png';
-                        BlocProvider
-                            .of<GlobalBloc>(context)
-                            .messageBloc
-                            .addition
-                            .add(new Message(
-                            text: 'assets/images/car_start_3.png',
-                            status: true));
-                      }
-
-                      engineStatus = !engineStatus;*/
                       },
                       child:
                       new Stack(
@@ -833,163 +798,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                       // ),
 
                     ),
-                    /*new HoldDetector(
-                    onTap: () {
-                      if (controller.isAnimating)
-                        controller.stop();
-                      else {
-                        controller.reverse(
-                            from: controller.value == 0.0
-                                ? 1.0
-                                : controller.value);
-                      }
-                    },
-                    onHold: () {
 
-                      if (controller.isAnimating)
-                        controller.stop();
-                      else {
-                        controller.reverse(
-                            from: controller.value == 0.0
-                                ? 1.0
-                                : controller.value);
-                      }
-                      if (_controllerA.isCompleted) {
-                        _controllerA.reverse();
-                      } else {
-                        _controllerA.forward(from: 0.0);
-                      }
-
-
-
-                      if (engineStatus) {
-                        // engineImageUrl='assets/images/car_start_3_1.png';
-                        BlocProvider
-                            .of<GlobalBloc>(context)
-                            .messageBloc
-                            .addition
-                            .add(new Message(
-                            text: 'assets/images/car_start_3_1.png',
-                            status: false));
-                      }
-                      else {
-                        // engineImageUrl='assets/images/car_start_3.png';
-                        BlocProvider
-                            .of<GlobalBloc>(context)
-                            .messageBloc
-                            .addition
-                            .add(new Message(
-                            text: 'assets/images/car_start_3.png',
-                            status: true));
-                      }
-
-                      engineStatus = !engineStatus;
-                    },
-                    holdTimeout: Duration(milliseconds: 4000),
-                    enableHapticFeedback: true,
-                    child: Transform.scale(
-                      scale: squareScaleA,
-                      child:
-                      new Padding(padding: EdgeInsets.only(top: 4.0),
-                        child:
-                        AvatarGlow(
-                          startDelay: Duration(milliseconds: 1000),
-                          glowColor: Colors.pink,
-                          endRadius: MediaQuery
-                              .of(context)
-                              .size
-                              .width / 4.0,
-                          duration: Duration(milliseconds: 2000),
-                          repeat: true,
-                          showTwoGlows: true,
-                          repeatPauseDuration: Duration(milliseconds: 100),
-                          child: Material(
-                            elevation: 0.0,
-                            shape: CircleBorder(),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.white,
-                              //Colors.grey[100] ,
-                              child: Image.asset(startImgPath, scale: 1,),
-                              radius: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width / 5.0,
-                              //shape: BoxShape.circle
-                            ),
-                          ),
-                          shape: BoxShape.circle,
-                          animate: engineStatus,
-                          curve: Curves.fastOutSlowIn,
-                        ),
-                      ),
-                    ),),*/
-
-                    /* new GestureDetector(
-                  onTap: () {
-
-                    if (_controllerA.isCompleted) {
-
-                      _controllerA.reverse();
-                    } else {
-                      _controllerA.forward(from: 0.0);
-                    }
-
-
-                    if(engineStatus) {
-                     // engineImageUrl='assets/images/car_start_3_1.png';
-                      */ /*BlocProvider
-                          .of<GlobalBloc>(context)
-                          .messageBloc
-                          .addition
-                          .add(new Message(
-                          text: 'assets/images/car_start_3_1.png',
-                          status: false));*/ /*
-                    }
-                    else {
-                     // engineImageUrl='assets/images/car_start_3.png';
-                      */ /*BlocProvider
-                          .of<GlobalBloc>(context)
-                          .messageBloc
-                          .addition
-                          .add(new Message(
-                          text: 'assets/images/car_start_3.png', status: true));*/ /*
-                    }
-
-                    engineStatus=!engineStatus;
-                    //noty.updateValue(new Message(text: 'assets/images/car_start_3.png',status: true));
-                  },
-                  child:
-                     Transform.scale(
-                       scale: squareScaleA,
-                        child:
-                  new Padding(padding: EdgeInsets.only(top: 4.0) ,
-                    child:
-
-                    AvatarGlow(
-                      startDelay: Duration(milliseconds: 1000),
-                      glowColor: Colors.pink,
-                      endRadius: MediaQuery.of(context).size.width/4.0,
-                      duration: Duration(milliseconds: 2000),
-                      repeat: true,
-                      showTwoGlows: true,
-                      repeatPauseDuration: Duration(milliseconds: 100),
-                      child: Material(
-                        elevation: 0.0,
-                        shape: CircleBorder(),
-                        child: CircleAvatar(
-                          backgroundColor:Colors.white, //Colors.grey[100] ,
-                          child: Image.asset(startImgPath,scale: 1,),
-                          radius:MediaQuery.of(context).size.width/5.0,
-                          //shape: BoxShape.circle
-                        ),
-                      ),
-                      shape: BoxShape.circle,
-                      animate: engineStatus,
-                      curve: Curves.fastOutSlowIn,
-                    ),
-                  ),
-    ),
-                ),*/
                     Expanded(
                       child:
                       Padding(
@@ -1018,23 +827,27 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                             right: 25.0, bottom: 5, top: 1.0),
                         child:
                         new GestureDetector(
-                          onTap: () {
+                          onTap: ()  {
                             trunk_status = !trunk_status;
-
+                            updateTrunkStatus(trunk_status);
                             /*listenerRepository.onTrunkTap(
                                 context, trunk_status);*/
                             widget.carStateVM.isTraunkOpen=trunk_status;
-                            updateTrunkStatus(trunk_status);
+
                             /*widget.carStateVM.setCarStatusImages();
                             centerRepository.setCarStateVMMap(widget.carStateVM);
                             widget.carStateNoty.updateValue(widget.carStateVM);*/
                             if(trunk_status) {
                               //play(Constants.TRUNK_OPEN_SOUND);
-                              sendCommand(ActionsCommand.RemoteTrunk_Release_CODE);
+                             sendCommand(ActionsCommand.RemoteTrunk_Release_CODE);
+
+
+
                             }
                             else {
                               //play(Constants.TRUNK_CLOSE_SOUND);
                               sendCommand(ActionsCommand.DriveLock_ONOrOFF_Nano_CODE);
+
                             }
 
                           },
@@ -1091,6 +904,12 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                         new GestureDetector(
                           onTap: () {
                             //listenerRepository.onTap(context, true);
+                            siren=!siren;
+
+                            widget.carStateVM.siren=siren;
+                            updateSirenStatus(siren);
+                            sendCommand(siren ? ActionsCommand.SIREN_Nano_CODE :
+                            ActionsCommand.SIREN_Nano_CODE);
                           },
                           child:
                           AvatarGlow(
@@ -1115,7 +934,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                               ),
                             ),
                             shape: BoxShape.circle,
-                            animate: false,
+                            animate: siren,
                             curve: Curves.fastOutSlowIn,
                           ),
 

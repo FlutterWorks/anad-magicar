@@ -5,6 +5,7 @@ import 'package:anad_magicar/bloc/login/login.dart';
 import 'package:anad_magicar/components/BorderedButton.dart';
 import 'package:anad_magicar/components/animated_switcher.dart';
 import 'package:anad_magicar/components/animstepper/stepper.dart';
+import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/components/fancy_popup/main.dart';
 import 'package:anad_magicar/components/flushbar/flushbar.dart';
 import 'package:anad_magicar/components/flushbar/flushbar_helper.dart';
@@ -23,6 +24,7 @@ import 'package:anad_magicar/service/locator.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/loading_screen.dart';
 import 'package:anad_magicar/ui/screen/login/fancy_login/flutter_login.dart';
+import 'package:anad_magicar/ui/screen/login/fancy_login/src/widgets/animated_text_form_field.dart';
 import 'package:anad_magicar/ui/screen/login/fancy_login/src/widgets/expandable_container.dart';
 import 'package:anad_magicar/ui/screen/login/fancy_login_form.dart';
 import 'package:anad_magicar/ui/screen/login/fancy_login/src/models/login_data.dart' as logData;
@@ -34,7 +36,9 @@ import 'package:anad_magicar/ui/screen/login/register/src/models/login_data.dart
 
 import 'package:anad_magicar/ui/screen/login/register/flutter_register.dart';
 import 'package:anad_magicar/ui/screen/register/register_screen.dart';
+import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash.dart';
+import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -43,8 +47,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:solid_bottom_sheet/solid_bottom_sheet.dart';
-
+import 'package:anad_magicar/widgets/animated_dialog_box.dart';
 
 
 
@@ -95,7 +100,7 @@ class _LoginFormState extends  BaseState<LoginForm> //State<LoginForm>
   String password='';
   bool isLoginDisabled;
   MyProgressDialog myProgressDialog;
-
+  bool _isLoading=false;
   bool fingerprintSupport=true;
   bool reSendSecurityCode=false;
   TextEditingController _securityCodeTextEditController;
@@ -121,20 +126,30 @@ class _LoginFormState extends  BaseState<LoginForm> //State<LoginForm>
         {
          // this.userName=event.message;
         }
-      if(event.type=='LOGIN_PASSWORD')
+      if(event.type=='LOGIN_CLICKED')
         {
          // this.password=event.message;
-        }
-      if(event.message=='LOGIN_CLICKED')
-        {
-          //myProgressDialog.showProgressDialog();
-         // isLoginDisabled=true;
-         // _loginBloc.dispatch(new LoginButtonPressed(username: userName,password: password));
+          //_pvController.jumpToPage(0);
 
         }
+      if(event.type=='SIGNUP_PAGE_SELECT')
+        {
+          _pvController.jumpToPage(1);
+
+        }
+      if(event.type=='LOGIN_PAGE_SELECT'){
+        _pvController.jumpToPage(0);
+      }
     });
   }
-
+  void handleLoadingAnimationStatus(AnimationStatus status) {
+    if (status == AnimationStatus.forward) {
+      setState(() => _isLoading = true);
+    }
+    if (status == AnimationStatus.completed) {
+      setState(() => _isLoading = false);
+    }
+  }
 
   void initFingerPrint() async{
     fingerprintSupport=await _localAuth.init();
@@ -153,6 +168,15 @@ class _LoginFormState extends  BaseState<LoginForm> //State<LoginForm>
    /* myProgressDialog=new MyProgressDialog(context: context,
         message: 'در حال ورود به برنامه',
         showPercentage: true);*/
+    _loadingController =
+        AnimationController(
+          vsync: this,
+          duration: Duration(milliseconds: 1150),
+          reverseDuration: Duration(milliseconds: 300),
+        )..value = 1.0;
+
+    _loadingController?.addStatusListener(handleLoadingAnimationStatus);
+    _nameTextFieldLoadingAnimationInterval = const Interval(0, .85);
 double start = index * 0.1;
 double duration = 0.6;
 double end = duration + start;
@@ -382,7 +406,7 @@ _buildLogin() {
                   {
                     if(code==securityCode)
                       {
-                        Navigator.of(context).pushReplacementNamed('/register',arguments: mobile);
+                        Navigator.of(context).pushNamed('/register',arguments: mobile);
                       }
                     else
                       {
@@ -687,18 +711,141 @@ _buildExit() {
     );
   }
 
-  Future<String> _recoverFunc(String data)
+  showValidateCode() async{
+    await animated_dialog_box.showScaleAlertBox(
+        title:Center(child: Text(Translations.current.changePasswordTitle())) ,
+        context: context,
+        firstButton: MaterialButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          color: Colors.white,
+          child: Text(Translations.current.yes()),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/login');
+          },
+        ),
+        secondButton: MaterialButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          color: Colors.pinkAccent,
+          child: Text(Translations.current.exit(),style: TextStyle(color: Colors.white),),
+          onPressed: () {
+            SystemNavigator.pop(animated: true);
+          },
+        ),
+        icon: Icon(Icons.info_outline,color: Colors.red,),
+        yourWidget: Container(
+          child: Text(Translations.current.loginAndThenEditYourProfile()),
+        ));
+  }
+
+  AnimationController _loadingController;
+  Interval _nameTextFieldLoadingAnimationInterval;
+
+  String mobileNo='';
+  final _passwordFocusNode = FocusNode();
+  final GlobalKey<FormState> _formKey = GlobalKey();
+
+  Widget _buildConfirmSecurityCode2(double width, ) {
+    return Form(
+        key: _formKey,
+      child:
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+      Container(
+      height: 100.0,
+      child:
+      AnimatedTextFormField(
+      enabled: true,
+      width: width,
+      loadingController: _loadingController,
+      interval: _nameTextFieldLoadingAnimationInterval,
+      labelText: Translations.current.pleaseEnterSecurityCode(),
+      prefixIcon: Icon(Icons.security),
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.next,
+      onFieldSubmitted: (value) {
+        FocusScope.of(context).requestFocus(_passwordFocusNode);
+      },
+      validator: (value) {
+        if(value==null || value.isEmpty)
+          return Translations.current.allFieldsRequired();
+        return null;
+      } ,
+      onSaved: (value) async {
+        var result;
+        try {
+           result = await restDatasource.validateSMSCode(mobileNo, value);
+        } catch(ex) {
+          FlashHelper.informationBar(context, message: ex.toString());
+          showValidateCode();
+        }
+        if((result!=null && result) /*|| (result==null || !result)*/) {
+          FlashHelper.informationBar(context, message: Translations.current.passwordHasChanged());
+          showValidateCode();
+        } else {
+          FlashHelper.errorBar(context, message: Translations.current.changePasswordError());
+        }
+      }
+      ),
+      ),
+      Container(
+        margin: EdgeInsets.all(10.0),
+        decoration: BoxDecoration(
+          color: Color(0xfffefefe),
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          border: Border.all(width: 1.0,color: Color(0xfffefefe)),
+        ),
+        height: 85.0,
+        child: FlatButton(
+          onPressed: () {
+            _formKey.currentState.save();
+          },
+          child: Button(title: Translations.current.confirmSecurityCode(),
+            color: Colors.pinkAccent.value,wid: 150.0,
+          ),
+        ) ),
+      ],
+      ),
+    );
+  }
+  _showBottomSheetConfirmCode(BuildContext cntext,)
+  {
+    double wid=MediaQuery.of(context).size.width*0.80;
+    showModalBottomSheetCustom(context: cntext ,
+        mHeight: 0.65,
+        builder: (BuildContext context) {
+      return Builder(
+        builder: (context) {
+         return _buildConfirmSecurityCode2(wid);
+        }
+      );
+        });
+  }
+
+  Future<String> _recoverFunc(String data) async
   {
     return Future.delayed(new Duration(microseconds: 100)).then((_) {
       if (data != null ) {
         if(isOnline) {
+          mobileNo=data;
           SaveUserModel userModel=new SaveUserModel(MobileNo: data,UserId: 0);
        var result=  restDatasource.forgotPassword(userModel);
        if(result!=null) {
          result.then((res){
            if(res.IsSuccessful){
-             Navigator.pushReplacementNamed(context, 'login');
-           }
+             FlashHelper.successBar(context, message: res.Message);
+             _showBottomSheetConfirmCode(context);
+             //Navigator.pushReplacementNamed(context, 'login');
+           }else
+             {
+               FlashHelper.errorBar(context, message: res.Message);
+               //_showBottomSheetConfirmCode(context);
+
+             }
          });
        }
         }
@@ -789,13 +936,17 @@ _buildExit() {
             return Translations.current.noConnection();
           }
       }
+      else if(!signUpDone) {
+         return Translations.current.hasErrors();
+      }
       else {
         return Translations.current.allLoginFieldsRequired();
       }
-      return '';
+      return Translations.current.errorinSignUp();
     });
 
   }
+
   Future<String> _signUpFuncForRegister(regData.LoginData data)
   {
     return Future.delayed(new Duration(microseconds: 100)).then((_) {
@@ -809,7 +960,7 @@ _buildExit() {
       else {
         return Translations.current.allLoginFieldsRequired();
       }
-      return '';
+      return Translations.current.errorinSignUp();
     });
 
   }
@@ -895,7 +1046,26 @@ _buildExit() {
     );
     return popup;
   }
-
+  Future<bool> _onWillPop(BuildContext ctx) {
+    return showDialog(
+      context: ctx,
+      child: new AlertDialog(
+        title: new Text(Translations.current.areYouSureToExitForBackTouchCancel()),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: new Text(Translations.current.no()),
+          ),
+          new FlatButton(
+            onPressed: () =>
+                SystemNavigator.pop(),
+            child: new Text(Translations.current.yes()),
+          ),
+        ],
+      ),
+    ) ??
+        false;
+  }
  Widget  showConfirmBox(String code)
    {
      return new Center(
@@ -927,8 +1097,11 @@ _buildExit() {
 
     double w=MediaQuery.of(context).size.width;
     double h=MediaQuery.of(context).size.height;
-
-    return
+   return new WillPopScope(
+        onWillPop: () async {
+          return _onWillPop(context);
+        },
+        child:
       BlocBuilder<LoginBloc, LoginState>(
       bloc: _loginBloc,
       builder: (
@@ -994,7 +1167,11 @@ _buildExit() {
          }
        else if(state is SignUpFaild)
          {
+
            centerRepository.dismissDialog(context);
+           signUpDone=false;
+           RxBus.post(new ChangeEvent(type: 'SIGNUP_FAILD_FOR_RELOGIN',message: 'SIGNUP_FAILD'));
+
            RxBus.post(new ChangeEvent(type: 'SIGNUP_FAILD',message: state.error));
          }
        else if(state is LoginForAuthenticate){
@@ -1006,16 +1183,10 @@ _buildExit() {
 
           children: <Widget>[
           Container(
-          //alignment: Alignment.topCenter,
-           //margin: EdgeInsets.all(0.0),
         width: w,
         height: h* 0.3,
         decoration: BoxDecoration(
-         // color: Colors.indigoAccent.withOpacity(0.8),
-        /*image: DecorationImage(
 
-        image: AssetImage('assets/images/login_back.jpg',)
-        ),*/
             borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(80)
             )
@@ -1030,9 +1201,7 @@ _buildExit() {
               ),
             ),
           ),
-        /*Positioned(
-          top: 0.0,
-       child:*/
+
       Container(
         margin: EdgeInsets.only(top:0),
         alignment: Alignment.topCenter,
@@ -1053,89 +1222,6 @@ _buildExit() {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget> [
                   Spacer(),
-
-                 /* Padding(
-                    padding: EdgeInsets.only(top: 10.0),
-                    child:
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget> [
-                      GestureDetector(
-                        onTap: () {
-                          if(fingerprintSupport)
-                            _localAuth.authenticate();
-                        },
-                        child:
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0xFFFFFFFF).withAlpha(60),
-                            blurRadius: 6.0,
-                            spreadRadius: 0.0,
-                            offset: Offset(
-                              0.0,
-                              3.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                      child:
-                      Padding(
-                        padding: EdgeInsets.all( 10.0),
-                        child:
-
-                      Icon(Icons.fingerprint,
-                      size: 48,
-                      color: Colors.white70,
-                    ),
-                            ),
-                      ),
-                    ),
-                  ),
-              GestureDetector(
-                onTap: () {
-                  if(fingerprintSupport)
-                    _localAuth.authenticate();
-                },
-                child:
-                      Align(
-                        alignment: Alignment.center,
-                        child:Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color(0xFFFFFFFF).withAlpha(60),
-                                blurRadius: 6.0,
-                                spreadRadius: 0.0,
-                                offset: Offset(
-                                  0.0,
-                                  3.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        child:
-                        Padding(
-                          padding: EdgeInsets.all( 10.0),
-                          child:
-                        Icon(Icons.touch_app,
-                          size: 48,
-                          color: Colors.white70,
-                        ),
-                        ),
-                        ),
-                      ),
-              ),
-              ],
-                  ),
-                  ),*/
-                  Spacer(),
               Container(
                 width: MediaQuery.of(context).size.width/1.5,
                 height: MediaQuery.of(context).size.height/6.5,
@@ -1149,7 +1235,7 @@ _buildExit() {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget> [
-                  Align(
+                 /* Align(
                     alignment: Alignment.bottomRight,
                       child: Padding(
                         padding: const EdgeInsets.only(
@@ -1160,51 +1246,10 @@ _buildExit() {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                       /* new Shimmer.fromColors(
-                        baseColor:  Colors.redAccent ,
-                          highlightColor: Colors.white ,
-                          direction: ShimmerDirection.rtl,
-                          period: new Duration(seconds: 3),
-                          child:
-                            new Text(Translations.current.register(),
-                              style: TextStyle(color: Colors.redAccent,fontSize: 18.0,fontStyle: FontStyle.normal,fontWeight: FontWeight.w600),),
-                        ),*/
-                            // GestureDetector(
-                            //   onTap: () {
-
-                            //   },
-                            //   child:
-                            // Align(
-                            //   alignment: Alignment.centerRight,
-                            //   child: Padding(
-                            //     padding: const EdgeInsets.only(
-                            //       top: 10, right: 2,bottom: 20.0,left: 2.0
-                            //     ),
-                            //     child: Text(Translations.of(context).forgotPassword(),
-                            //       style: TextStyle(
-                            //         color: Colors.pinkAccent
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
-                            // ),
                             GestureDetector(
 
                               child:
-                              /*AvatarGlow(
-                                startDelay: Duration(milliseconds: 300),
-                                glowColor: Colors.black26,
-                                endRadius: 50.0,
-                                duration: Duration(milliseconds: 2000),
-                                repeat: true,
-                                showTwoGlows: true,
-                                repeatPauseDuration: Duration(milliseconds: 100),
-                                child: Material(
-                                  elevation: 0.0,
-                                  shape: CircleBorder(),
-                                  child: CircleAvatar(
-                                    backgroundColor:Colors.white30, //Colors.grey[100] ,
-                                    child:*/  Align(
+                               Align(
                                       alignment: Alignment.center,
                                       child: Padding(
                                         padding: const EdgeInsets.only(
@@ -1225,30 +1270,22 @@ _buildExit() {
                                     //shape: BoxShape.circle
                                   ),
                                 ),
-                               /* shape: BoxShape.circle,
-                                animate: true,
-                                curve: Curves.fastOutSlowIn,
-                              ),*/
+
 
                               onTap: () {
                                // Navigator.pushReplacementNamed(context, '/register');
                               },
                             ),
                           ],
-                        ), /*Text(Translations.of(context).login(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18
-                          ),
-                        ),*/
+                        ),
                       ),
-                  ),
+                  ),*/
                   Align(
                     alignment: Alignment.bottomLeft,
                     child: Padding(
-                      padding: const EdgeInsets.only(
+                      padding:  EdgeInsets.only(
                           bottom: 32,
-                          right: 32
+                          right:  MediaQuery.of(context).size.width*0.55
                       ),
                       child: new Container(
                         width: 100.0,
@@ -1286,6 +1323,7 @@ _buildExit() {
               Container(
                 height: MediaQuery.of(context).size.height * 0.65,
                 child: PageView(
+                  physics: BouncingScrollPhysics(),
                   controller: _pvController,
                   children: <Widget>[
 
@@ -1306,8 +1344,7 @@ _buildExit() {
                         authUser: _loginFunc,
                         onSignup: _signUpFunc,
                         recoverPassword: _recoverFunc,
-                        onSubmit: () { /*Navigator.of(context).pushReplacementNamed('/loadingscreen');*/
-                        },),
+                        onSubmit: () {},),
                       signUpDone ? showConfirmBox(recCode) :
                     FancyRegisterForm(
           isSignUp: true,
@@ -1321,155 +1358,7 @@ _buildExit() {
                 ),
               ),
 
-        /*Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-         // crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
 
-            _buildFingerPrintLogin(),
-            _buildPatternLogin(),
-
-                  ],
-        ),*/
-
-                 // ],
-        //),
-                  //Spacer(),
-
-            /*  new Column(
-                //crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center ,
-                  children: <Widget>[
-                   *//* _buildLogin(),
-                    _buildExit(),*//*
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget> [
-                        GestureDetector(
-                          onTap: () {
-                            if(fingerprintSupport)
-                              _localAuth.authenticate();
-                          },
-                          child:
-                          Align(
-                            alignment: Alignment.center,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Color(0xFF263238).withAlpha(60),
-                                    blurRadius: 6.0,
-                                    spreadRadius: 0.0,
-                                    offset: Offset(
-                                      0.0,
-                                      3.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              child:
-                              Padding(
-                                padding: EdgeInsets.all( 10.0),
-                                child:
-
-                                Icon(Icons.fingerprint,
-                                  size: 48,
-                                  color: Colors.black45,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            if(fingerprintSupport)
-                              _localAuth.authenticate();
-                          },
-                          child:
-                          Align(
-                            alignment: Alignment.center,
-                            child:Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Color(0xFF263238).withAlpha(60),
-                                    blurRadius: 6.0,
-                                    spreadRadius: 0.0,
-                                    offset: Offset(
-                                      0.0,
-                                      3.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              child:
-                              Padding(
-                                padding: EdgeInsets.all( 10.0),
-                                child:
-                                Icon(Icons.touch_app,
-                                  size: 48,
-                                  color: Colors.black45,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    new Container(
-                      width:MediaQuery.of(context).size.width/2.0,
-                      height: 68.0,
-                      margin: EdgeInsets.only(bottom: 5.0,top:10.0),
-                      child:
-                      StepperTouch(
-                        initialValue: 0,
-                        direction: Axis.horizontal,
-                        withSpring: false,
-                        showIcon: false,
-                        leftImage: 'assets/images/logout.png',
-                        rightImage: 'assets/images/login.png',
-                        leftTitle: 'خروج',
-                        rightTitle: 'ورود',
-                        onChanged: (int value)  {
-                          if((value % 2)!=0)
-                            {
-                              _loginBloc.dispatch(new LoginButtonPressed(username: userName,password: ''));
-                              myProgressDialog.showProgressDialog();
-                              isLoginDisabled=true;
-                            }
-                          else
-                            {
-                              SystemNavigator.pop();
-                            }
-                        },
-                      ),
-                    ),
-                    ],
-              ),*/
-           /*  new Center(
-               child:
-             new Row(
-
-               mainAxisAlignment: MainAxisAlignment.spaceAround,
-               crossAxisAlignment: CrossAxisAlignment.center,
-                 children: <Widget>[
-                   new Align(
-                     child:
-                 _buildFingerPrintLogin(),
-                     alignment: Alignment.center,
-                   ),
-                   new Align(child:
-                   _buildPatternLogin(),
-                     alignment: Alignment.center,
-                   ),
-
-        ],
-             ),
-             ),*/
           ],
         ),
       ),
@@ -1478,6 +1367,7 @@ _buildExit() {
         );
 
       }
+    ),
       );
   }
 

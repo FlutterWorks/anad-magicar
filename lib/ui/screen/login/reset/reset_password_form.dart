@@ -1,6 +1,5 @@
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/login/reset/fancy_login/flutter_login.dart';
-import 'package:anad_magicar/ui/screen/login/reset/fancy_login/src/providers/auth.dart';
 import 'package:flutter/material.dart';
 
 

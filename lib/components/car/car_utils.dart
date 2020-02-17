@@ -192,7 +192,16 @@ class CarWidgetFactoryState extends State<CarWidgetFactory> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    isAdmin && statusId==Constants.CAR_TO_USER_STATUS_WAITING_TAG ?  FlatButton(
+                    isAdmin && statusId==Constants.CAR_TO_USER_STATUS_WAITING_TAG ?   Container(
+                      width: 100.0,
+                      height: 48.0,
+                      decoration: BoxDecoration(
+                          color: Colors.pinkAccent,
+                          border: Border.all(color: Colors.pinkAccent,width: 0.5),
+                          borderRadius: BorderRadius.all(Radius.circular(25))
+                      ),
+                      child:
+                    FlatButton(
                       padding: EdgeInsets.only(left: 0, right: 0),
                       child: Icon(
                           Icons.check_circle_outline,
@@ -209,9 +218,17 @@ class CarWidgetFactoryState extends State<CarWidgetFactory> {
                          _showBottomSheetAcceptRole(context, c.carId, c.userId);
                         }
                       },
-                    ) :
+                    ) ) :
                     Container(width: 0.0,height: 0.0,),
-                    isAdmin ?      FlatButton(
+                    isAdmin ?   Container(
+                      width: 100.0,
+                      height: 48.0,
+                      decoration: BoxDecoration(
+                          color: Colors.pinkAccent,
+                          border: Border.all(color: Colors.pinkAccent,width: 0.5),
+                          borderRadius: BorderRadius.all(Radius.circular(25))
+                      ),
+                      child:   FlatButton(
                       padding: EdgeInsets.only(left: 0, right: 0),
                       child: Icon(
                           Icons.remove_circle_outline,
@@ -220,7 +237,7 @@ class CarWidgetFactoryState extends State<CarWidgetFactory> {
                       onPressed: () {
                             _deleteCarToUser(c.userId, c.carId);
                       },
-                    ) :
+                    ) ) :
                     Container(width: 0.0,height: 0.0,)
                   ],
                 ),
@@ -313,7 +330,7 @@ class CarWidgetFactoryState extends State<CarWidgetFactory> {
               backgroundColorAppBar: Colors.transparent,
               title: new MagicarAppbarTitle(
                 //image: Image.asset(name),
-                currentColor: Colors.redAccent,
+                currentColor: Colors.blueAccent,
                 actionIcon: null,//Icon(Icons.add_circle_outline,color: Colors.redAccent,size: 20.0,),
                 actionFunc: null,//widget.addCar,
               ),
@@ -326,7 +343,7 @@ class CarWidgetFactoryState extends State<CarWidgetFactory> {
                 )
               ],
               elevationAppBar: 0.0,
-              iconMenuAppBar: Icon(Icons.arrow_back,color: Colors.redAccent,),
+              iconMenuAppBar: Icon(Icons.arrow_back,color: Colors.blueAccent,),
               toggle: widget.toggle ,
             ),
           ),

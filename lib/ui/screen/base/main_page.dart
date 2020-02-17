@@ -24,6 +24,8 @@ abstract class MainPage<T extends StatefulWidget> extends State<T> {
 
   String imageUrl = 'assets/images/user_profile.png';
   int userId=0;
+  int _currentCarId;
+
   String userName='';
   bool isDark=false;
 
@@ -92,7 +94,7 @@ abstract class MainPage<T extends StatefulWidget> extends State<T> {
     return Scaffold(
       key: _scaffoldKey,
       floatingActionButton: getFab()!=null ? getFab() : null,
-      drawer: AppDrawer(carPageTap: onCarPageTap,userName: userName,imageUrl: imageUrl,currentRoute: getCurrentRoute(),),
+      drawer: AppDrawer(carPageTap: onCarPageTap,userName: userName,imageUrl: imageUrl,currentRoute: getCurrentRoute(),carId: CenterRepository.getCurrentCarId(),),
       bottomNavigationBar: CurvedNavigationBar(
         index: setCurrentTab()!=null ? setCurrentTab() : 2,
         height: 60.0,

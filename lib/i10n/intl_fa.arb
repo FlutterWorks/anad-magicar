@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2020-02-07T20:21:32.983378",
+  "@@last_modified": "2020-02-16T22:43:48.439009",
   "confirm": "تایید",
   "@confirm": {
     "description": "Confirm Security Code",
@@ -900,7 +900,7 @@
       "type": "text",
       "placeholders": {}
     },
-    "buyPlan": "Buy خرید طرح",
+    "buyPlan": "خرید طرح",
     "@buyPlan": {
       "description": "buyPlan",
       "type": "text",
@@ -1275,6 +1275,300 @@
   "selectForJoin": "برای اضافه شدن انتخاب کنید",
   "@selectForJoin": {
     "description": "selectForJoin",
+    "type": "text",
+    "placeholders": {}
+  },
+  "editCarSuccessful": "ویرایش خودرو با موفقیت انجام شد",
+  "@editCarSuccessful": {
+    "description": "editCarSuccessful",
+    "type": "text",
+    "placeholders": {}
+  },
+  "editCarUnSuccessful": "ویرایش خودرو با خطا مواجه شد",
+  "@editCarUnSuccessful": {
+    "description": "editCarUnSuccessful",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageDate": "تاریخ پیام",
+  "@messageDate": {
+    "description": "messageDate",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageSubject": "موضوع پیام",
+  "@messageSubject": {
+    "description": "messageSubject",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageBody": "متن پیام",
+  "@messageBody": {
+    "description": "messageBody",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageSentUnSuccessfull": "پیام ارسال نشد",
+  "@messageSentUnSuccessfull": {
+    "description": "messageSentUnSuccessfull",
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageHasSentSuccessfull": "ارسال پیام با موفقیت انجام شد",
+  "@messageHasSentSuccessfull": {
+    "description": "messageHasSentSuccessfull",
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendMessage": "ارسال پیام",
+  "@sendMessage": {
+    "description": "sendMessage",
+    "type": "text",
+    "placeholders": {}
+  },
+  "noServiceTypes": "نوع سرویسی یافت نشد",
+  "@noServiceTypes": {
+    "description": "noServiceTypes",
+    "type": "text",
+    "placeholders": {}
+  },
+  "showDetails": "نمایش جزییات",
+  "@showDetails": {
+    "description": "showDetails",
+    "type": "text",
+    "placeholders": {}
+  },
+  "confimDelete": "هشدار برای حذف!",
+  "@confimDelete": {
+    "description": "confimDelete",
+    "type": "text",
+    "placeholders": {}
+  },
+  "areYouSureToDelete": "آیا از حذف مطمئن هستید؟",
+  "@areYouSureToDelete": {
+    "description": "areYouSureToDelete",
+    "type": "text",
+    "placeholders": {}
+  },
+  "carNotFound": "خودرو یافت نشد",
+  "@carNotFound": {
+    "description": "carNotFound",
+    "type": "text",
+    "placeholders": {}
+  },
+  "serviceType": "نوع سرویس",
+  "@serviceType": {
+    "description": "serviceType",
+    "type": "text",
+    "placeholders": {}
+  },
+  "serviceTypeIsDurational": "سرویس از نوع دوره ای است",
+  "@serviceTypeIsDurational": {
+    "description": "serviceTypeIsDurational",
+    "type": "text",
+    "placeholders": {}
+  },
+  "serviceTypeIsFunctionality": "سرویس از نوع کارکردی است",
+  "@serviceTypeIsFunctionality": {
+    "description": "serviceTypeIsFunctionality",
+    "type": "text",
+    "placeholders": {}
+  },
+  "functional": "کارکردی",
+  "@functional": {
+    "description": "functional",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durational": "دوره ای",
+  "@durational": {
+    "description": "durational",
+    "type": "text",
+    "placeholders": {}
+  },
+  "both": "کارکردی-دوره ای",
+  "@both": {
+    "description": "both",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durationDay": "روز",
+  "@durationDay": {
+    "description": "durationDay",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durationMonth": "ماه",
+  "@durationMonth": {
+    "description": "durationMonth",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durationYear": "سال",
+  "@durationYear": {
+    "description": "durationYear",
+    "type": "text",
+    "placeholders": {}
+  },
+  "remaind": "مانده روز",
+  "@remaind": {
+    "description": "remaind",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durationFunctionalCountValue": "تعداد",
+  "@durationFunctionalCountValue": {
+    "description": "durationFunctionalCountValue",
+    "type": "text",
+    "placeholders": {}
+  },
+  "durationFunctionalValue": "مقدار",
+  "@durationFunctionalValue": {
+    "description": "durationFunctionalValue",
+    "type": "text",
+    "placeholders": {}
+  },
+  "securityCodeWillSmsYou": "رمز عبور به همراه شما پیامک شد",
+  "@securityCodeWillSmsYou": {
+    "description": "securityCodeWillSmsYou",
+    "type": "text",
+    "placeholders": {}
+  },
+  "smsHasRead": "خوانده شده",
+  "@smsHasRead": {
+    "description": "smsHasRead",
+    "type": "text",
+    "placeholders": {}
+  },
+  "smsHasUnRead": "خوانده نشده",
+  "@smsHasUnRead": {
+    "description": "smsHasUnRead",
+    "type": "text",
+    "placeholders": {}
+  },
+  "loginAndThenEditYourProfile": "لطفا در صفحه ورود به برنامه با رمز عبور 1111 وارد شوید و سپس رمز خود را در پروفایل ویرایش کنید",
+  "@loginAndThenEditYourProfile": {
+    "description": "loginAndThenEditYourProfile",
+    "type": "text",
+    "placeholders": {}
+  },
+  "passwordHasChanged": "رمز عبور به پیش فرض تغییر کرد",
+  "@passwordHasChanged": {
+    "description": "passwordHasChanged",
+    "type": "text",
+    "placeholders": {}
+  },
+  "changePasswordError": "تغییر رمز با خطا مواجه شد",
+  "@changePasswordError": {
+    "description": "changePasswordError",
+    "type": "text",
+    "placeholders": {}
+  },
+  "changePasswordTitle": "بازیابی رمز",
+  "@changePasswordTitle": {
+    "description": "changePasswordTitle",
+    "type": "text",
+    "placeholders": {}
+  },
+  "replyMessage": "پاسخ به پیام",
+  "@replyMessage": {
+    "description": "replyMessage",
+    "type": "text",
+    "placeholders": {}
+  },
+  "actionService": "انجام سرویس",
+  "@actionService": {
+    "description": "actionService",
+    "type": "text",
+    "placeholders": {}
+  },
+  "done": "انجام شد",
+  "@done": {
+    "description": "done",
+    "type": "text",
+    "placeholders": {}
+  },
+  "notDone": "انجام نشد",
+  "@notDone": {
+    "description": "notDone",
+    "type": "text",
+    "placeholders": {}
+  },
+  "fromDateToDate": "گزارش بر اساس از تاریخ تا تاریخ",
+  "@fromDateToDate": {
+    "description": "fromDateToDate",
+    "type": "text",
+    "placeholders": {}
+  },
+  "showReportBaseOnDate": "گزارش براساس تاریخ",
+  "@showReportBaseOnDate": {
+    "description": "showReportBaseOnDate",
+    "type": "text",
+    "placeholders": {}
+  },
+  "showReportBaseOnDays": "گزارش براساس چند روز قبل",
+  "@showReportBaseOnDays": {
+    "description": "showReportBaseOnDays",
+    "type": "text",
+    "placeholders": {}
+  },
+  "fromLastDays": "گزارش براساس چند روز قبل",
+  "@fromLastDays": {
+    "description": "fromLastDays",
+    "type": "text",
+    "placeholders": {}
+  },
+  "alarmDistance": "کارکرد هشدار",
+  "@alarmDistance": {
+    "description": "alarmDistance",
+    "type": "text",
+    "placeholders": {}
+  },
+  "areYouSureToExitForBackTouchCancel": "آیا از خروج مطمئن هستید؟ جهت برگشت میتوانید دکمه انصراف در فرم اصلی را لمس کنید.",
+    "@areYouSureToExitForBackTouchCancel": {
+      "description": "areYouSureToExitForBackTouchCancel",
+      "type": "text",
+      "placeholders": {}
+    },
+    "carPairedCounts": "تعداد درگروه",
+      "@carPairedCounts": {
+        "description": "carPairedCounts",
+        "type": "text",
+        "placeholders": {}
+      },
+      "carToRequestForPair": "خودروی درخواست دهنده",
+      "@carToRequestForPair": {
+        "description": "carToRequestForPair",
+        "type": "text",
+        "placeholders": {}
+      },
+      "addToPaired": "افزودن به گروه",
+      "@addToPaired": {
+        "description": "addToPaired",
+        "type": "text",
+        "placeholders": {}
+      },
+      "masterCarId": "شناسه درخواست دهنده",
+      "@masterCarId": {
+        "description": "masterCarId",
+        "type": "text",
+        "placeholders": {}
+      },
+      "thisCarPaired": "خودرو افزوده شد",
+      "@thisCarPaired": {
+        "description": "thisCarPaired",
+        "type": "text",
+        "placeholders": {}
+      },
+      "messageRead": "خوانده شده",
+      "@messageRead": {
+        "description": "messageRead",
+        "type": "text",
+        "placeholders": {}
+      },
+  "errorinSignUp": "در روند ثبت نام خطایی وجود دارد",
+  "@errorinSignUp": {
+    "description": "errorinSignUp",
     "type": "text",
     "placeholders": {}
   },

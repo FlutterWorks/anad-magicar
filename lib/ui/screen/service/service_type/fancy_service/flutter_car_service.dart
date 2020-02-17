@@ -291,10 +291,11 @@ class _FlutterCarState extends State<FlutterCar>
 
   @override
   void dispose() {
-    super.dispose();
+
     _loadingController.dispose();
     _logoController.dispose();
     _titleController.dispose();
+    super.dispose();
   }
 
   void _reverseHeaderAnimation() {

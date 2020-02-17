@@ -1,3 +1,7 @@
+import 'package:anad_magicar/date/helper/shamsi_date.dart' as sh;
+import 'package:anad_magicar/model/apis/service_type.dart';
+import 'package:anad_magicar/widgets/persian_datepicker/jalaali_js.dart';
+import 'package:anad_magicar/widgets/persian_datepicker/persian_datetime.dart';
 import 'package:flutter/material.dart';
 
 class ApiService {
@@ -16,7 +20,7 @@ class ApiService {
   String Description;
   String CreatedDate;
   int RowStateType;
-
+  ServiceType serviceType;
   ApiService({
     @required this.ServiceId,
     @required this.CarId,
@@ -29,7 +33,8 @@ class ApiService {
     @required this.AlarmCount,
     @required this.Description,
     @required this.CreatedDate,
-    @required this.RowStateType
+    @required this.RowStateType,
+    @required this.serviceType
   });
 
   Map<String, dynamic> toMap() {
@@ -97,6 +102,8 @@ class ApiService {
       "RowStateType":this.RowStateType,
     };
   }
+
+
 
 
 }

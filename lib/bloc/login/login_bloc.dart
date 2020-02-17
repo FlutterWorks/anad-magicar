@@ -77,7 +77,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         if(securityCode!=null &&
         securityCode.isNotEmpty)
           {
-            yield SignUpDone(code: securityCode);
+            if(securityCode.contains('تکرار')){
+              yield SignUpFaild(error: securityCode);
+            }
+            else
+             yield SignUpDone(code: securityCode);
           }
         else
           yield SignUpFaild();
@@ -89,6 +93,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       if(securityCode!=null &&
           securityCode.isNotEmpty)
       {
+        if(securityCode.contains('تکرار')){
+          yield SignUpFaild(error: securityCode);
+        }
+        else
         yield SignUpDone(code: securityCode);
       }
       else

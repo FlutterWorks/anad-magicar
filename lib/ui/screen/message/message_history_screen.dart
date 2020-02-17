@@ -9,7 +9,7 @@ import 'package:anad_magicar/utils/date_utils.dart';
 import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
 import 'package:anad_magicar/widgets/persian_datepicker/persian_datepicker.dart';
 import 'package:flutter/material.dart';
-import 'package:anad_magicar/components/date_picker/flutter_datetime_picker.dart' as dtpicker;
+
 
 class MessageHistoryScreen extends StatefulWidget {
   int carId;
@@ -49,20 +49,26 @@ class MessageHistoryScreenState extends MainPage<MessageHistoryScreen> {
   _showBottomSheetDates(BuildContext cntext)
   {
     showModalBottomSheetCustom(context: cntext ,
-        mHeight: 0.90,
+        mHeight: 0.95,
         builder: (BuildContext context) {
           return
             Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            Text(Translations.current.fromDate(),
+              style: TextStyle(color: Colors.pinkAccent,fontSize: 15.0),
+              textAlign: TextAlign.center,),
             Container(
-              height: MediaQuery.of(context).size.height*0.3,
-              child: initDatePicker(null, 'From'),
+              height: MediaQuery.of(context).size.height*0.35,
+              child: initDatePicker(textEditingController, 'From'),
             ),
+            Text(Translations.current.toDate(),
+              style: TextStyle(color: Colors.pinkAccent,fontSize: 15.0),
+              textAlign: TextAlign.center,),
             Container(
-              height:MediaQuery.of(context).size.height*0.3,
-              child: initDatePicker(null, 'To'),
+              height:MediaQuery.of(context).size.height*0.35,
+              child: initDatePicker(textEditingController, 'To'),
             ),
           Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -92,6 +98,8 @@ class MessageHistoryScreenState extends MainPage<MessageHistoryScreen> {
 
   @override
   void dispose() {
+    notyDateFilterBloc.dispose();
+    notyDateSelectedBloc.dispose();
     super.dispose();
   }
 
@@ -143,7 +151,8 @@ class MessageHistoryScreenState extends MainPage<MessageHistoryScreen> {
     ).init();
     notyDateFilterBloc=new NotyBloc<ChangeEvent>();
     notyDateSelectedBloc=new NotyBloc<ChangeEvent>();
-
+   /* fromDate=Jalali.now().addDays(-3).toString();
+    notyDateFilterBloc.updateValue(new ChangeEvent(fromDate:fromDate,toDate: Jalali.now().toString() ));*/
     return null;
   }
 

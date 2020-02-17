@@ -86,6 +86,7 @@ class _RegisterDeviceState extends State<RegisterDeviceScreen>
 
   @override
   void dispose() {
+    _notyBloc.dispose();
     super.dispose();
   }
 

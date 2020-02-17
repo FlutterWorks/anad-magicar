@@ -39,6 +39,7 @@ class UsersPage extends StatefulWidget {
 }
 class UserPageState extends MainPage<UsersPage> {
   static final route='/showusers';
+
   final GlobalKey<FormState> _formKey = GlobalKey();
   ProgressDialog _progressDialog;
   int _userCounts=0;
@@ -379,7 +380,7 @@ class UserPageState extends MainPage<UsersPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text( Translations.current.roleTitle(),style: TextStyle(fontSize: 20.0,)),*/
-                Text('roleTitle',style: TextStyle(fontSize: 20.0,),),
+                Text(roleTitle,style: TextStyle(fontSize: 20.0,),),
                 /*],
           ),*/
                 //leading: Container(width: 0.0,height: 0.0,),

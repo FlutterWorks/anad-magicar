@@ -807,7 +807,7 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
       fadeDirection: FadeDirection.topToBottom,
       child: FlatButton(
         child: AnimatedText(
-          text: auth.isConfirm ? messages.loginButton : messages.signupButton,
+          text: auth.isConfirm ? messages.signupButton : messages.loginButton,
           textRotation: AnimatedTextRotation.down,
         ),
         disabledTextColor: theme.primaryColor,
@@ -839,15 +839,7 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
               top: cardPadding + 10,
             ),
           child:
-          ExpandableContainer(
-            onExpandCompleted: () => _postSwitchAuthLoginController.forward(),
-            controller: _switchAuthLoginController,
-            initialState: isConfirm
-                ? ExpandableContainerState.expanded
-                : ExpandableContainerState.shrunk,
-
-            width: cardWidth,
-            child: Column(
+          Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 _buildCurrentPasswordField(textFieldWidth, messages),
@@ -858,14 +850,14 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
                 SizedBox(height: 10),
               ],
             ),
-          ),
+
           ),
           ExpandableContainer(
             backgroundColor: theme.accentColor,
             controller: _switchAuthController,
             initialState: isConfirm
                 ? ExpandableContainerState.shrunk
-                : ExpandableContainerState.shrunk,
+                : ExpandableContainerState.expanded,
             alignment: Alignment.topLeft,
             color: theme.cardTheme.color,
             width: cardWidth,

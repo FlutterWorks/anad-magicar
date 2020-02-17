@@ -212,7 +212,8 @@ class SecuritySettingsFormState extends State<SecuritySettingsForm> {
   Widget build(BuildContext context) {
     return
       Scaffold(
-        drawer: AppDrawer(userName: userName,imageUrl: imageUrl,currentRoute: route,carPageTap: onCarPageTap,) ,//buildDrawer(context, route,userName,imageUrl,null,''),
+        key: _scaffoldKey,
+        drawer: AppDrawer(userName: userName,imageUrl: imageUrl,currentRoute: route,carPageTap: onCarPageTap,carId: CenterRepository.getCurrentCarId(),) ,//buildDrawer(context, route,userName,imageUrl,null,''),
       bottomNavigationBar: CurvedNavigationBar(
         index: 2,
         height: 60.0,
@@ -227,7 +228,7 @@ class SecuritySettingsFormState extends State<SecuritySettingsForm> {
         ],
         onTap: (index) {
           //Handle button tap
-          CenterRepository.onNavButtonTap(context, index);
+          CenterRepository.onNavButtonTap(context, index,carId: CenterRepository.getCurrentCarId());
         },
       ),
       /*appBar: (widget.fromMain==null || !widget.fromMain) ?
@@ -277,11 +278,11 @@ class SecuritySettingsFormState extends State<SecuritySettingsForm> {
               SettingsList(
                 sections: [
 
-                  SettingsSection(
+                 /* SettingsSection(
                     title: 'کاربری',
                     tiles: [
-                      /*SettingsTile(
-                          title: 'شماره همراه', leading: Icon(Icons.phone)),*/
+                      *//*SettingsTile(
+                          title: 'شماره همراه', leading: Icon(Icons.phone)),*//*
                      // SettingsTile(title: 'ایمیل', leading: Icon(Icons.email)),
                       SettingsTile(title: 'خروج از حساب کاربری',
                         leading: Icon(Icons.exit_to_app),
@@ -289,7 +290,7 @@ class SecuritySettingsFormState extends State<SecuritySettingsForm> {
                           Navigator.of(context).pushNamed('/logout');
                         },),
                     ],
-                  ),
+                  ),*/
                   SettingsSection(
                     title: 'امنیتی',
                     tiles: [
@@ -363,7 +364,7 @@ class SecuritySettingsFormState extends State<SecuritySettingsForm> {
                             });
                           },
                           switchValue: useFinger),
-                      SettingsTile.switchTile(
+                     /* SettingsTile.switchTile(
                           leftPadding: 25,
                           rightPadding: 2,
                           title: Translations.current.usePattern(),
@@ -390,7 +391,7 @@ class SecuritySettingsFormState extends State<SecuritySettingsForm> {
                               setAppLogin();
                             });
                           },
-                          switchValue: usePattern),
+                          switchValue: usePattern),*/
                       SettingsTile.switchTile(
                           leftPadding: 25,
                           rightPadding: 2,

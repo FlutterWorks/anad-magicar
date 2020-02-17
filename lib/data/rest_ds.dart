@@ -127,6 +127,8 @@ class RestDatasource extends BaseRest {
   static final CHECK_DEVICE_AVAILABLE_URL=BASE_URL+BASE_DEVICE_URL+"/CheckDeviceAvalable";
   static final ASSIGN_ROLE_TO_CAR_URL=BASE_URL+BASE_ACTION_TO_ROLE_URL+"/AssignRoleToCar";
   static final SEARCH_CAR_URL=BASE_URL+BASE_CAR_URL+'/SerachCarToRequest';
+  static final SEARCH_CARS_URL=BASE_URL+BASE_CAR_URL+'/SearchCars';
+
   static final DeleteCarToUser_URL=BASE_URL+BASE_CAR_TO_USER_URL+'/DeleteCarToUser';
   static final DeleteCars_URL=BASE_URL+BASE_CAR_URL+'/DeleteCars';
   static final DeleteCarToUser_URI_URL=BASE_CAR_TO_USER_URL+'/DeleteCarToUser';
@@ -142,6 +144,7 @@ class RestDatasource extends BaseRest {
   static final Get_LASTPOSITION_URL=BASE_URL+BASE_LASTPOSITION_URL+'/GetLastPosition';
   static final PairedCar_URL=BASE_URL+BASE_PAIREDCAR_URL+'/GetAllPairedCar';
   static final DeletePairedCar_URL=BASE_URL+BASE_PAIREDCAR_URL+'/DeletePairedCar';
+  static final SavePairedCar_URL=BASE_URL+BASE_PAIREDCAR_URL+'/Save';
 
   static final GetCarLog_URL=BASE_URL+BASE_CARLOG_URL+'/GetCarLog';
   static final GetAlarmType_URL=BASE_URL+BASE_ALARMTYPE_URL+'/GetAlarmType';
@@ -149,10 +152,11 @@ class RestDatasource extends BaseRest {
   static final SaveService_URL=BASE_URL+BASE_CARSERVICE_URL+'/SaveService';
   static final GetCarService_URL=BASE_URL+BASE_CARSERVICE_URL+'/GetCarService';
   static final GetServiceTypes_URL=BASE_URL+BASE_SERVICETYPE_URL+'/GetServiceTypes';
-  static final GetUserMessage_URL=BASE_URL+BASE_CARSERVICE_URL+'/GetUserMessage';
+  static final GetUserMessage_URL=BASE_URL+BASE_MESSAGE_URL+'/GetUserMessage';
   static final ChanegMessageStatus_URL=BASE_URL+BASE_MESSAGE_URL+'/ChanegMessageStatus';
   static final SendMessage_URL=BASE_URL+BASE_MESSAGE_URL+'/SendMessage';
   static final ForgetPassword_URL=BASE_URL+BASE_USER_URL+'/ForgotPassword';
+  static final BUY_REQUEST_URL='http://anadgps.com/payline/api/invoices/request';
 
   RestDatasource();
 
@@ -200,6 +204,7 @@ class RestDatasource extends BaseRest {
   }
 
   Future<bool> validateSMSCode(String username, String code) async{
+
     return _netUtil.post(LOGIN_URL, body: {
       "userId":int.tryParse( username),
       "code": code
@@ -361,9 +366,7 @@ class RestDatasource extends BaseRest {
   }
 
 
-  GetUserMessage(){
 
-  }
 
   Future<List<CarActionLog>> GetCarLog(int CarId,String FromDate,String ToDate){
     var bdy={
@@ -449,6 +452,20 @@ class RestDatasource extends BaseRest {
           }
       }
       catch(error) {
+        return null;
+      }
+    });
+  }
+  Future<List<ApiPairedCar>> getAllPairedCars() async{
+    return _netUtil.post(PairedCar_URL,).then((res) {
+      try {
+        if (res != null) {
+          return res.map<ApiPairedCar>((r)=>ApiPairedCar.fromJsonForGetAllPaired(r)).toList();
+        }
+        return null;
+      }
+      catch(error)
+      {
         return null;
       }
     });
@@ -586,7 +603,23 @@ class RestDatasource extends BaseRest {
       return null;
     });
   }
+  Future<List<Car>> searchCars(int carId,String pelak,String serialNumber) async{
 
+    Map<String,dynamic> body={
+        "CarId":carId,
+    "pelak":pelak,
+    "SerialNumber": serialNumber};
+    return _netUtil.post(SEARCH_CARS_URL,body: body).then((res) {
+      try {
+        if (res != null && res.length>0)
+          return  res.map<Car>((s)=>Car.fromJson(s)).toList();
+      }
+      catch(error) {
+        return null;
+      }
+      return null;
+    });
+  }
   Future<ServiceResult> changeMessageStatus( int messageId,int status) async{
     Map<String,dynamic> params={
       "MessageId": messageId,
@@ -664,6 +697,19 @@ class RestDatasource extends BaseRest {
     });
   }
 
+  Future<ServiceResult> savePairedCar(ApiPairedCar entity) async{
+
+    return _netUtil.post(SaveServiceType_URL,body: entity.toJson()).then((res) {
+      try {
+        if (res != null )
+          return  ServiceResult.fromJson(res);
+      }
+      catch(error) {
+        return null;
+      }
+      return null;
+    });
+  }
   Future<ServiceResult> partialSaveInvoice(int userId,int planId) async{
     Map<String,int> params={
       "userId": userId,
@@ -833,7 +879,16 @@ class RestDatasource extends BaseRest {
       return res;
     });
   }
+  Future<Map<String,dynamic>> requestBuyUrl({Map<String,dynamic> body} ) async{
+    String content="application/json";
+    Map<String,String> headers=new Map();
+    headers.putIfAbsent("Content-Type",()=> content);
 
+    return _netUtil.post(BUY_REQUEST_URL, body: body,headers: headers
+    ).then(( res) {
+      return res;
+    });
+  }
   Future<dynamic> fetchOpenRouteServiceURlJSON({dynamic body} ) async{
     String content="application/json";
     Map<String,String> headers=new Map();

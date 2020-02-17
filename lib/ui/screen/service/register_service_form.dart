@@ -4,11 +4,14 @@ import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/model/apis/api_service.dart';
 import 'package:anad_magicar/model/user/user.dart';
 import 'package:anad_magicar/model/viewmodel/noty_loading_vm.dart';
+import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/pref_repository.dart';
 import 'package:anad_magicar/ui/screen/service/fancy_register_service_form.dart';
 import 'package:anad_magicar/ui/screen/service/fancy_service/src/models/car_service_data.dart';
+import 'package:anad_magicar/ui/screen/service/service_form.dart';
 import 'package:anad_magicar/ui/screen/service/service_page.dart';
+import 'package:anad_magicar/utils/date_utils.dart';
 import 'package:anad_magicar/widgets/forms_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,9 +47,9 @@ class RegisterServiceFormState extends State<RegisterServiceForm> {
             ServiceId: data.serviceId,
             CarId: widget.carId,
             ServiceTypeId: data.serviceTypeId,
-            ServiceDate: data.serviceDate,
-            ActionDate: data.actionDate,
-            AlarmDate: data.alarmDate,
+            ServiceDate: DateTimeUtils.convertIntoDateTime( data.serviceDate),
+            ActionDate: DateTimeUtils.convertIntoDateTime(data.actionDate),
+            AlarmDate: DateTimeUtils.convertIntoDateTime(data.alarmDate),
             ServiceStatusConstId: ApiService.ServiceStatusConstId_Tag,
             ServiceCost: data.cost,
             AlarmCount: data.alarmCount,
@@ -89,6 +92,7 @@ class RegisterServiceFormState extends State<RegisterServiceForm> {
   @override
   void dispose() {
     registerCarServiceBloc.close();
+    loadingNoty.dispose();
     super.dispose();
   }
 
@@ -97,10 +101,24 @@ class RegisterServiceFormState extends State<RegisterServiceForm> {
 
     double w=MediaQuery.of(context).size.width;
     double h=MediaQuery.of(context).size.height;
-    return Stack(
+    return  BlocListener(
+        bloc: registerCarServiceBloc,
+        listener: (BuildContext context, RegisterServiceState state) {
+          if(state is RegisteredServiceState){
+            centerRepository.dismissDialog(context);
+            loadingNoty.updateValue(new NotyLoadingVM(isLoading: false,
+                hasLoaded: false,
+                haseError: false,
+                hasInternet: true));
+            Navigator.pushReplacementNamed(context, ServicePageState.route,arguments: new ServiceVM(carId: widget.carId,refresh: false));
+            //Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {return SecondScreen();}));
+          }
+        },
+        child:
+      Stack(
       overflow: Overflow.visible,
       children: <Widget> [
-        new Padding(padding: EdgeInsets.only(top: 70.0),
+        new Padding(padding: EdgeInsets.only(top: 65.0),
           child:
 
           BlocBuilder<RegisterCarServiceBloc, RegisterServiceState>(
@@ -115,13 +133,10 @@ class RegisterServiceFormState extends State<RegisterServiceForm> {
                 }
                 if(currentState is RegisteredServiceState)
                 {
-                  centerRepository.dismissDialog(context);
-                  loadingNoty.updateValue(new NotyLoadingVM(isLoading: false,
-                      hasLoaded: false,
-                      haseError: false,
-                      hasInternet: true));
-                  Navigator.pushReplacementNamed(context, ServicePageState.route);
 
+                  //return ServiceForm(serviceVM: new ServiceVM(carId: widget.carId,refresh: true),);
+                  //Navigator.pushReplacementNamed(context, ServicePageState.route,arguments: new ServiceVM(carId: widget.carId,refresh: false));
+                  return Container();
                 }
                 if(currentState is ErrorRegisterServiceState)
                 {
@@ -136,7 +151,7 @@ class RegisterServiceFormState extends State<RegisterServiceForm> {
                 return  new FancyRegisterServiceForm(
                   editMode: widget.editMode ,
                   service: widget.service,
-                  onSubmit: _authAddCarService,
+                  onSubmit: (){},
                 authUser: _authAddCarService,
                 recoverPassword: null,);
               }
@@ -153,6 +168,7 @@ class RegisterServiceFormState extends State<RegisterServiceForm> {
           loadingNoty: loadingNoty,
           onBackPress:() {} ,)*/
       ],
+      ),
     );
   }
 }

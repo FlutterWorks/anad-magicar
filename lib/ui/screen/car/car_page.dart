@@ -106,22 +106,46 @@ class CarPageState extends MainPage<CarPage> {
           .first;
       if (car_info != null) {
         int tip=0;
+        int modelId=0;
+        int brandId=0;
         if(centerRepository.getCarBrands()!=null)
           {
            // tip=centerRepository.getCarBrands().where((d)=>d.brandId==car_info. )
           }
+        if(centerRepository.getCarModelDetails()!=null && centerRepository.getCarModelDetails().length>0) {
+          var modelDetail = centerRepository.getCarModelDetails().where((c) =>
+          c.carModelDetailId == car_info.carModelDetailId).toList();
+          if (modelDetail != null && modelDetail.length > 0) {
+              modelId=modelDetail.first.carModelId;
+              if(centerRepository.getCarBrands()!=null && centerRepository.getCarBrands().length>0) {
+                var model = centerRepository.getCarModels().where((c) =>
+                c.carModelId == modelId).toList();
+                if (model != null && model.length > 0) {
+                  var brand = centerRepository.getCarBrands().where((c) =>
+                  c.brandId == model.first.brandId).toList();
+                  if(brand!=null && brand.length>0){
+                    brandId=brand.first.brandId;
+                  }
+                }
+              }
+          }
+        }
         SaveCarModel editModel=new SaveCarModel(
             carId: car_info.carId,
-            brandId:0,
-            modelId: null,
-            tip: null,
+            brandId:brandId,
+            modelId: modelId,
+            tip: car_info.carModelDetailId,
             pelak: car_info.pelaueNumber,
             colorId: car_info.colorTypeConstId,
-            distance: null,
+            distance: car_info.totlaDistance,
             ConstantId: null,
             DisplayName: null);
 
         CarInfoVM carInfoVM = new CarInfoVM(
+          colorId: car_info.colorTypeConstId,
+          brandId: brandId,
+            moddelId: modelId,
+            modelDetailId: car_info.carModelDetailId,
             brandModel: null,
             car: car_info,
             carColor: null,
@@ -164,6 +188,13 @@ class CarPageState extends MainPage<CarPage> {
      }
   }
   _deleteCars(int carId,) async{
+
+    centerRepository.showConfirmDialog(context, Translations.current.confimDelete(),
+        Translations.current.areYouSureToDelete(),
+         onConfirmDelete, null,carId);
+  }
+
+  Future<void> onConfirmDelete(int carId) async {
     List<int> cars=new List();
     cars..add(carId);
     ServiceResult result=await restDatasource.deleteCars( cars);
@@ -178,6 +209,7 @@ class CarPageState extends MainPage<CarPage> {
     {
       centerRepository.showFancyToast(Translations.current.hasErrors());
     }
+    return Future.value(0);
   }
   _addCar(SaveCarModel editModel,int userId, bool edit){
 
@@ -369,8 +401,10 @@ class CarPageState extends MainPage<CarPage> {
                           child: Button(title: Translations.current.edit(),wid: 90.0,color: Colors.blueAccent.value,),
                     onPressed: () {
                       if(isAdmin) {
+
                         SaveCarModel editModel=new SaveCarModel(userId: c.userId, carId: c.carId,
-                            brandId: 0, modelId: null, tip: null, pelak: null, colorId:null , distance: null, ConstantId: null, DisplayName: null);
+                            brandId: c.brandId, modelId: c.moddelId, tip: c.modelDetailId,
+                            pelak: c.pelak, colorId:c.colorId , distance: int.tryParse(c.distance), ConstantId: null, DisplayName: null);
                         _showBottomSheetEditCarInfo(context, editModel, c.carId,c.userId);
                       }
                     },

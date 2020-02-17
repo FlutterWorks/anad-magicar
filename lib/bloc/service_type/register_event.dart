@@ -50,18 +50,7 @@ class InRegisterServiceTypeEvent extends RegisterServiceTypeEvent{
 
   @override
   Future<RegisterServiceTypeState> applyAsync({RegisterServiceTypeState currentState, RegisterServiceTypeBloc bloc}) async{
-    if(currentState is UnRegisterServiceTypeState) {
-      try {
 
-            return new LoadRegisterServiceTypeState();
-
-      }
-
-      catch (_, stackTrace) {
-        return new ErrorRegisterServiceTypeState(_?.toString());
-      }
-    }
-    return new InRegisterServiceTypeState();
   }
 
 }
@@ -79,24 +68,7 @@ class LoadRegisterServiceTypeEvent extends RegisterServiceTypeEvent {
   @override
   Future<RegisterServiceTypeState> applyAsync({RegisterServiceTypeState currentState, RegisterServiceTypeBloc bloc}) async {
 
-   try {
 
-              if(serviceType!=null) {
-                var result=await restDatasource.saveServiceType(serviceType);
-                if(result!=null) {
-                  if(result.IsSuccessful) {
-                    return new RegisteredServiceTypeState();
-                  }
-                  return ErrorRegisterServiceTypeState(result.Message);
-                }
-                else {
-                  return ErrorRegisterServiceTypeState(Translations.current.hasErrors());
-                  }
-              }
-
-    } catch (_, stackTrace) {
-      return new ErrorRegisterServiceTypeState(_?.toString());
-    }
   }
 }
 
@@ -111,13 +83,6 @@ class RegisteredServiceTypeEvent extends RegisterServiceTypeEvent {
   Future<RegisterServiceTypeState> applyAsync(
       {
         RegisterServiceTypeState currentState, RegisterServiceTypeBloc bloc}) async {
-    try {
 
-
-      return new RegisteredServiceTypeState();
-    } catch (_, stackTrace) {
-
-      return new ErrorRegisterServiceTypeState(_?.toString());
-    }
   }
 }

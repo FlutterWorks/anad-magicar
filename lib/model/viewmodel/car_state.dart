@@ -113,6 +113,7 @@ class CarStateVM {
   bool isPowerOn;
   bool AUX1_On=false;
   bool AUX2_On=false;
+  bool siren=false;
   bool bothClosed;
   int carIndex;
   int carId;
@@ -136,6 +137,7 @@ class CarStateVM {
     @required this.color,
     @required this.carIndex,
     @required this.isDoorOpen,
+    @required this.siren,
     @required this.isTraunkOpen,
     @required this.isCaputOpen,
     @required this.bothClosed,

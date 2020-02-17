@@ -18,6 +18,9 @@ class ApiMessage {
   int MessageTypeConstId;
   int CarId;
   int ReceiverUserId;
+  int SenderUserId;
+  String SenderUserTitle;
+  String MessageStatusConstTitle;
   bool IsActive;
   int RowStateType;
 
@@ -28,34 +31,35 @@ class ApiMessage {
     @required this.Description,
     @required this.MessageSubject,
     @required this.MessageStatusConstId,
+    @required this.ReceiverUserId,
+    @required this.CarId,
+    @required this.MessageTypeConstId,
+    @required this.RowStateType,
+    @required this.IsActive,
+    @required this.SenderUserId,
+    @required this.SenderUserTitle,
+    @required this.MessageStatusConstTitle
+
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'MessageBody': this.MessageBody,
-      'MessageDate': this.MessageDate,
-      'Description': this.Description,
-      'MessageSubject': this.MessageSubject,
-      'MessageStatusConstId': this.MessageStatusConstId,
-    };
-  }
 
-  factory ApiMessage.fromMap(Map<String, dynamic> map) {
-    return new ApiMessage(
-      MessageBody: map['MessageBody'] ,
-      MessageDate: map['MessageDate'] ,
-      Description: map['Description'] ,
-      MessageSubject: map['MessageSubject'] ,
-      MessageStatusConstId: map['MessageStatusConstId'] ,
-    );
-  }
+
 
   factory ApiMessage.fromJson(Map<String, dynamic> json) {
-    return ApiMessage(MessageBody: json["MessageBody"],
+    return ApiMessage(
+        MessageBody: json["MessageBody"],
       MessageDate: json["MessageDate"],
       Description: json["Description"],
       MessageSubject: json["MessageSubject"],
-      MessageStatusConstId: json["MessageStatusConstId"],);
+      MessageStatusConstId: json["MessageStatusConstId"],
+      MessageId: json["MessageId"],
+      ReceiverUserId:json["ReceiverUserId"],
+      MessageTypeConstId: json["MessageTypeConstId"],
+      IsActive: json["IsActive"],
+        SenderUserId: json["SenderUserId"],
+      SenderUserTitle: json["SenderUserTitle"],
+      MessageStatusConstTitle: json["MessageStatusConstTitle"]
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -65,6 +69,12 @@ class ApiMessage {
       "Description": this.Description,
       "MessageSubject": this.MessageSubject,
       "MessageStatusConstId": this.MessageStatusConstId,
+      "MessageTypeConstId":this.MessageTypeConstId,
+      "ReceiverUserId": this.ReceiverUserId,
+      "MessageId":this.MessageId,
+      "SenderUserId": this.SenderUserId,
+      "SenderUserTitle":this.SenderUserTitle,
+      "MessageStatusConstTitle":this.MessageStatusConstTitle
     };
 
 
@@ -80,8 +90,8 @@ class ApiMessage {
       "MessageStatusConstId": this.MessageStatusConstId,
       "ReceiverUserId":this.ReceiverUserId,
       "MessageTypeConstId":this.MessageTypeConstId,
-      "IsActive":this.IsActive,
-      "RowStateType" :Constants.ROWSTATE_TYPE_INSERT
+      "IsActive": this.IsActive,
+      "RowStateType" : Constants.ROWSTATE_TYPE_INSERT
     };
 
 
@@ -107,5 +117,42 @@ class ApiMessage {
     return date.toString();
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'MessageId': this.MessageId,
+      'MessageBody': this.MessageBody,
+      'MessageDate': this.MessageDate,
+      'Description': this.Description,
+      'MessageSubject': this.MessageSubject,
+      'MessageStatusConstId': this.MessageStatusConstId,
+      'MessageStatusConstTitle':this.MessageStatusConstTitle,
+      'MessageTypeConstId': this.MessageTypeConstId,
+      'CarId': this.CarId,
+      'ReceiverUserId': this.ReceiverUserId,
+      'SenderUserId': this.SenderUserId,
+      'SenderUserTitle': this.SenderUserTitle,
+      'IsActive': this.IsActive,
+      'RowStateType': this.RowStateType,
+    };
+  }
+
+  factory ApiMessage.fromMap(Map<String, dynamic> map) {
+    return new ApiMessage(
+      MessageId: map['MessageId'] ,
+      MessageBody: map['MessageBody'] ,
+      MessageDate: map['MessageDate'] ,
+      Description: map['Description'] ,
+      MessageSubject: map['MessageSubject'] ,
+      MessageStatusConstId: map['MessageStatusConstId'] ,
+      MessageTypeConstId: map['MessageTypeConstId'] ,
+      CarId: map['CarId'] ,
+      ReceiverUserId: map['ReceiverUserId'] ,
+      SenderUserId: map['SenderUserId'] ,
+      SenderUserTitle: map['SenderUserTitle'] ,
+      IsActive: map['IsActive'] ,
+      RowStateType: map['RowStateType'] ,
+      MessageStatusConstTitle: map['MessageStatusConstTitle']
+    );
+  }
 
 }
