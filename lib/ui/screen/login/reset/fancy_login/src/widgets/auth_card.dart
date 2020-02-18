@@ -975,7 +975,7 @@ class _RecoverCardState extends State<_RecoverCard>
   Widget _buildRecoverNameField(double width, LoginMessages messages) {
     return AnimatedTextFormField(
       width: width,
-      labelText: messages.usernameHint,
+      labelText: messages.mobileHint,
       prefixIcon: Icon(FontAwesomeIcons.solidUserCircle),
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.done,

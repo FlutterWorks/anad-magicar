@@ -212,13 +212,13 @@ class RestDatasource extends BaseRest {
       return res;
     });
   }
-  Future<bool> resetPassword(String current, String newPassword,String confirmPassword) async{
-    return _netUtil.post(LOGIN_URL, body: {
+  Future<ServiceResult> resetPassword(String current, String newPassword,String confirmPassword) async{
+    return _netUtil.post(ResetCurrentPassword_URL, body: {
       "currentPassword":current,
       "newPassword": newPassword,
     "confirmNewPassword":confirmPassword
     }).then(( res) {
-      return res;
+      return ServiceResult.fromJson( res);
     });
   }
 

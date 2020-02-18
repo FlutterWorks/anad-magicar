@@ -13,6 +13,7 @@ import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/user/user_repo.dart';
 import 'package:anad_magicar/ui/screen/car/register_car_screen.dart';
 import 'package:anad_magicar/ui/screen/login/confirm_login.dart';
+import 'package:anad_magicar/ui/screen/profile/profile2.dart';
 import 'package:anad_magicar/ui/screen/register/confirm_car_form.dart';
 import 'package:anad_magicar/ui/screen/register/fancy_register/src/models/login_data.dart';
 import 'package:anad_magicar/ui/screen/register/fancy_register_form.dart';
@@ -601,7 +602,21 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
   Widget build(BuildContext context) {
     double w=MediaQuery.of(context).size.width;
     double h=MediaQuery.of(context).size.height;
-    return BlocBuilder<RegisterBloc, RegisterState>(
+    return BlocListener(
+        bloc: widget.bloc,
+        listener: (BuildContext context, RegisterState state) {
+      if(state is RegisteredState){
+       if(widget.isEdit!=null && widget.isEdit) {
+         centerRepository.dismissDialog(context);
+         centerRepository.showFancyToast(
+             Translations.current.editProfileSuccessful());
+         Navigator.pushNamed(context, ProfileTwoPageState.route,
+             arguments: centerRepository.getUserInfo());
+       }
+      }
+    },
+    child:
+      BlocBuilder<RegisterBloc, RegisterState>(
         bloc: widget.bloc,
         builder: (
             BuildContext context,
@@ -630,7 +645,7 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
             }
             else{
             // FlashHelper.successBar(context, message: Translations.current.editProfileSuccessful());
-             centerRepository.showFancyToast(Translations.current.editProfileSuccessful());
+             //centerRepository.showFancyToast(Translations.current.editProfileSuccessful());
             }
           }
         else  if(currentState is ErrorRegisterState)
@@ -649,7 +664,7 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
             onSubmit: () { /*gotoAddCar();*/ },
           );
         }
-     // ),
+      ),
     );
 
   }

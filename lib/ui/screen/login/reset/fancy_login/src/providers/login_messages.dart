@@ -36,9 +36,9 @@ class LoginMessages with ChangeNotifier {
   static const defaultSecurityCodeButton = 'SecurityCode';
 
   static const defaultRecoverPasswordButton = 'RECOVER';
-  static const defaultRecoverPasswordIntro = 'Don\'t worry, happens to the best of us.';
+  static const defaultRecoverPasswordIntro = 'بازیابی رمز عبور';
   static const defaultRecoverPasswordDescription =
-      'We will send your plain-text password to this email account.';
+      'جهت بازیابی رمز عبور لطفا شماره همراه خود را وارد نمایید';
   static const defaultGoBackButton = 'BACK';
   static const defaultConfirmPasswordError = 'Password do not match!';
   static const defaultRecoverPasswordSuccess = 'An email has been sent';

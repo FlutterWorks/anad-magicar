@@ -256,7 +256,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin ,
   getUserName() async {
    userName=await prefRepository.getLoginedUserName();
    userId=await prefRepository.getLoginedUserId();
-
+   CenterRepository.setUserId(userId);
    centerRepository.setUserCached(new User(userName: userName,
    imageUrl: imageUrl,id: userId),);
 

@@ -1,6 +1,7 @@
 import 'package:anad_magicar/bloc/device/register.dart';
 import 'package:anad_magicar/bloc/values/notify_value.dart';
 import 'package:anad_magicar/components/fancy_popup/main.dart';
+import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/viewmodel/noty_loading_vm.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/device/add_device_form.dart';
@@ -18,6 +19,8 @@ class RegisterDeviceScreen extends StatefulWidget
 {
   bool hasConnection;
   bool fromMainApp;
+  int userId;
+  NotyBloc<Message> changeFormNotyBloc;
   @override
   _RegisterDeviceState createState() {
     return _RegisterDeviceState();
@@ -26,7 +29,8 @@ class RegisterDeviceScreen extends StatefulWidget
   RegisterDeviceScreen({
     @required this.hasConnection,
     @required this.fromMainApp,
-
+    @required this.userId,
+    @required this.changeFormNotyBloc
   });
 
 }
@@ -65,7 +69,10 @@ class _RegisterDeviceState extends State<RegisterDeviceScreen>
     child:*/
         BlocProvider<RegisterDeviceBloc>(
           create: (context) => RegisterDeviceBloc(),
-          child: new AddDeviceForm(hasConnection: true,fromMainApp: widget.fromMainApp,),
+          child: new AddDeviceForm(hasConnection: true,
+            fromMainApp: widget.fromMainApp,
+            userId: widget.userId,
+            changeFormNotyBloc: widget.changeFormNotyBloc,),
         ),
        // ),
               FormsAppBar( actionIcon: Icon(Icons.directions_car),loadingNoty: _notyBloc,

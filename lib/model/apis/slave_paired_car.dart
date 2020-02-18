@@ -7,7 +7,7 @@ class SlavedCar {
   String CarModelTitle;
   String BrandTitle;
   String Color;
-
+  int index;
   SlavedCar({
     @required this.masterId,
     @required this.CarId,
@@ -15,6 +15,7 @@ class SlavedCar {
     @required this.CarModelTitle,
     @required this.BrandTitle,
     @required this.Color,
+    @required this.index
   });
 
   Map<String, dynamic> toMap() {

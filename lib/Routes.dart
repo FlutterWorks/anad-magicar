@@ -17,6 +17,7 @@ import 'package:anad_magicar/firebase/message/firebase_message_handler.dart';
 import 'package:anad_magicar/firebase/message/message_handler.dart';
 import 'package:anad_magicar/model/change_event.dart';
 import 'package:anad_magicar/model/message.dart';
+import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/pref_repository.dart';
 import 'package:anad_magicar/repository/user/user_repo.dart';
 import 'package:anad_magicar/ui/map/countries.dart';
@@ -510,7 +511,10 @@ class _MyAppState extends State<MyApp>
                                               );
                                             case '/adddevice':
                                               return new MyCustomRoute(
-                                                builder: (_) => new RegisterDeviceScreen(hasConnection: true,fromMainApp: settings.arguments,),
+                                                builder: (_) => new RegisterDeviceScreen(hasConnection: true,
+                                                  userId: 0,
+                                                  changeFormNotyBloc: changeFormNotyBloc,
+                                                  fromMainApp: settings.arguments,),
                                                 settings: settings,
                                               );
                                             case '/mappage':

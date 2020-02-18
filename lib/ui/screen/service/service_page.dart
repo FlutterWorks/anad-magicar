@@ -2,6 +2,7 @@ import 'package:anad_magicar/bloc/values/notify_value.dart';
 import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/components/no_data_widget.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
+import 'package:anad_magicar/data/rxbus.dart';
 import 'package:anad_magicar/model/apis/api_service.dart';
 import 'package:anad_magicar/model/apis/service_type.dart';
 import 'package:anad_magicar/model/change_event.dart';
@@ -42,6 +43,19 @@ class ServicePageState extends MainPage<ServicePage> {
   List<ServiceType> servcieTypes=new List();
 
   NotyBloc<ChangeEvent> notyDateBloc;
+  void registerBus() {
+    RxBus.register<ChangeEvent>().listen((ChangeEvent event)  {
+
+      if(event.type=='SERVICE')
+      {
+          if(event.message=='DELETED'){
+            fServices=loadCarServices(widget.serviceVM.carId);
+          }
+      }
+
+
+    });
+  }
   Future<List<ApiService>> loadCarServices(int carId) async {
     centerRepository.showProgressDialog(context, Translations.current.loadingdata());
     List<ApiService> result=await restDatasource.getCarService(widget.serviceVM.carId);
@@ -103,7 +117,7 @@ class ServicePageState extends MainPage<ServicePage> {
             centerRepository.dismissDialog(context);
             servcies = snapshot.data;
             return
-              ServiceForm(carId: widget.carId, serviceVM: widget.serviceVM,servcies: servcies,);
+              ServiceForm(carId: widget.serviceVM.carId, serviceVM: widget.serviceVM,servcies: servcies,);
           }
           else {
             if (widget.serviceVM != null && widget.serviceVM.refresh != null &&

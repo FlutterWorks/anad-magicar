@@ -1,7 +1,9 @@
 import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
+import 'package:anad_magicar/data/rxbus.dart';
 import 'package:anad_magicar/model/apis/api_service.dart';
+import 'package:anad_magicar/model/change_event.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
@@ -35,19 +37,20 @@ class ServiceItem extends StatelessWidget {
         else {
           centerRepository.showFancyToast(result.Message);
         }
+        Navigator.pop(context);
       }
     }
     else{
-      Navigator.pushNamed(context, RegisterServicePageState.route,arguments: new ServiceVM(carId: serviceItem.CarId,
-          editMode: true, service: serviceItem));
+      Navigator.pushNamed(context, RegisterServicePageState.route,arguments: new ServiceVM(carId: sItem.CarId,
+          editMode: true, service: sItem));
     }
   }
 
   deleteService(ApiService sItem,BuildContext context,bool mode) async{
 
     if(mode) {
-      Navigator.pushNamed(context, RegisterServicePageState.route,arguments: new ServiceVM(carId: serviceItem.CarId,
-          editMode: true, service: serviceItem));
+      Navigator.pushNamed(context, RegisterServicePageState.route,arguments: new ServiceVM(carId:sItem.CarId,
+          editMode: true, service: sItem));
     } else {
       await animated_dialog_box.showScaleAlertBox(
           title: Center(child: Text(
@@ -88,14 +91,15 @@ class ServiceItem extends StatelessWidget {
     sItem.RowStateType= Constants.ROWSTATE_TYPE_UPDATE;
     sItem.ServiceStatusConstId=type;
 
-    if(mode){
-      Navigator.pushNamed(context, RegisterServicePageState.route,arguments: new ServiceVM(carId: serviceItem.CarId,
-          editMode: true, service: serviceItem));
+    if(mode || type==Constants.SERVICE_DONE || type==Constants.SERVICE_NOTDONE){
+      Navigator.pushNamed(context, RegisterServicePageState.route,arguments: new ServiceVM(carId: sItem.CarId,
+          editMode: true, service: sItem));
     } else {
       var result = await restDatasource.saveCarService(sItem);
       if (result != null) {
         if (result.IsSuccessful) {
           centerRepository.showFancyToast(result.Message);
+          RxBus.post(new ChangeEvent(type:"SERVICE",message: 'DELETED'));
         }
         else {
           centerRepository.showFancyToast(result.Message);
@@ -268,6 +272,7 @@ class ServiceItem extends StatelessWidget {
                         child:
                         Button(title: Translations.current.done(),color: Colors.pinkAccent.value,wid: wid,),
                         onPressed: (){
+                          Navigator.pop(context);
                           _onUpdateService(serviceItem,context,false,Constants.SERVICE_DONE);
                         },
                       ),),
@@ -287,7 +292,9 @@ class ServiceItem extends StatelessWidget {
                       FlatButton(
                         child:
                         Button(title: Translations.current.notDone(),color: Colors.pinkAccent.value,wid: wid,),
-                        onPressed: (){ _onUpdateService(serviceItem,context,false,Constants.SERVICE_NOTDONE); },
+                        onPressed: (){
+                          Navigator.pop(context);
+                          _onUpdateService(serviceItem,context,false,Constants.SERVICE_NOTDONE); },
                       ),),],),
           Row(
           mainAxisAlignment: MainAxisAlignment.center,

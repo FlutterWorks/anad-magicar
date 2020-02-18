@@ -33,6 +33,7 @@ import 'package:anad_magicar/repository/user/user_repo.dart';
 import 'package:anad_magicar/ui/screen/car/car_page.dart';
 import 'package:anad_magicar/ui/screen/car/fancy_car/flutter_car.dart';
 import 'package:anad_magicar/ui/screen/car/fancy_car_form.dart';
+import 'package:anad_magicar/ui/screen/car/register_car_screen.dart';
 import 'package:anad_magicar/ui/screen/device/add_device_form.dart';
 import 'package:anad_magicar/ui/screen/device/register_device.dart';
 import 'package:anad_magicar/ui/screen/home/index.dart';
@@ -183,11 +184,11 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
               ConstantId: null,
               DisplayName: null);
           if (hasInternet) {
-            loadingNoty.updateValue(new NotyLoadingVM(isLoading: true,
+            /*loadingNoty.updateValue(new NotyLoadingVM(isLoading: true,
                 hasLoaded: false,
                 haseError: false,
-                hasInternet: true));
-            if (!isRegisterBtnDisabled) registerCarBloc.add(
+                hasInternet: true));*/
+            if (!isRegisterBtnDisabled) widget.registerCarBloc.add(
                 new LoadRegisterEvent(user, carModel, context));
           }
           else {
@@ -753,7 +754,7 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
               onPressed: () {
                 // ApiCustomer apiCustomer=new ApiCustomer();
                 // apiCustomer=ApiCustomer.map(user);
-                if(!isRegisterBtnDisabled)   BlocProvider.of<RegisterCarBloc>(context).add(new LoadRegisterEvent(user,null, context));
+                if(!isRegisterBtnDisabled)   widget.registerCarBloc.add(new LoadRegisterEvent(user,null, context));
                 isRegisterBtnDisabled=true;
 
                 //new SoapSaveCustomer(context: context).call(SoapConstants.METHOD_SAVE_CUSTOMER,  jsonEncode(apiCustomer));
@@ -875,14 +876,14 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
           .getAllDeviceModels();
       centerRepository.setDeviceModels(deviceModels);
       InitDeviceData result = InitDeviceData(deviceModels: deviceModels);
-      Navigator.of(context).pushReplacementNamed('/adddevice');
+      Navigator.of(context).pushReplacementNamed('/adddevice',);
       return result;
     }
     else
     {
       List<DeviceModel> deviceModels = centerRepository.getDeviceModels();
       InitDeviceData result = InitDeviceData(deviceModels: deviceModels);
-      Navigator.of(context).pushReplacementNamed('/adddevice');
+      Navigator.of(context).pushReplacementNamed('/adddevice',);
 
       return result;
     }
@@ -947,8 +948,8 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
       ),
     );
     //formAnimationController.forward();
-    registerCarBloc=new RegisterCarBloc();
-
+    //registerCarBloc=new RegisterCarBloc();
+   // registerCarBloc.initialState;
   }
 
   @override
@@ -956,14 +957,24 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
     double w=MediaQuery.of(context).size.width;
     double h=MediaQuery.of(context).size.height;
     //final RegisterBloc _registerBloc=BlocProvider.of<RegisterBloc>(context);
-    return Stack(
-      overflow: Overflow.visible,
-      children: <Widget> [
-        new Padding(padding: EdgeInsets.only(top: 80.0),
-          child:
+    return
+      BlocListener(
+        bloc: widget.registerCarBloc,
+        listener: (BuildContext context, RegisterState state) {
+      if(state is RegisteredState){
+        _progressDialog.dismissProgressDialog(context);
 
-      BlocBuilder<RegisterCarBloc, RegisterState>(
-        bloc: registerCarBloc,
+        isRegisterBtnDisabled=false;
+        loadingNoty.updateValue(new NotyLoadingVM(isLoading: false,
+            hasLoaded: false,
+            haseError: false,
+            hasInternet: true));
+        RxBus.post(new ChangeEvent(type: 'CAR_ADDED'));
+        //Navigator.pushNamed(context, '/adddevice',arguments: true);
+      }
+    },
+    child: BlocBuilder<RegisterCarBloc, RegisterState>(
+        bloc: widget.registerCarBloc,
         builder: (
             BuildContext context,
             RegisterState currentState,
@@ -975,30 +986,11 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
           }
           if(currentState is RegisteredState)
           {
-            _progressDialog.dismissProgressDialog(context);
-            isRegisterBtnDisabled=false;
-            //Navigator.of(context).pushReplacementNamed('/home');
-            //Navigator.of(context).pop(false);
 
-            loadingNoty.updateValue(new NotyLoadingVM(isLoading: false,
-                hasLoaded: false,
-                haseError: false,
-                hasInternet: true));
-            RxBus.post(new ChangeEvent(type: 'CAR_ADDED'));
+            return new AddDeviceForm(userId: widget.addCarVM.userId,fromMainApp: widget.addCarVM.fromMainApp,
+                hasConnection: true,carNoty: widget.addCarVM.notyBloc,
+            changeFormNotyBloc: changeFormNotyBloc,);
 
-            //widget.changeFormNotyBloc.updateValue(new Message(type: 'DEVICE_FORM',index: 1,text: 'INTERNET',status: true));
-              return new AddDeviceForm(
-                hasConnection: true,
-                fromMainApp: widget.fromMainApp,
-              carNoty: widget.carAddNotyBloc,);
-
-
-
-           /*return BlocProvider.value
-              (
-              value: BlocProvider.of<RegisterCarBloc>(context),
-              child:new HomeScreen(),
-            );*/
           }
           if(currentState is ErrorRegisterState)
           {
@@ -1011,29 +1003,34 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
                 hasInternet: true));
             centerRepository.showFancyToast(currentState.errorMessage);
           }
-          return  new FancyCarForm(addCarVM: widget.addCarVM,
-              authUser: _authAddCar, recoverPassword: null, onSubmit: () { });
+          return  Stack(
+              overflow: Overflow.visible,
+              children: <Widget> [
+          new Padding(padding: EdgeInsets.only(top: 75.0),
+          child:  new FancyCarForm(addCarVM: widget.addCarVM,
+              authUser: _authAddCar, recoverPassword: null, onSubmit: () { }),
+          ),
+                FormsAppBar(
+                  onIconFunc: () {
+                    showSearchCar();
+                  },
+                  actionIcon: (widget.addCarVM!=null && widget.addCarVM.editMode!=null && widget.addCarVM.editMode) ? null :
+                  Icon(Icons.search,color: Colors.indigoAccent,size: 28.0,),
+                  loadingNoty: loadingNoty,
+                  onBackPress:() {showExitDialog();} ,)
+          ],
+          );
         }
-
       ),
-     // ),
-    //),
-    ),
-        FormsAppBar(
-          onIconFunc: () {
-            showSearchCar();
-          },
-          actionIcon: Icon(Icons.search,color: Colors.indigoAccent,size: 28.0,),
-          loadingNoty: loadingNoty,
-        onBackPress:() {showExitDialog();} ,)
-    ],
-    );
+      );
+
+
   }
 
 
   @override
   void dispose() {
-    registerCarBloc.close();
+    //registerCarBloc.close();
     valueNotyModelBloc.dispose();
     valueNotyBrandBloc.dispose();
     valueNotyColorBloc.dispose();
@@ -1184,95 +1181,105 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
     bool hasError=false;
     String errorMessage='';
       RestDatasource restDS=new RestDatasource();
-      SearchCarModel result;
-      SearchCarModel searchCarModel=new SearchCarModel(
-          AdminUserId: null,
-          RequestFromThisUserId: null,
-          CarId: int.tryParse(carIdForSearch),
-          Message: null,
-          userId:userId ,
-          pelak: pelakForSearch,
-          DecviceSerialNumber: serialNumberForSearch);
       try {
-         result = await restDS.searchCar(searchCarModel);
+        var result = await restDS.searchCars(
+            int.tryParse(carIdForSearch), pelakForSearch, serialNumberForSearch);
+
+
+        if (result != null && result.length>0) {
+          Navigator.pop(context);
+          Car car=result.first;
+          final resultWidget = Stack(
+            children: <Widget>[
+              new Center(
+                child:
+                new ListView (
+                  children: <Widget>[
+                    Column(
+                      //margin: EdgeInsets.symmetric(horizontal: 20.0),
+                      children: <Widget>[
+                        SizedBox(
+                          height: 60,
+                        ),
+                        Container(
+                          margin: EdgeInsets.symmetric(horizontal: 2.0),
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .width * 0.90,
+                          child:
+
+                          SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            physics: BouncingScrollPhysics(),
+                            child: hasError ?
+                            Text(errorMessage) :
+                            new Column(
+                              children: <Widget>[
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: <Widget>[
+                                    Text(Translations.current.description()),
+                                    Text(DartHelper.isNullOrEmptyString(
+                                        car.description)),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: <Widget>[
+                                    Text(Translations.current.foundCar()),
+                                    Text(DartHelper.isNullOrEmptyString(
+                                        car.brandTitle)),
+                                  ],
+                                ),
+                                Text(Translations.current
+                                    .carIsWaitingForConfirm()),
+                                Text(DartHelper.isNullOrEmptyString(
+                                    car.carModelTitle) + ' ' +
+                                    DartHelper.isNullOrEmptyString(
+                                        car.carModelDetailTitle)),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: <Widget>[
+                                    Text(Translations.current.carpelak()),
+                                    Text(DartHelper.isNullOrEmptyString(
+                                        car.pelaueNumber)),
+                                  ],
+                                ),
+
+                                Container(
+                                  child:
+                                  new FlatButton(onPressed: () {
+                                    Navigator.pop(context);
+                                  }, child: Text(Translations.current.exit())),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+            ],
+          );
+
+          _showPopUpSearchcar(context, resultWidget);
+        } else {
+          FlashHelper.errorBar(
+              context, message: Translations.current.carNotFound());
+        }
       }
       catch(error)
-    {
-      hasError=true;
-      errorMessage=error.toString();
-    }
-     if(result!=null)
-       {
-         Navigator.pop(context);
-
-         final  resultWidget=Stack(
-           children: <Widget>[
-             new Center(
-               child:
-               new ListView (
-                 children: <Widget>[
-                   Column(
-                     //margin: EdgeInsets.symmetric(horizontal: 20.0),
-                     children: <Widget>[
-                       SizedBox(
-                         height: 60,
-                       ),
-                       Container(
-                         margin: EdgeInsets.symmetric(horizontal: 2.0),
-                         width:MediaQuery.of(context).size.width*0.90,
-                         child:
-
-                           SingleChildScrollView(
-                             scrollDirection: Axis.vertical,
-                             physics: BouncingScrollPhysics(),
-                             child:hasError ?
-                                Text(errorMessage) :
-                             new Column(
-                               children: <Widget>[
-                                 Row(
-                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                   children: <Widget>[
-                                     Text(Translations.current.description()),
-                                     Text(DartHelper.isNullOrEmptyString(result.Message)),
-                                   ],
-                                 ),
-                             Row(
-                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                               children: <Widget>[
-                                 Text(Translations.current.foundCar()),
-                                 Text(DartHelper.isNullOrEmptyString(result.BrandTitle)),
-                                    ],
-                             ),
-                                     Text(Translations.current.carIsWaitingForConfirm()),
-                                     Text( DartHelper.isNullOrEmptyString(result.FirstName) + ' '+
-                                         DartHelper.isNullOrEmptyString(result.LastName)),
-
-
-
-                                   Container(
-                                     child:
-                                     new FlatButton(onPressed: (){
-                                       Navigator.pop(context);
-                                     }, child: Text(Translations.current.exit())),
-                                 ),
-                               ],
-                             ),
-                           ),
-                         ),
-               ],
-                       ),
-                     ],
-                   ),
-    ),
-
-           ],
-         );
-
-    _showPopUpSearchcar(context,resultWidget);
-
-       } else{
-       FlashHelper.errorBar(context, message: Translations.current.carNotFound());
-    }
+      {
+        hasError=true;
+        errorMessage=error.toString();
+      }
   }
 
   showExitDialog()

@@ -102,6 +102,7 @@ class CenterRepository{
   static CarModelDetaillDS carModelDetaillDS;
 
   int carId=0;
+  static int userId;
   static int currentCarId=0;
   static ProgressDialog progressDialog;
   User userCached;
@@ -186,6 +187,13 @@ class CenterRepository{
   }
   CenterRepository._internal();
 
+  static int getUserId() {
+  return userId;
+ }
+
+ static setUserId(int usrId){
+   userId=usrId;
+ }
 
   static onCarPageTap(BuildContext context,int userId) {
     Navigator.of(context).pushNamed('/carpage',

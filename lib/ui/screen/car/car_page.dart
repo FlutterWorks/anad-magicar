@@ -33,7 +33,7 @@ import 'package:anad_magicar/widgets/magicar_appbar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pedantic/pedantic.dart';
-
+import 'package:anad_magicar/widgets/animated_dialog_box.dart';
 class CarPage extends StatefulWidget {
 
   CarPageVM carPageVM;
@@ -156,7 +156,7 @@ class CarPageState extends MainPage<CarPage> {
             brandTitle: car_info.brandTitle,
             modelTitle: car_info.carModelTitle,
             modelDetailTitle: car_info.carModelDetailTitle,
-            color: '',
+            color: car_info.colorTitle,
         carId: car_info.carId,
         Description: car_info.description,
         fromDate: car.FromDate,
@@ -188,10 +188,36 @@ class CarPageState extends MainPage<CarPage> {
      }
   }
   _deleteCars(int carId,) async{
+    await animated_dialog_box.showScaleAlertBox(
+        title:Center(child: Text(Translations.current.confimDelete())) ,
+        context: context,
+        firstButton: MaterialButton(
 
-    centerRepository.showConfirmDialog(context, Translations.current.confimDelete(),
-        Translations.current.areYouSureToDelete(),
-         onConfirmDelete, null,carId);
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40),
+          ),
+          color: Colors.white,
+          child: Text(Translations.current.yes()),
+          onPressed: () async {
+            onConfirmDelete(carId);
+          }
+        ),
+        secondButton: MaterialButton(
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40),
+          ),
+          color: Colors.white,
+          child: Text(Translations.current.no()),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        icon: Icon(Icons.info_outline,color: Colors.red,),
+        yourWidget: Container(
+          child: Text(Translations.current.areYouSureToDelete()),
+        ));
+
   }
 
   Future<void> onConfirmDelete(int carId) async {
@@ -213,7 +239,7 @@ class CarPageState extends MainPage<CarPage> {
   }
   _addCar(SaveCarModel editModel,int userId, bool edit){
 
-    Navigator.of(context).pushNamed('/addcar',
+    Navigator.of(context).pushReplacementNamed('/addcar',
         arguments: new AddCarVM(
         fromMainApp: true,
     editMode: edit,
@@ -262,6 +288,7 @@ class CarPageState extends MainPage<CarPage> {
         String detailTitle=DartHelper.isNullOrEmptyString(c.modelDetailTitle);
         String fromDate=DartHelper.isNullOrEmptyString( c.fromDate);
         String pelak=DartHelper.isNullOrEmptyString(c.pelak);
+        String colortitle=DartHelper.isNullOrEmptyString(c.color);
         bool isAdmin=c.isAdmin;
         int statusId=c.CarToUserStatusConstId;
         list.add(
@@ -353,6 +380,21 @@ class CarPageState extends MainPage<CarPage> {
     ),
             ],
           ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(right: 5.0,left: 5.0),
+                          child:
+                          Text(Translations.current.carcolor(),style: TextStyle(fontSize: 18.0)),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(right: 5.0,left: 5.0),
+                          child:
+                          Text(colortitle ,style: TextStyle(fontSize: 18.0)),
+                        ),
+                      ],
+                    ),
     Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: <Widget>[

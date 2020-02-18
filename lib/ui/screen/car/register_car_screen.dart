@@ -1,6 +1,8 @@
 import 'package:anad_magicar/bloc/car/register.dart';
 import 'package:anad_magicar/bloc/values/notify_value.dart';
 import 'package:anad_magicar/components/RegisterButton.dart';
+import 'package:anad_magicar/components/no_data_widget.dart';
+import 'package:anad_magicar/model/change_event.dart';
 import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/viewmodel/add_car_vm.dart';
 import 'package:anad_magicar/model/viewmodel/init_data_vm.dart';
@@ -35,9 +37,9 @@ class _RegisterCarScreenState extends State<RegisterCarScreen>
   bool hasInternet=true;
   int _count=0;
   ValueChanged<String> onChanged;
-  RegisterCarBloc registerCarBloc;
-  NotyBloc<Message> _changeFormNotyBloc;
-  bool _firstShow=true;
+ // RegisterCarBloc registerCarBloc;
+
+  bool _showDeviceForm=false;
 
   Future<InitDataVM> initDataVM;
   InitDataVM _initDataVM;
@@ -63,12 +65,7 @@ class _RegisterCarScreenState extends State<RegisterCarScreen>
 
   @override
   Widget build(BuildContext context) {
-    return /*new WillPopScope(
-      onWillPop: () async {
-        return Navigator.pushReplacementNamed(context, "/home");
-      },
-      child:*/
-      Scaffold(
+    return Scaffold(
         body: FutureBuilder<InitDataVM>(
           future: initDataVM,
           builder: (context,snapshot) {
@@ -78,42 +75,43 @@ class _RegisterCarScreenState extends State<RegisterCarScreen>
               _initDataVM = snapshot.data;
               return
                 StreamBuilder<Message>(
-                    stream: _changeFormNotyBloc.noty,
-                    initialData: null,
+                    stream: changeFormNotyBloc.noty,
+                    initialData: new Message(type: 'CAR_FORM'),
                     builder: (BuildContext c, AsyncSnapshot<Message> data) {
                       if (data != null && data.hasData) {
                         Message message = data.data;
                         if (message.type == 'CAR_FORM') {
-                          _firstShow = true;
+                          _showDeviceForm = false;
+                          //registerCarBloc=new RegisterCarBloc();
                         }
                         if (message.type == 'DEVICE_FORM') {
+                          _showDeviceForm = true;
+                          //registerCarBloc=new RegisterCarBloc();
                           _count = message.index;
                           if (message.text == 'INTERNET')
                             hasInternet = message.status;
-                          _firstShow = false;
-                         /* return RegisterDeviceScreen(
-                            hasConnection: hasInternet,
-                            fromMainApp: widget.fromMainApp,);*/
+
                         }
                       }
-                      else {
 
-                      }
 
                       return
-                        new RegisterCarForm(
+                        _showDeviceForm ?  RegisterDeviceScreen(
+                        hasConnection: hasInternet,
+                        fromMainApp: widget.fromMainApp,
+                        userId: widget.addCarVM.userId,
+                        changeFormNotyBloc: changeFormNotyBloc,) :
+                      new RegisterCarForm(
                           addCarVM: widget.addCarVM,
-                          registerCarBloc: registerCarBloc,
-                          changeFormNotyBloc: _changeFormNotyBloc,
+                          registerCarBloc: new RegisterCarBloc(),
+                          changeFormNotyBloc: changeFormNotyBloc,
                           carAddNotyBloc: widget.addCarVM.notyBloc,
                           fromMainApp: widget.addCarVM.fromMainApp,);
                     }
                 );
           }
             return
-              new Container(
-                width: 0.0,
-                height: 0.0);
+              new NoDataWidget();
           }
       ),
 
@@ -122,17 +120,18 @@ class _RegisterCarScreenState extends State<RegisterCarScreen>
   @override
   void initState() {
     super.initState();
-    registerCarBloc=new RegisterCarBloc();
-    _changeFormNotyBloc=new NotyBloc<Message>();
+    //registerCarBloc=new RegisterCarBloc();
+    //_changeFormNotyBloc=new NotyBloc<Message>();
     initDataVM=loadInitData();
   }
 
   @override
   void dispose() {
-    registerCarBloc.close();
-    _changeFormNotyBloc.dispose();
+    //registerCarBloc.close();
+    changeFormNotyBloc.dispose();
     super.dispose();
   }
 
 
 }
+NotyBloc<Message> changeFormNotyBloc=new NotyBloc<Message>();

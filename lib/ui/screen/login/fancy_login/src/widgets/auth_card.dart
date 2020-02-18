@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:anad_magicar/data/rxbus.dart';
 import 'package:anad_magicar/model/change_event.dart';
+import 'package:anad_magicar/translation_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -564,6 +565,13 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
       setState(() => _isSubmitting = false);
       return false;
     }
+    else{
+      Future.delayed(const Duration(milliseconds: 271), () {
+        setState(() => _showShadow = true);
+      });
+      setState(() => _isSubmitting = false);
+      //return true;
+    }
 
     widget?.onSubmitCompleted();
 
@@ -967,12 +975,19 @@ class _RecoverCardState extends State<_RecoverCard>
   Widget _buildRecoverNameField(double width, LoginMessages messages) {
     return AnimatedTextFormField(
       width: width,
-      labelText: messages.usernameHint,
+      labelText: messages.mobileHint,
       prefixIcon: Icon(FontAwesomeIcons.solidUserCircle),
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.done,
       onFieldSubmitted: (value) => _submit(),
-      validator:null,// widget.emailValidator,
+      validator:(value) {
+        if(value==null || value.isEmpty)
+          {
+            return Translations.current.allLoginFieldsRequired();
+          }
+        else
+          return null;
+      } ,
       onSaved: (value) => _name = value,
     );
   }

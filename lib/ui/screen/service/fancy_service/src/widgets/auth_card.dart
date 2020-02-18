@@ -522,13 +522,14 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       _valueCarServiceType=sType.first;
     }
     String seDate = widget.service.ServiceDate;
-    textEditingController.value = textEditingController.value.copyWith(
-      text: seDate,
-      selection:
-      TextSelection(baseOffset: seDate.length, extentOffset: seDate.length),
-      composing: TextRange.empty,
-    );
-
+    if(seDate!=null && seDate.isNotEmpty) {
+      textEditingController.value = textEditingController.value.copyWith(
+        text: seDate,
+        selection:
+        TextSelection(baseOffset: seDate.length, extentOffset: seDate.length),
+        composing: TextRange.empty,
+      );
+    }
     String actDate = widget.service.ActionDate;
     if(actDate!=null && actDate.isNotEmpty) {
       textEditingController2.value = textEditingController3.value.copyWith(
@@ -548,7 +549,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         composing: TextRange.empty,
       );
     }
-    String count=widget.service.AlarmCount.toString();
+    String count=widget.service.AlarmCount!=null ? widget.service.AlarmCount.toString() : '0';
     distanceController.value = distanceController.value.copyWith(
       text: count,
       selection:
@@ -1033,22 +1034,23 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
               children: <Widget>[
                 _buildServiceTypesField(textFieldWidth, messages,serviceTypeId),
                 SizedBox(height: 5),
-                _buildServiceDateField(textFieldWidth, messages),
+                (isDurational) ?  _buildServiceDateField(textFieldWidth, messages) : Container(),
                 SizedBox(height: 5),
                 (widget.editMode!=null && widget.editMode) ?  _buildActionDateField(textFieldWidth, messages) :
                 Container(width: 0.0,height: 0.0,),
                 SizedBox(height: 5),
-                (widget.editMode!=null && widget.editMode) ? _buildAlarmDateField(textFieldWidth, messages) :
+                ((widget.editMode!=null && widget.editMode) || (isDurational)) ? _buildAlarmDateField(textFieldWidth, messages) :
                 Container(width: 0.0,height: 0.0,),
                 SizedBox(height: 5),
-                _buildAlarmCountField(textFieldWidth, messages),
+                (!isDurational)  ? _buildAlarmCountField(textFieldWidth, messages) : Container(),
                 SizedBox(height: 5),
                 (widget.editMode!=null && widget.editMode) ?   _buildServiceCostField(textFieldWidth, messages) :
                 Container(),
                 SizedBox(height: 5),
                !isDurational ? _buildDistanceField(textFieldWidth, messages) : Container(),
                 SizedBox(height: 5),
-                _buildDescriptionField(textFieldWidth, messages),
+                ((widget.editMode!=null && widget.editMode) && widget.service.ServiceStatusConstId==Constants.SERVICE_NOTDONE) ?  _buildDescriptionField(textFieldWidth, messages) :
+                Container(),
               ],
             ),
           ),

@@ -462,8 +462,8 @@ _buildLogin() {
             child:
             RaisedButton(
               onPressed: (){
-                //reSendSecurityCode=true;
-              // _loginBloc.dispatch(new SignUpButtonPressed(mobile: mobil ));
+                reSendSecurityCode=true;
+                _loginBloc.add(new ReSignUpButtonPressed(mobile: mobil));
               },
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
@@ -1086,7 +1086,7 @@ _buildExit() {
             _buildConfirmSecurityCode(code),
              _buildReSendSecurityCode(mobile),
              _buildCancel(),
-             _buildExit(),
+            // _buildExit(),
            ],
          ),
        ),

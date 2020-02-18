@@ -10,8 +10,12 @@ import 'package:anad_magicar/model/apis/device_model.dart';
 import 'package:anad_magicar/model/apis/service_result.dart';
 import 'package:anad_magicar/model/cars/car_model.dart';
 import 'package:anad_magicar/model/change_event.dart';
+import 'package:anad_magicar/model/message.dart';
+import 'package:anad_magicar/model/viewmodel/car_page_vm.dart';
 import 'package:anad_magicar/model/viewmodel/init_device_data.dart';
 import 'package:anad_magicar/repository/fake_server.dart';
+import 'package:anad_magicar/ui/screen/car/car_page.dart';
+import 'package:anad_magicar/ui/screen/home/index.dart';
 import 'package:anad_magicar/widgets/flutter_offline/flutter_offline.dart';
 import 'package:file/file.dart';
 import 'package:flutter/material.dart';
@@ -36,14 +40,15 @@ class AddDeviceForm extends StatefulWidget {
 
   bool hasConnection;
   bool fromMainApp;
+  int userId;
   NotyBloc<ChangeEvent> carNoty;
-
+  NotyBloc<Message> changeFormNotyBloc;
   @override
   AddDeviceFormState createState() {
     return new AddDeviceFormState();
   }
 
-  AddDeviceForm({key: Key,this.hasConnection,this.fromMainApp,this.carNoty});
+  AddDeviceForm({key: Key,this.hasConnection,this.fromMainApp,this.carNoty,this.userId,this.changeFormNotyBloc});
 }
 
 class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderStateMixin
@@ -95,7 +100,7 @@ class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderS
 
 
   Future<InitDeviceData> loadDeviceModel(bool connection) async {
-    _progressDialog.showProgressDialog(context);
+    //centerRepository.showProgressDialog(context,Translations.current.loadingdata());
     if(connection && widget.hasConnection) {
       RestDatasource restDatasource = new RestDatasource();
       List<DeviceModel> deviceModels =new List();
@@ -138,6 +143,8 @@ class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderS
     confirmDeviceModel.password=password;
   }
 
+
+
   static FormFieldStatePersister fieldStatePersister;
   static bool _formWasEdited = false;
   //final _formKey = GlobalKey<FormState>();
@@ -164,7 +171,7 @@ class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderS
               {
                 if (snapshot.data != null &&
                     snapshot.hasData) {
-                  _progressDialog.dismissProgressDialog(context);
+                 // centerRepository.dismissDialog(context);
                   InitDeviceData result=snapshot.data;
                   return
                     new ListView (
@@ -366,7 +373,7 @@ class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderS
                 {
                   if (snapshot.data != null &&
                       snapshot.hasData) {
-                    _progressDialog.dismissProgressDialog(context);
+                    centerRepository.dismissDialog(context);
                     InitDeviceData result=snapshot.data;
                     return
                       new ListView (
@@ -509,9 +516,17 @@ class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderS
                                           },
                                           child:
                                           new FlatButton(onPressed: (){
-                                            (widget.fromMainApp==null || widget.fromMainApp==false) ?
-                                            Navigator.pushReplacementNamed(context, '/login') :
-                                            Navigator.pop(context);
+                                           if (widget.fromMainApp==null || widget.fromMainApp==false) {
+                                            Navigator.pushReplacementNamed(context, '/login'); }
+                                           else {
+                                             widget.changeFormNotyBloc
+                                                 .updateValue(
+                                                 new Message(type: 'CAR_FORM'));
+                                             Navigator.pushReplacementNamed(context, CarPageState.route,arguments: new CarPageVM(
+                                                userId: widget.userId,
+                                                isSelf: true,
+                                                carAddNoty: valueNotyModelBloc));
+                                           }
                                           },
                                               child: Text(Translations.current.goBack())),
                                         ),
@@ -590,7 +605,7 @@ class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderS
 
 
 
-    _progressDialog=new ProgressDialog();
+   // _progressDialog=new ProgressDialog();
     fieldStatePersister = new FormFieldStatePersister(_update);
 
 
@@ -644,26 +659,14 @@ class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderS
     });
   }
 
-  void _handleSubmitted(FormFieldStatePersister fieldStatePersister) {
-    final FormState form = _formKey.currentState;
-    if (!form.validate()) {
-      _autoValidate = true; // Start validating on every change.
-      showInSnackBar('Please fix the errors in red before submitting.');
-      _update();
-    } else {
-      showInSnackBar('${fieldStatePersister['Name']} is a ${fieldStatePersister['Sex']},\n'
-          '  eye color is ${fieldStatePersister['EyeColor']},\n'
-          '  education level is ${fieldStatePersister['Education']}\n'
-          '  can contact parents? ${fieldStatePersister['ContactParents']}');
-    }
-  }
+
 
   static String _validateName(String value) {
     _formWasEdited = true;
     if (value.isEmpty) return 'Name is required.';
     final RegExp nameExp = new RegExp(r'^[A-za-z ]+$');
     if (!nameExp.hasMatch(value))
-      return 'Please enter only alphabetical characters.';
+      return 'erro';
     return null;
   }
 

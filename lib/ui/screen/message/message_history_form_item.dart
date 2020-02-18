@@ -3,6 +3,7 @@ import 'package:anad_magicar/model/apis/car_action_log.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:anad_magicar/utils/dart_helper.dart';
 
 class MessageHistoryItem extends StatelessWidget {
 
@@ -32,6 +33,14 @@ class MessageHistoryItem extends StatelessWidget {
         new Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+        new Padding(padding: EdgeInsets.only(right: 10.0,left: 10.0,),
+        child:
+        new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+        Text(Translations.current.actionUsername()),
+              Text(DartHelper.isNullOrEmptyString( carActionLog.UserName))
+            ],),),
             new Padding(padding: EdgeInsets.only(right: 10.0),
               child:
               new Row(

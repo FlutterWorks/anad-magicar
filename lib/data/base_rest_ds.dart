@@ -99,13 +99,13 @@ abstract class BaseRestDS<T> extends RestDatasource {
       return res;
     });
   }
-  Future<bool> resetPassword(String current, String newPassword,String confirmPassword) async{
+  Future<ServiceResult> resetPassword(String current, String newPassword,String confirmPassword) async{
     return netUtil.post(LOGIN_URL, body: {
       "currentPassword":current,
       "newPassword": newPassword,
       "confirmNewPassword":confirmPassword
     }).then(( res) {
-      return res;
+      return ServiceResult.fromJson( res);
     });
   }
 

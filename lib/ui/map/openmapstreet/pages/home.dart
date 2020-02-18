@@ -4,6 +4,7 @@ import 'package:anad_magicar/bloc/theme/change_theme_bloc.dart';
 import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/components/flutter_form_builder/flutter_form_builder.dart';
+import 'package:anad_magicar/components/no_data_widget.dart';
 import 'package:anad_magicar/components/send_data.dart';
 import 'package:anad_magicar/data/database_helper.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
@@ -157,22 +158,57 @@ class MapPageState extends State<MapPage> {
     carIdForSearch=value.toString();
   }
 
-  _deleteCarFromPaired(int masterId,int  secondCar) async{
+  _deleteCarFromPaired(int masterId,int  secondCar,) async{
     // var result=await restDatasource.savePairedCar(car);
     List<int> carIds=[secondCar];
     var result=await restDatasource.deletePairedCars(masterId, carIds);
      if(result!=null){
        if(result.IsSuccessful){
          centerRepository.showFancyToast(result.Message);
-         setState(() {
-
-         });
+        // setState(() {
+           carsSlavePairedList.removeWhere((c)=>c.CarId==secondCar);
+         //});
        }else{
          centerRepository.showFancyToast(result.Message);
        }
      }
   }
 
+  _showCarPairedActions(SlavedCar car,BuildContext context){
+    showModalBottomSheetCustom(context: context ,
+        mHeight: 0.70,
+        builder: (BuildContext context) {
+          return new Container(
+            height: 250.0,
+            child:
+    Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        GestureDetector(
+          child : Button(color: Colors.pinkAccent.value,wid:120.0,title: Translations.current.delete(),),
+          onTap: (){
+            Navigator.pop(context);
+            _deleteCarFromPaired(car.masterId,car.CarId);
+          },),
+
+
+
+
+        GestureDetector(
+          child :Button(color: Colors.pinkAccent.value,wid:120.0,title: Translations.current.navigateToCurrent(),),
+          onTap: (){
+            Navigator.pop(context);
+            navigateToCarSelected(0,true, car.CarId);
+          },),
+
+
+
+      ],
+    ),
+          );
+        });
+  }
   _showBottomSheetForSearchedCar(BuildContext cntext, Car car )
   {
     showModalBottomSheetCustom(context: cntext ,
@@ -553,10 +589,27 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  Future<ApiRoute> navigateToCarSelected(int index) async{
+  Future<ApiRoute> navigateToCarSelected(int index,bool isCarPaired,int carId) async{
 
-    var carInfo=carInfos[index];
-    List<int> carIds=new List()..add(carInfo.carId);
+    String imgUrl='';
+    CarInfoVM carInfo;
+    //SlavedCar carSlave;
+    if(isCarPaired){
+       // carSlave=carsSlavePairedList[index];
+    }
+    else{
+      carInfo=carInfos[index];
+    }
+
+    List<int> carIds=new List();
+    if(isCarPaired) {carIds..add(carId);
+    imgUrl=carImgList[0];
+    }
+      else {
+        carIds..add(carInfo.carId);
+        imgUrl=carInfo.imageUrl;
+    }
+
     ApiRoute apiRoute=new ApiRoute(carId: null,
         startDate: null,
         endDate: null,
@@ -591,7 +644,7 @@ class MapPageState extends State<MapPage> {
             child: CircleAvatar(
               radius: 38.0,
                 backgroundColor: Colors.transparent,
-                child: Image.asset(carInfo.imageUrl,key: ObjectKey(Colors.green),))
+                child: Image.asset(imgUrl,key: ObjectKey(Colors.green),))
           ),
         );
 
@@ -613,7 +666,7 @@ class MapPageState extends State<MapPage> {
             child: CircleAvatar(
                 radius: 38.0,
                 backgroundColor: Colors.transparent,
-                child: Image.asset(carInfo.imageUrl,key: ObjectKey(Colors.green),))
+                child: Image.asset(imgUrl,key: ObjectKey(Colors.green),))
         ),
       );
 
@@ -886,60 +939,41 @@ class MapPageState extends State<MapPage> {
                 body: DartHelper.isNullOrEmptyString(car.CarId.toString()),
                 background: Container(
                   width: 160.0,
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   child: Container(
                       child:
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
+
                             Row(
                               children: <Widget>[
-                                Text(Translations.current.thisCarPaired()),
+                                Text(Translations.current.thisCarPaired(),style: TextStyle(fontSize: 10.0),),
                               ],
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text(Translations.current.masterCarId()),
-                                Text(DartHelper.isNullOrEmptyString(car.masterId.toString())),
+                                Text(Translations.current.masterCarId(),style: TextStyle(fontSize: 10.0)),
+                                Text(DartHelper.isNullOrEmptyString(car.masterId.toString()),style: TextStyle(fontSize: 10.0)),
                               ],
                             ),
                             Row(
                               children: <Widget>[
-                                Text(DartHelper.isNullOrEmptyString(car.CarModelTitle)),
+                                Text(DartHelper.isNullOrEmptyString(car.CarModelTitle),style: TextStyle(fontSize: 10.0)),
                               ],
                             ),
                             Row(
                               children: <Widget>[
-                                Text(DartHelper.isNullOrEmptyString(car.CarModelDetailTitle)),
+                                Text(DartHelper.isNullOrEmptyString(car.CarModelDetailTitle),style: TextStyle(fontSize: 10.0)),
                               ],
                             ),
-                            new Padding(padding: EdgeInsets.only(top: 10.0),
-                                child: Row(
-                              children: <Widget>[
-                                FlatButton(
 
-                                  child: Button(color: Colors.pinkAccent.value,wid:80.0,title: Translations.current.delete(),),
-                                  onPressed: (){
-                                    String toDate=DateTimeUtils.convertIntoDateTime(DateTimeUtils.getDateJalali());
-                                    String toTime=DateTimeUtils.getTimeNow();
-                                    ApiPairedCar entity=new ApiPairedCar(PairedCarId: 0, MasterCarId: car.masterId,
-                                        SecondCarId: car.CarId,
-                                        FromDate: null, ToDate: toDate,
-                                        FromTime: null, ToTime: toTime ,
-                                        Description: null, IsActive: true,
-                                        RowStateType: Constants.ROWSTATE_TYPE_UPDATE,
-                                        CarIds: null, master: null, slaves: null);
-                                        _deleteCarFromPaired(car.masterId,car.CarId);
-                                  },
-                                ),
-                              ],
-                            ),),
-                          ],
-                        )
+    ],
                     ),
-
-                )),
+    ),
+                ),
+            ),
         ];
 
       return
@@ -1103,7 +1137,7 @@ class MapPageState extends State<MapPage> {
                             alignment: Alignment(1,-1),
                             child:
                             Container(
-                              height:80.0,
+                              height:70.0,
                               child:
                               AppBar(
                                 automaticallyImplyLeading: true,
@@ -1127,7 +1161,7 @@ class MapPageState extends State<MapPage> {
                             ),
                           ),
           Padding(
-            padding: EdgeInsets.only(top: 40.0),
+            padding: EdgeInsets.only(top: 60.0),
             child:
           Container(
             color: Colors.transparent,
@@ -1147,7 +1181,7 @@ class MapPageState extends State<MapPage> {
                       visibilityResolver.resolvePageVisibility(index);
                       return GestureDetector(
                         onTap: (){
-                          navigateToCarSelected(index);
+                          navigateToCarSelected(index,false,0);
                         },
                         child:
                        Container(
@@ -1375,10 +1409,7 @@ class MapPageState extends State<MapPage> {
                     final pageVisibility =
                     visibilityResolver.resolvePageVisibility(index);
                     return GestureDetector(
-                      onTap: (){
-
-                      },
-                      child:
+                    child:
                       Container(
                         color: Colors.white.withOpacity(0.0),
                         width: 200.0,
@@ -1388,6 +1419,9 @@ class MapPageState extends State<MapPage> {
                           pageVisibility: pageVisibility,
                         ),
                       ),
+                      onTap: (){
+                        _showCarPairedActions(carsSlavePairedList[index],context);
+                      },
                     );
                   },
                 );
@@ -1397,7 +1431,7 @@ class MapPageState extends State<MapPage> {
     }
       else
         {
-          return Container();
+          return NoDataWidget();
         }
   },
     );

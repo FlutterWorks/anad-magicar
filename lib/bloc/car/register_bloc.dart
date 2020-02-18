@@ -49,6 +49,7 @@ class RegisterCarBloc extends Bloc<RegisterEvent,RegisterState>
             centerRepository.setCarId(result.carId);
             prefRepository.addCarsCount();
             yield RegisteredState();
+           // yield UnRegisterState();
           }
           else
             yield ErrorRegisterState('خطا در ثبت خودرو');

@@ -35,7 +35,7 @@ class AppDrawer extends StatelessWidget {
 
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   bool _autoValidate=false;
-  String days='';
+  String days='3';
   final TextEditingController textEditingController = TextEditingController();
   String fromDate='';
   String toDate='';

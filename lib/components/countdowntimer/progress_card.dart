@@ -120,18 +120,18 @@ class _ProgressCardState extends State<ProgressCard> {
               ),*/
 
               onTap: () {
-                final updated = ((this.progressPercent + 0.1).clamp(0.0, 1.0) *
+                /*final updated = ((this.progressPercent + 0.1).clamp(0.0, 1.0) *
                     100);
                 setState(() {
                   this.progressPercent = updated.round() / 100;
-                });
+                });*/
               },
               onDoubleTap: () {
-                final updated = ((this.progressPercent - 0.1).clamp(0.0, 1.0) *
+                /*final updated = ((this.progressPercent - 0.1).clamp(0.0, 1.0) *
                     100);
                 setState(() {
                   this.progressPercent = updated.round() / 100;
-                });
+                });*/
               },
             ),
           ),

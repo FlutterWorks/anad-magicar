@@ -583,6 +583,14 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
       setState(() => _isSubmitting = false);
       return false;
     }
+    else{
+      Future.delayed(const Duration(milliseconds: 271), () {
+        setState(() => _showShadow = true);
+      });
+      setState(() => _isSubmitting = false);
+      //return false;
+
+    }
 
     widget?.onSubmitCompleted();
 

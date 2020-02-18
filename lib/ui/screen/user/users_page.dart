@@ -280,7 +280,7 @@ class UserPageState extends MainPage<UsersPage> {
               ),
               leading: FlatButton(
                 padding: EdgeInsets.only(left: 0, right: 0),
-                child: Icon(Icons.done_outline, size: 28.0, color: Colors.green),
+                child: Text(Translations.current.confirm(),style:TextStyle(fontSize: 10.0)),
                 onPressed: () {
                   _changeRole(user.userId, role.roleId).then((value) {
                     if (value)
@@ -425,7 +425,7 @@ class UserPageState extends MainPage<UsersPage> {
                   FlatButton(
                     padding: EdgeInsets.only(left: 0, right: 0),
                     child: Text(Translations.current.showAccessablActions(),
-                      style: TextStyle(color: Colors.black, fontSize: 12.0),), //Icon(Icons.done_all,size: 28.0, color: Colors.red),
+                      style: TextStyle(color: Colors.white, fontSize: 12.0),), //Icon(Icons.done_all,size: 28.0, color: Colors.red),
                     onPressed: () {
                       loadCarToUser(u.userId);
                     },
@@ -552,8 +552,8 @@ class UserPageState extends MainPage<UsersPage> {
                                     .textTheme
                                     .headline),
                             onTap: () {
-                              Navigator.of(context).pushNamed('/addcar',arguments: new AddCarVM(notyBloc: null,
-                                  fromMainApp: true));
+                             /* Navigator.of(context).pushNamed('/addcar',arguments: new AddCarVM(notyBloc: null,
+                                  fromMainApp: true));*/
                             },
 
                           ),

@@ -11,7 +11,7 @@ class Button extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ( new Padding(
-      padding: EdgeInsets.only(right: 5.0,left: 5.0) ,
+      padding: EdgeInsets.only(right: 0.0,left: 0.0) ,
         child:
         new Container(
       width: wid,

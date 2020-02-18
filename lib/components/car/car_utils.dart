@@ -203,10 +203,7 @@ class CarWidgetFactoryState extends State<CarWidgetFactory> {
                       child:
                     FlatButton(
                       padding: EdgeInsets.only(left: 0, right: 0),
-                      child: Icon(
-                          Icons.check_circle_outline,
-                          size: 28.0,
-                          color: Colors.red),
+                      child: Text(Translations.current.confirm(),style:TextStyle(fontSize: 10.0)),
                       onPressed: () {
                         if(isAdmin) {
                          /* confirmCarBloc.add(new LoadConfirmCarEvent(
@@ -230,10 +227,7 @@ class CarWidgetFactoryState extends State<CarWidgetFactory> {
                       ),
                       child:   FlatButton(
                       padding: EdgeInsets.only(left: 0, right: 0),
-                      child: Icon(
-                          Icons.remove_circle_outline,
-                          size: 28.0,
-                          color: Colors.red),
+                      child: Text(Translations.current.delete(),style:TextStyle(fontSize: 12.0,color: Colors.white)),
                       onPressed: () {
                             _deleteCarToUser(c.userId, c.carId);
                       },

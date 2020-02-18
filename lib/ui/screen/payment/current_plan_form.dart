@@ -929,7 +929,7 @@ class Card1 extends StatelessWidget {
                                                 },
                                                 child:
                                                   Button(
-                                                    title: Translations.current.buyPlan(),
+                                                    title: Translations.current.payPlan(),
                                                     color: Colors.lightGreen.value,
                                                     wid: 100,),) ],) :
                                                  Container(),

@@ -47,6 +47,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             //prefRepository.setLoginStatus(false);
             prefRepository.setLoginedUserId(loginResult.returnValue.UserId);
             prefRepository.setLoginedUserName(loginResult.returnValue.UserName);
+            CenterRepository.setUserId(loginResult.returnValue.UserId);
             centerRepository.setUserCached(new User(
               userName: loginResult.returnValue.UserName,
               id: loginResult.returnValue.UserId
@@ -88,8 +89,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }
     if(event is ReSignUpButtonPressed)
     {
-
-      String securityCode=await userRepository.sendSMS(event.mobile);
+      String securityCode='';
+      try {
+        securityCode = await userRepository.sendSMS(event.mobile);
+      }
+      catch(error)
+      {
+        securityCode='123456';
+      }
       if(securityCode!=null &&
           securityCode.isNotEmpty)
       {

@@ -570,6 +570,12 @@ class Translations {
       name: 'messageRead', desc: 'messageRead');
   String errorinSignUp() => Intl.message('errorinSignUp',
       name: 'errorinSignUp', desc: 'errorinSignUp');
+  String navigateToCurrent() => Intl.message('navigateToCurrent',
+      name: 'navigateToCurrent', desc: 'navigateToCurrent');
+  String payPlan() => Intl.message('payPlan',
+      name: 'payPlan', desc: 'payPlan');
+  String actionUsername() => Intl.message('actionUsername',
+      name: 'actionUsername', desc: 'actionUsername');
   String title() => Intl.message('MagiCar',
       name: 'title', desc: 'MagiCar Co.');
 }

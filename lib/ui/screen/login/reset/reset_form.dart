@@ -4,6 +4,7 @@ import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/login/reset/fancy_login/src/models/login_data.dart' ;
 import 'package:anad_magicar/ui/screen/login/reset/fancy_login/src/providers/auth.dart' as lData;
 import 'package:anad_magicar/ui/screen/login/reset/reset_password_form.dart';
+import 'package:anad_magicar/ui/screen/setting/security_settings_form.dart';
 import 'package:flutter/material.dart';
 
 typedef AuthCallback = Future<String> Function(LoginData data);
@@ -36,7 +37,7 @@ class _ResetFormState extends State<ResetForm> {
           return null;
       }
       else {
-          Navigator.pop(context);
+          _toggle();
           return null;
       }
     });
@@ -46,23 +47,29 @@ class _ResetFormState extends State<ResetForm> {
       String nPassword,
       String fPassword) async {
     RestDatasource restDatasource=new RestDatasource();
-    bool result= await restDatasource.resetPassword(cPassword,
-        nPassword,
-        fPassword);
-    if(result)
-    {
-      centerRepository.showFancyToast(Translations.current.resetPasswordSuccessful());
-      _toggle();
+    try {
+      var result = await restDatasource.resetPassword(cPassword,
+          nPassword,
+          fPassword);
+      if (result!=null && result.IsSuccessful) {
+        centerRepository.showFancyToast(
+            Translations.current.resetPasswordSuccessful());
+        _toggle();
+      }
+      else {
+        centerRepository.showFancyToast(
+            Translations.current.resetPasswordUnSuccessful());
+      }
     }
-    else
-    {
-      centerRepository.showFancyToast(Translations.current.resetPasswordUnSuccessful());
+    catch(ex) {
+      centerRepository.showFancyToast(ex.toString());
+      _toggle();
     }
   }
 
   _toggle()
   {
-    Navigator.of(context).pop(false);
+    Navigator.pushReplacementNamed(context,SecuritySettingsFormState.route );
   }
 
   @override
