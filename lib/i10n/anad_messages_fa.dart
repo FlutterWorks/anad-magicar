@@ -111,7 +111,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "done" : MessageLookupByLibrary.simpleMessage("انجام شد"),
     "durationCountValue" : MessageLookupByLibrary.simpleMessage("فاصله زمانی"),
     "durationDay" : MessageLookupByLibrary.simpleMessage("روز"),
-    "durationFunctionalCountValue" : MessageLookupByLibrary.simpleMessage("تعداد"),
+    "durationFunctionalCountValue" : MessageLookupByLibrary.simpleMessage("مقدار کارکرد"),
     "durationFunctionalValue" : MessageLookupByLibrary.simpleMessage("مقدار"),
     "durationMonth" : MessageLookupByLibrary.simpleMessage("ماه"),
     "durationValue" : MessageLookupByLibrary.simpleMessage("مقدار زمانی"),

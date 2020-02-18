@@ -576,6 +576,8 @@ class Translations {
       name: 'payPlan', desc: 'payPlan');
   String actionUsername() => Intl.message('actionUsername',
       name: 'actionUsername', desc: 'actionUsername');
+  String noData() => Intl.message('noData',
+      name: 'noData', desc: 'noData');
   String title() => Intl.message('MagiCar',
       name: 'title', desc: 'MagiCar Co.');
 }

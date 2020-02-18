@@ -30,7 +30,7 @@ class AuthenticationBloc
   ) async* {
     if (event is AppStarted) {
       yield AuthenticationLoading();
-      databaseHelper.initAdapter();
+      //databaseHelper.initAdapter();
 
       // final bool hasToken = await userRepository.hasToken();
       // SharedPreferences prefs = await prefRepository.getPrefs();

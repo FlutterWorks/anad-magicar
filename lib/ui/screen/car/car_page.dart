@@ -13,6 +13,7 @@ import 'package:anad_magicar/model/apis/service_result.dart';
 import 'package:anad_magicar/model/cars/car.dart';
 import 'package:anad_magicar/model/cars/car_model.dart';
 import 'package:anad_magicar/model/change_event.dart';
+import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/user/admin_car.dart';
 import 'package:anad_magicar/model/viewmodel/add_car_vm.dart';
 import 'package:anad_magicar/model/viewmodel/car_info_vm.dart';
@@ -59,7 +60,7 @@ class CarPageState extends MainPage<CarPage> {
   List<AdminCarModel> carsToUserForConfirm;
   ConfirmCarBloc confirmCarBloc;
   List<CarInfoVM> carInfos=new List();
-
+  NotyBloc<Message> carActionsNoty;
 
 
   void registerBus() {
@@ -227,13 +228,14 @@ class CarPageState extends MainPage<CarPage> {
     if(result!=null)
     {
       centerRepository.showFancyToast(result.Message);
-      setState(() {
         carInfos.removeWhere((r)=>r.carId==carId);
-      });
+        Navigator.pop(context);
+        carActionsNoty.updateValue(new Message(type: 'CAR_DELETED'));
     }
     else
     {
       centerRepository.showFancyToast(Translations.current.hasErrors());
+      Navigator.pop(context);
     }
     return Future.value(0);
   }
@@ -586,6 +588,7 @@ class CarPageState extends MainPage<CarPage> {
     );
   }
 
+
   @override
   void dispose() {
     super.dispose();
@@ -600,6 +603,7 @@ class CarPageState extends MainPage<CarPage> {
   @override
   initialize() {
     confirmCarBloc=new ConfirmCarBloc();
+    carActionsNoty=new NotyBloc<Message>();
     if(widget.carPageVM!=null &&
         widget.carPageVM.isSelf!=null && !widget.carPageVM.isSelf)
       carsToUser=factoryCar.loadCarsToUserByUserId(widget.carPageVM.userId);
@@ -645,7 +649,15 @@ class CarPageState extends MainPage<CarPage> {
                       _carCounts = snapshot.data;
                     }
 
-                    return createBody(carInfos, hasInternet);
+                    return  StreamBuilder(
+                      stream: carActionsNoty.noty,
+                      builder: (context,snapshot) {
+                        if(snapshot.hasData && snapshot.data!=null){
+
+                        }
+                       return createBody(carInfos, hasInternet);
+                      }
+                    );
                   }
 
               ) :

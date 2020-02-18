@@ -784,7 +784,7 @@ _buildExit() {
           showValidateCode();
         }
         if((result!=null && result) /*|| (result==null || !result)*/) {
-          FlashHelper.informationBar(context, message: Translations.current.passwordHasChanged());
+          FlashHelper.successBar(context, message: Translations.current.passwordHasChanged());
           showValidateCode();
         } else {
           FlashHelper.errorBar(context, message: Translations.current.changePasswordError());
@@ -833,8 +833,10 @@ _buildExit() {
         if(isOnline) {
           mobileNo=data;
           SaveUserModel userModel=new SaveUserModel(MobileNo: data,UserId: 0);
+          centerRepository.showProgressDialog(context, Translations.current.send());
        var result=  restDatasource.forgotPassword(userModel);
        if(result!=null) {
+         centerRepository.dismissDialog(context);
          result.then((res){
            if(res.IsSuccessful){
              FlashHelper.successBar(context, message: res.Message);
@@ -847,6 +849,9 @@ _buildExit() {
 
              }
          });
+       } else{
+         centerRepository.dismissDialog(context);
+         FlashHelper.errorBar(context, message: Translations.current.noData());
        }
         }
         else

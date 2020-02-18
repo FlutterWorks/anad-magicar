@@ -1033,7 +1033,35 @@ class MapPageState extends State<MapPage> {
                   ),*/
                                   ],
                                 ),
+                                Positioned(
+                                  right: 20.0,
+                                  bottom: 290.0,
+                                  child:
+                                  Container(
+                                    width: 38.0,
+                                    height: 38.0,
+                                    child:
+                                    FloatingActionButton(
+                                      onPressed: (){
+                                          if(lines!=null){
+                                            lines.clear();
+                                          }
+                                          if(lines2!=null){
+                                            lines2=null;
+                                          }
+                                          setState(() {
 
+                                          });
+                                      },
+                                      child:Container(
+                                        width: 38.0,
+                                        height: 38.0,
+                                        child: Image.asset('assets/images/clear_map.png',color: Colors.white,),),
+                                      elevation: 3.0,
+                                      backgroundColor: Colors.blueAccent,
+                                    ),
+                                  ),
+                                ),
                             Positioned(
                               right: 20.0,
                               bottom: 210.0,

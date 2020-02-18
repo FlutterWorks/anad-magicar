@@ -169,6 +169,7 @@ class CurrentPlanFormState extends MainPage<CurrentPlanForm>
 
   List<Widget> getInvoiceDetailsTiles(BuildContext context, InvoiceModel invoiceModel) {
     List<Widget> list = [];
+
     if (invoices != null &&
     invoiceModel.invoiceDetailModel!=null &&
     invoiceModel.invoiceDetailModel.length>0) {
@@ -887,7 +888,7 @@ class Card1 extends StatelessWidget {
                                                   Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: <Widget>[
-                                                      remainDayProgress (
+                                                         remainDayProgress (
                                                         DateTimeUtils.diffDaysFromDateToDate(invoiceModel.StartDate,invoiceModel.EndDate),
                                                           DateTimeUtils.diffDaysFromDateToDate2(invoiceModel.StartDate,invoiceModel.EndDate)),
                                                       remainAmountProgress((calcSumAmount(invoiceModel.invoiceDetailModel) / (invoiceModel.Amount!=null ? invoiceModel.Amount : calcSumAmount(invoiceModel.invoiceDetailModel)))),

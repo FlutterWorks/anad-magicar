@@ -171,7 +171,8 @@ class _UserAccessPageState extends State<UserAccessPage> {
                     onTap: () {
                       actModel.selected = !selected;
                     },
-                    child: Switch( onChanged: (value) {
+                    child: Switch(
+                      onChanged: (value) {
 
                     },
 
@@ -224,7 +225,7 @@ class _UserAccessPageState extends State<UserAccessPage> {
       return SwitchItem(
         headerValue: 'Action $index',
         expandedValue: 'No. $index',
-        selected: false,
+        selected: true,
         actionTitle: actionTitle,
         actionCode: actionCode
       );
@@ -368,7 +369,7 @@ class _UserAccessPageState extends State<UserAccessPage> {
             actionCode = actionModel.ActionCode;
             switchItem=new SwitchItem(actionCode: actionCode,
             actionTitle: actionTitle,
-            selected: false);
+            selected: true);
           }
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -501,9 +502,7 @@ class _UserAccessPageState extends State<UserAccessPage> {
                   backgroundColorAppBar: Colors.transparent,
                   title: new MagicarAppbarTitle(
                     currentColor: Colors.indigoAccent,
-                   actionIcon: (widget.accessableActionVM.isFromMainAppForCommand!=null &&
-                       widget.accessableActionVM.isFromMainAppForCommand) ? null :
-                   Icon(Icons.add, color: Colors.indigoAccent, size: 20.0,),
+                   actionIcon: null,
                     actionFunc: () {},
                   ),
                   actionsAppBar: null,
@@ -542,7 +541,7 @@ class SwitchItem {
     this.expandedValue,
     this.headerValue,
     this.isExpanded = false,
-    this.selected=false,
+    this.selected=true,
     this.actionTitle,
     this.actionCode
   });

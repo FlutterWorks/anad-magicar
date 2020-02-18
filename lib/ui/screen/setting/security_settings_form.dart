@@ -314,7 +314,7 @@ class SecuritySettingsFormState extends State<SecuritySettingsForm> {
                               usePassword = loginRequiered;
                               useFinger = loginRequiered;
                             }
-                            if (loginRequiered)
+                            //if (loginRequiered)
                               setAppLogin();
                           });
                         },
@@ -331,7 +331,7 @@ class SecuritySettingsFormState extends State<SecuritySettingsForm> {
                               usePassword = value;
                               useFinger = value;
                             }
-                            if (value)
+                            //if (value)
                               setAppLogin();
                           });
                         },
