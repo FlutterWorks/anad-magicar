@@ -4,10 +4,12 @@ import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/data/rxbus.dart';
 import 'package:anad_magicar/model/apis/api_service.dart';
 import 'package:anad_magicar/model/change_event.dart';
+import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/service/register_service_page.dart';
+import 'package:anad_magicar/ui/screen/service/service_form.dart';
 import 'package:anad_magicar/ui/screen/style/app_style.dart';
 import 'package:anad_magicar/utils/dart_helper.dart';
 import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
@@ -33,10 +35,12 @@ class ServiceItem extends StatelessWidget {
       if (result != null) {
         if (result.IsSuccessful) {
           centerRepository.showFancyToast(result.Message);
+          changeServiceNotyBloc.updateValue(new Message(type: 'SERVICE_DELETED',index: sItem.ServiceId));
         }
         else {
           centerRepository.showFancyToast(result.Message);
         }
+
         Navigator.pop(context);
       }
     }
@@ -91,15 +95,17 @@ class ServiceItem extends StatelessWidget {
     sItem.RowStateType= Constants.ROWSTATE_TYPE_UPDATE;
     sItem.ServiceStatusConstId=type;
 
-    if(mode || type==Constants.SERVICE_DONE || type==Constants.SERVICE_NOTDONE){
+    if(mode || type==Constants.SERVICE_DONE || type==Constants.SERVICE_NOTDONE) {
       Navigator.pushNamed(context, RegisterServicePageState.route,arguments: new ServiceVM(carId: sItem.CarId,
           editMode: true, service: sItem));
     } else {
+      sItem.RowStateType= Constants.ROWSTATE_TYPE_DELETE;
       var result = await restDatasource.saveCarService(sItem);
       if (result != null) {
         if (result.IsSuccessful) {
           centerRepository.showFancyToast(result.Message);
-          RxBus.post(new ChangeEvent(type:"SERVICE",message: 'DELETED'));
+         // RxBus.post(new ChangeEvent(type:"SERVICE",message: 'DELETED'));
+          changeServiceNotyBloc.updateValue(new Message(type: 'SERVICE_DELETED',index: sItem.ServiceId));
         }
         else {
           centerRepository.showFancyToast(result.Message);

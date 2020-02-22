@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:anad_magicar/bloc/basic/bloc_provider.dart';
@@ -32,6 +33,7 @@ import 'package:anad_magicar/model/viewmodel/car_page_vm.dart';
 import 'package:anad_magicar/model/viewmodel/car_state.dart';
 import 'package:anad_magicar/model/viewmodel/map_vm.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
+import 'package:anad_magicar/model/viewmodel/status_noti_vm.dart';
 import 'package:anad_magicar/notifiers/opacity.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/pref_repository.dart';
@@ -172,7 +174,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin ,
   List<AdminCarModel> newCarsList;
   int currentBottomNaviSelected=2;
   var startEnginChangedNoty=new NotyBloc<Message>();
-  var statusChangedNoty=new NotyBloc<CarStateVM>();
+  //var statusChangedNoty=new NotyBloc<CarStateVM>();
   var carPageChangedNoty=new NotyBloc<Message>();
   var carLockPanelNoty=new NotyBloc<Message>();
   var sendCommandNoty=new NotyBloc<SendingCommandVM>();
@@ -501,7 +503,9 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin ,
           animController),
       buildMapRow(context,
           carStateVM,
-          carPageChangedNoty),
+          carPageChangedNoty,
+      statusChangedNoty,
+          animController),
       buildArrowRow(context,
           carIndex,
           carStateVM,
@@ -805,17 +809,31 @@ void registerBus() {
          {
            // Navigator.of(context).pushReplacementNamed('/map');
          }
-         if(event.type=='LOGIN_FAIED')
-           {
+         if(event.type=='LOGIN_FAIED') {
              bottomSheetMessage=event.message;
              if(_solidBottomSheetController.isOpened)
                _solidBottomSheetController.hide();
              _solidBottomSheetController.show();
            }
+
          if(event.type=='FCM_STATUS') {
            String msg=event.message;
-           Uint8List fcmBody=hx.base64Decode(msg);//.toString();
-           NotiAnalyze notiAnalyze=new NotiAnalyze(noti: null, carId: _currentCarId);
+           int carId=event.id;
+           String commandCode=msg.substring(0,2);
+           if(commandCode!=ActionsCommand.Check_Status_Car) {
+             RxBus.post(new ChangeEvent(type: 'COMMAND_SUCCESS',id: int.tryParse(commandCode)));
+           }
+           String newFCM=msg.substring(2,msg.length);
+           Uint8List fcmBody=base64Decode(newFCM);//.toString();
+
+           NotiAnalyze notiAnalyze=new NotiAnalyze(noti: null, carId: carId,data: fcmBody);
+           StatusNotiVM status= notiAnalyze.analyzeStatusNoti();
+           if(status!=null){
+                CarStateVM carStateVMForThisCarId=centerRepository.getCarStateVMByCarId(carId);
+                if(carStateVMForThisCarId!=null){
+                  carStateVMForThisCarId.fillStatusNotiData(status,statusChangedNoty);
+                }
+           }
          }
          else if(event.type=='FCM') {
                 FlashHelper.successBar(context, message: event.message);
@@ -880,7 +898,7 @@ void registerBus() {
     startEnginChangedNoty=new NotyBloc<Message>();
     carPageChangedNoty=new NotyBloc<Message>();
     carLockPanelNoty=new NotyBloc<Message>();
-    statusChangedNoty=new NotyBloc<CarStateVM>();
+    //statusChangedNoty=new NotyBloc<CarStateVM>();
     sendCommandNoty=new NotyBloc<SendingCommandVM>();
     valueNotyModelBloc=new NotyBloc<ChangeEvent>();
     _solidBottomSheetController=new SolidController();
@@ -923,6 +941,10 @@ void registerBus() {
         }
       });
     });
+
+    centerRepository.checkCarStatusPeriodic(1);
+    centerRepository.checkParkGPSStatusPeriodic(1);
+
     super.initState();
 
 
@@ -935,6 +957,7 @@ void registerBus() {
     carLockPanelNoty.dispose();
     carPageChangedNoty.dispose();
     //_subscription.cancel();
+
     RxBus.destroy();
     super.dispose();
   }
@@ -1849,9 +1872,9 @@ class _MenuState extends State<Menu> {
   }
 }
 
-/*NotyBloc<Message> startEnginChangedNoty=new NotyBloc<Message>();
+//NotyBloc<Message> startEnginChangedNoty=new NotyBloc<Message>();
 NotyBloc<CarStateVM> statusChangedNoty=new NotyBloc<CarStateVM>();
-NotyBloc<Message> carPageChangedNoty=new NotyBloc<Message>();
+/*NotyBloc<Message> carPageChangedNoty=new NotyBloc<Message>();
 NotyBloc<Message> carLockPanelNoty=new NotyBloc<Message>();
 NotyBloc<SendingCommandVM> sendCommandNoty=new NotyBloc<SendingCommandVM>();*/
 NotyBloc<ChangeEvent> valueNotyModelBloc=new NotyBloc<ChangeEvent>();

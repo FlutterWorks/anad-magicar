@@ -11,6 +11,7 @@ import 'package:anad_magicar/model/cars/car_model_detail.dart';
 import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/viewmodel/add_car_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
+import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/car/fancy_car/src/models/car_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -309,9 +310,9 @@ class AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
                     passwordValidator: widget.passwordValidator,
                     onSwitchRecoveryPassword: () => _switchRecovery(true),
                     onSubmitCompleted: () {
-                      _forwardChangeRouteAnimation().then((_) {
+                      //_forwardChangeRouteAnimation().then((_) {
                         widget.onSubmitCompleted();
-                      });
+                     // });
                     },
                   ),
                 )
@@ -328,7 +329,7 @@ class AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
       ),
     );
 
-    return AnimatedBuilder(
+    return current;/*AnimatedBuilder(
       animation: _cardSize2AnimationX,
       builder: (context, snapshot) {
         return Transform(
@@ -340,7 +341,7 @@ class AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
           child: current,
         );
       },
-    );
+    );*/
   }
 }
 
@@ -395,9 +396,36 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     '@': new RegExp(r'[\S]+$')
   };
 
+  String pelak_part1='';
+  String pelak_part2='';
+  String pelak_part3='';
+  String pelak_part4='';
+
+ var pelak_part2_title=[{'title': 'الف'},
+   {'title': 'ب'},
+   {'title': 'پ'},
+   {'title': 'ت'},
+   {'title': 'ث'},
+   {'title': 'ج'},
+   {'title': 'چ'},
+   {'title': 'ح'},
+   {'title': 'خ'},
+   {'title': 'د'},
+   {'title': 'ذ'},
+   {'title': 'ر'},
+   {'title': 'ز'},
+   {'title': 'س'},
+   {'title': 'ش'},
+   {'title': 'ص'},
+   {'title': 'ض'},{'title': 'ع'},{'title': 'غ'},{'title': 'ق'},{'title': 'ک'},{'title': 'گ'},{'title': 'ل'},{'title': 'م'},{'title': 'ن'},{'title': 'و'},
+   {'title': 'ه'},{'title': 'ی'},];
   var controller = new MaskedTextController(mask: '00-A-000-00'/*, translator: translator*/);
   var distanceController=new TextEditingController();
   var pelakController=new TextEditingController();
+  var pelakController1=new TextEditingController();
+  var pelakController2=new TextEditingController();
+  var pelakController3=new TextEditingController();
+  var pelakController4=new TextEditingController();
 
   /// switch between login and signup
   AnimationController _loadingController;
@@ -488,6 +516,8 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     _authData['brandId']=_valueBrand!=null ? _valueBrand.brandId.toString() : '0';
     _authData['tip']=_valueCarModelDetail!=null ? _valueCarModelDetail.carModelDetailId.toString() : '0';
 
+    pelak_part2=pelak_part2_title[0]['title'];
+
     _loadingController = widget.loadingController ??
         (AnimationController(
           vsync: this,
@@ -532,12 +562,37 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
 
       String seDate = widget.addCarVM.editCarModel.pelak;
       if (seDate != null && seDate.isNotEmpty) {
-        pelakController.value = pelakController.value.copyWith(
-          text: seDate,
-          selection:
-          TextSelection(baseOffset: seDate.length, extentOffset: seDate.length),
-          composing: TextRange.empty,
-        );
+        var parts=seDate.split('-');
+        if(parts!=null && parts.length>0 && parts.length==5) {
+          pelakController1.value = pelakController1.value.copyWith(
+            text: parts[0],
+            selection:
+            TextSelection(
+                baseOffset: parts[0].length, extentOffset: parts[0].length),
+            composing: TextRange.empty,
+          );
+          pelakController2.value = pelakController2.value.copyWith(
+            text: parts[1],
+            selection:
+            TextSelection(
+                baseOffset: parts[1].length, extentOffset: parts[1].length),
+            composing: TextRange.empty,
+          );
+          pelakController3.value = pelakController3.value.copyWith(
+            text: parts[2],
+            selection:
+            TextSelection(
+                baseOffset: parts[2].length, extentOffset: parts[2].length),
+            composing: TextRange.empty,
+          );
+          pelakController4.value = pelakController4.value.copyWith(
+            text: parts[4],
+            selection:
+            TextSelection(
+                baseOffset: parts[4].length, extentOffset: parts[4].length),
+            composing: TextRange.empty,
+          );
+        }
     /*    controller.addListener(() {
           final text = controller.text.toLowerCase();
           controller.value = controller.value.copyWith(
@@ -605,14 +660,15 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     }
 
     _formKey.currentState.save();
-    //_submitController.forward();
+    _submitController.forward();
     setState(() => _isSubmitting = true);
     final auth = Provider.of<Auth>(context, listen: false);
     String error;
 
     if (auth.isConfirm) {
+      _authData['pelak']=pelak_part1+'-'+pelak_part2+'-'+pelak_part3+'-'+Translations.current.iranTitle()+'-'+ pelak_part4;
       error = await auth.onConfirm(CarData(
-        pelak: _authData['pelak'],
+        pelak:_authData['pelak'] ,
         tip: int.tryParse(_authData['tip']),
         modelId: int.tryParse( _authData['modelId']),
         colorId:int.tryParse( _authData['colorId']),
@@ -635,18 +691,25 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     // workaround to run after _cardSizeAnimation in parent finished
     // need a cleaner way but currently it works so..
     Future.delayed(const Duration(milliseconds: 270), () {
-     // setState(() => _showShadow = false);
+      setState(() => _showShadow = false);
     });
 
-    //_submitController.reverse();
+    _submitController.reverse();
 
     if (!DartHelper.isNullOrEmpty(error)) {
       showErrorToast(context, error);
       Future.delayed(const Duration(milliseconds: 271), () {
-        //setState(() => _showShadow = true);
+        setState(() => _showShadow = true);
       });
-     // setState(() => _isSubmitting = false);
+      setState(() => _isSubmitting = false);
       return false;
+    } else {
+      Future.delayed(const Duration(milliseconds: 271), () {
+        setState(() => _showShadow = true);
+      });
+      setState(() => _isSubmitting = false);
+      //return false;
+
     }
 
     widget?.onSubmitCompleted();
@@ -656,30 +719,179 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
 
   Widget _buildPelakField(double width, LoginMessages messages) {
     final auth = Provider.of<Auth>(context);
-    return AnimatedTextFormField(
-      width: width,
-     controller: pelakController,
-      inputFormatters: [BlacklistingTextInputFormatter(RegExp("[,@#%^&*()+=!.`~\"';:?؟و/\\\\]")) ],
-      loadingController: _loadingController,
-      interval: _nameTextFieldLoadingAnimationInterval,
-      labelText: messages.pelakHint,
-      prefixIcon: Icon(FontAwesomeIcons.idCard),
-      keyboardType: TextInputType.text ,
-      textInputAction: TextInputAction.next,
-      onFieldSubmitted: (value) {
-        if(auth.isConfirm) {
-            _submit();
-          }
-        else
-          FocusScope.of(context).requestFocus(_pelakFocusNode);
-      },
-      validator: (value) {
-       /*if( auth.isConfirm )
-          widget.pelakValidator;*/
 
-             return null;
-           },
-      onSaved: (value) => _authData['pelak'] = value,
+    return Row(
+
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+      Container(
+        height: 40.0,
+      width: 50.0,
+      child:
+        new TextFormField(
+          decoration: new InputDecoration(
+            labelText: "",
+            fillColor: Colors.white,
+            border: new OutlineInputBorder(
+              borderRadius: new BorderRadius.circular(2.0),
+              borderSide: new BorderSide(
+                  width: 0.5,
+                  color: Colors.black
+              ),
+            ),
+            //fillColor: Colors.green
+          ),
+          validator: (val) {
+            if(auth.isConfirm) {
+              if (val.length == 0) {
+                return "نمیتواند خالی باشد";
+              }
+              return null;
+            }else{
+              return null;
+            }
+          },
+          keyboardType: TextInputType.numberWithOptions(signed: false,decimal: false),
+          style: new TextStyle(
+            fontFamily: "IranSans",
+          ),
+          onFieldSubmitted: (value) {
+            if(auth.isConfirm) {
+              _submit();
+            }
+            else
+              FocusScope.of(context).requestFocus(_pelakFocusNode);
+          },
+          onSaved: (value)=> pelak_part4=value,
+        ),),
+
+
+        Container(
+          width: 20.0,
+          child:
+          Text( Translations.current.iranTitle(),style: TextStyle(fontSize: 8.0),),),
+    Container(
+      height: 40.0,
+    width: 50.0,
+    child:
+        new TextFormField(
+          decoration: new InputDecoration(
+            labelText: "",
+            fillColor: Colors.white,
+            border: new OutlineInputBorder(
+              borderRadius: new BorderRadius.circular(2.0),
+              borderSide: new BorderSide(
+                  width: 0.5,
+                  color: Colors.black
+              ),
+            ),
+            //fillColor: Colors.green
+          ),
+          validator: (val) {
+            if(auth.isConfirm) {
+              if (val.length == 0) {
+                return "نمیتواند خالی باشد";
+              }
+              return null;
+            }else{
+              return null;
+            }
+          },
+          onFieldSubmitted: (value) {
+            if(auth.isConfirm) {
+              _submit();
+            }
+            else
+              FocusScope.of(context).requestFocus(_pelakFocusNode);
+          },
+          onSaved: (value)=> pelak_part3=value,
+          keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
+          style: new TextStyle(
+            fontFamily: "IranSans",
+          ),
+        ),),
+        Container(
+          height: 40.0,
+        width: 50.0,
+    child:
+        new TextFormField(
+          inputFormatters: [BlacklistingTextInputFormatter('.!@#\\\$%^&*(),;:"\\\'و،')],
+          decoration: new InputDecoration(
+            labelText: "",
+            fillColor: Colors.white,
+            border: new OutlineInputBorder(
+              borderRadius: new BorderRadius.circular(2.0),
+              borderSide: new BorderSide(
+                  width: 0.5,
+                  color: Colors.black
+              ),
+            ),
+            //fillColor: Colors.green
+          ),
+          validator: (val) {
+            if(auth.isConfirm) {
+              if (val.length == 0) {
+                return "نمیتواند خالی باشد";
+              }
+              return null;
+            }else{
+              return null;
+            }
+          },
+          keyboardType:TextInputType.text,
+          style: new TextStyle(
+            fontFamily: "IranSans",
+          ),
+          onFieldSubmitted: (value) {
+            if(auth.isConfirm) {
+              _submit();
+            }
+            else
+              FocusScope.of(context).requestFocus(_pelakFocusNode);
+          },
+          onSaved: (value)=> pelak_part2=value,
+        ),),
+    Container(
+      height: 40.0,
+    width: 50.0,
+    child:
+        new TextFormField(
+          decoration: new InputDecoration(
+            labelText: "",
+            fillColor: Colors.white,
+            border: new OutlineInputBorder(
+              borderRadius: new BorderRadius.circular(2.0),
+              borderSide: new BorderSide(
+                width: 0.5,
+                color: Colors.black
+              ),
+            ),
+            //fillColor: Colors.green
+          ),
+          validator: (val) {
+            if(auth.isConfirm) {
+              if (val.length == 0) {
+                return "نمیتواند خالی باشد";
+              }
+              return null;
+            }else{
+              return null;
+            }
+          },
+          onSaved: (value)=> pelak_part1 = value,
+          keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false) ,
+          style: new TextStyle(
+            fontFamily: "IranSans",
+          ),
+          onFieldSubmitted: (value) {
+            if(auth.isConfirm) {
+              _submit();
+            }
+            else
+              FocusScope.of(context).requestFocus(_pelakFocusNode);
+          },
+        ),),
+      ],
     );
   }
 

@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2020-02-16T22:43:48.439009",
+  "@@last_modified": "2020-02-21T23:06:37.064919",
   "confirm": "تایید",
   "@confirm": {
     "description": "Confirm Security Code",
@@ -576,7 +576,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "distance": "مسافت طی شده",
+  "distance": "کارکرد خودروه",
   "@distance": {
     "description": "distance",
     "type": "text",
@@ -1569,6 +1569,180 @@
   "errorinSignUp": "در روند ثبت نام خطایی وجود دارد",
   "@errorinSignUp": {
     "description": "errorinSignUp",
+    "type": "text",
+    "placeholders": {}
+  },
+  "navigateToCurrent": "مسیریابی به محل جاری",
+  "@navigateToCurrent": {
+    "description": "navigateToCurrent",
+    "type": "text",
+    "placeholders": {}
+  },
+  "payPlan": "پرداخت",
+  "@payPlan": {
+    "description": "payPlan",
+    "type": "text",
+    "placeholders": {}
+  },
+  "actionUsername": "کاربر انجام دهنده",
+  "@actionUsername": {
+    "description": "actionUsername",
+    "type": "text",
+    "placeholders": {}
+  },
+  "chargeAmount": "میزان شارژ",
+  "@chargeAmount": {
+    "description": "chargeAmount",
+    "type": "text",
+    "placeholders": {}
+  },
+  "chargeSimCard": "شارژ سیم کارت",
+  "@chargeSimCard": {
+    "description": "chargeSimCard",
+    "type": "text",
+    "placeholders": {}
+  },
+  "getHardwareVersion": "دریافت نسخه سخت افزار",
+  "@getHardwareVersion": {
+    "description": "getHardwareVersion",
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendInfoAccuracy": "ارسال دقت اطلاعات",
+  "@sendInfoAccuracy": {
+    "description": "sendInfoAccuracy",
+    "type": "text",
+    "placeholders": {}
+  },
+  "gethHrdwareVersion": "دریافت نسخه سخت افزار",
+  "@gethHrdwareVersion": {
+    "description": "gethHrdwareVersion",
+    "type": "text",
+    "placeholders": {}
+  },
+  "forGethwareVersionClickGetButton": "با فشردن کلید زیر نسخه سخت افزار دریافت می شود",
+  "@forGethwareVersionClickGetButton": {
+    "description": "forGethwareVersionClickGetButton",
+    "type": "text",
+    "placeholders": {}
+  },
+  "getChargeAmount": "دریافت میزان شارژ",
+  "@getChargeAmount": {
+    "description": "getChargeAmount",
+    "type": "text",
+    "placeholders": {}
+  },
+  "maxSpeed": "حداکثر سرعت",
+  "@maxSpeed": {
+    "description": "maxSpeed",
+    "type": "text",
+    "placeholders": {}
+  },
+  "minSpeed": "حداقل سرعت",
+  "@minSpeed": {
+    "description": "minSpeed",
+    "type": "text",
+    "placeholders": {}
+  },
+  "periodicSendTime": "بازه زمانی ارسال اطلاعات",
+  "@periodicSendTime": {
+    "description": "periodicSendTime",
+    "type": "text",
+    "placeholders": {}
+  },
+  "periodicAccuracy": "بازه زمانی ارسال دقت اطلاعات",
+  "@periodicAccuracy": {
+    "description": "periodicAccuracy",
+    "type": "text",
+    "placeholders": {}
+  },
+  "hardWareVersion": "نسخه سخت افزار",
+  "@hardWareVersion": {
+    "description": "hardWareVersion",
+    "type": "text",
+    "placeholders": {}
+  },
+  "plzEnterChargePassword": "رمز شارژ را وارد نمایید",
+  "@plzEnterChargePassword": {
+    "description": "plzEnterChargePassword",
+    "type": "text",
+    "placeholders": {}
+  },
+  "iranTitle": "ایران",
+  "@iranTitle": {
+    "description": "iranTitle",
+    "type": "text",
+    "placeholders": {}
+  },
+  "services": "سرویس ها",
+  "@services": {
+    "description": "services",
+    "type": "text",
+    "placeholders": {}
+  },
+  "cancelService": "انصراف",
+  "@cancelService": {
+    "description": "cancelService",
+    "type": "text",
+    "placeholders": {}
+  },
+  "notDoneService": "انجام نشده",
+  "@notDoneService": {
+    "description": "notDoneService",
+    "type": "text",
+    "placeholders": {}
+  },
+  "denyRequest": "رد درخواست",
+  "@denyRequest": {
+    "description": "denyRequest",
+    "type": "text",
+    "placeholders": {}
+  },
+  "accuracyInfo": "دقت اطلاعات",
+  "@accuracyInfo": {
+    "description": "accuracyInfo",
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendCommand": "ارسال فرامین",
+  "@sendCommand": {
+    "description": "sendCommand",
+    "type": "text",
+    "placeholders": {}
+  },
+  "sabteInfo": "ثبت اطلاعات",
+  "@sabteInfo": {
+    "description": "sabteInfo",
+    "type": "text",
+    "placeholders": {}
+  },
+  "lowLevel": "پایین",
+  "@lowLevel": {
+    "description": "lowLevel",
+    "type": "text",
+    "placeholders": {}
+  },
+  "mediumLevel": "متوسط",
+  "@mediumLevel": {
+    "description": "mediumLevel",
+    "type": "text",
+    "placeholders": {}
+  },
+  "highLevel": "بالا",
+  "@highLevel": {
+    "description": "highLevel",
+    "type": "text",
+    "placeholders": {}
+  },
+  "minStopTime": "حداقل زمان توقف",
+  "@minStopTime": {
+    "description": "minStopTime",
+    "type": "text",
+    "placeholders": {}
+  },
+  "showReport": "نمایش گزارش مسیر",
+  "@showReport": {
+    "description": "showReport",
     "type": "text",
     "placeholders": {}
   },

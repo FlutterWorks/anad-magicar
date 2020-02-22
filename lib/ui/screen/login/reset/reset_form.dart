@@ -53,12 +53,13 @@ class _ResetFormState extends State<ResetForm> {
           fPassword);
       if (result!=null && result.IsSuccessful) {
         centerRepository.showFancyToast(
-            Translations.current.resetPasswordSuccessful());
+            result.Message);
         _toggle();
       }
       else {
         centerRepository.showFancyToast(
-            Translations.current.resetPasswordUnSuccessful());
+            result.Message);
+        _toggle();
       }
     }
     catch(ex) {

@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2020-02-16T22:43:48.439009",
+  "@@last_modified": "2020-02-21T23:06:37.064919",
   "confirm": "confirm",
   "@confirm": {
     "description": "Confirm Security Code",
@@ -1569,6 +1569,180 @@
   "errorinSignUp": "errorinSignUp",
   "@errorinSignUp": {
     "description": "errorinSignUp",
+    "type": "text",
+    "placeholders": {}
+  },
+  "navigateToCurrent": "navigateToCurrent",
+  "@navigateToCurrent": {
+    "description": "navigateToCurrent",
+    "type": "text",
+    "placeholders": {}
+  },
+  "payPlan": "payPlan",
+  "@payPlan": {
+    "description": "payPlan",
+    "type": "text",
+    "placeholders": {}
+  },
+  "actionUsername": "actionUsername",
+  "@actionUsername": {
+    "description": "actionUsername",
+    "type": "text",
+    "placeholders": {}
+  },
+  "chargeAmount": "chargeAmount",
+  "@chargeAmount": {
+    "description": "chargeAmount",
+    "type": "text",
+    "placeholders": {}
+  },
+  "chargeSimCard": "chargeSimCard",
+  "@chargeSimCard": {
+    "description": "chargeSimCard",
+    "type": "text",
+    "placeholders": {}
+  },
+  "getHardwareVersion": "getHardwareVersion",
+  "@getHardwareVersion": {
+    "description": "getHardwareVersion",
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendInfoAccuracy": "sendInfoAccuracy",
+  "@sendInfoAccuracy": {
+    "description": "sendInfoAccuracy",
+    "type": "text",
+    "placeholders": {}
+  },
+  "gethHrdwareVersion": "gethHrdwareVersion",
+  "@gethHrdwareVersion": {
+    "description": "gethHrdwareVersion",
+    "type": "text",
+    "placeholders": {}
+  },
+  "forGethwareVersionClickGetButton": "forGethwareVersionClickGetButton",
+  "@forGethwareVersionClickGetButton": {
+    "description": "forGethwareVersionClickGetButton",
+    "type": "text",
+    "placeholders": {}
+  },
+  "getChargeAmount": "getChargeAmount",
+  "@getChargeAmount": {
+    "description": "getChargeAmount",
+    "type": "text",
+    "placeholders": {}
+  },
+  "maxSpeed": "maxSpeed",
+  "@maxSpeed": {
+    "description": "maxSpeed",
+    "type": "text",
+    "placeholders": {}
+  },
+  "minSpeed": "minSpeed",
+  "@minSpeed": {
+    "description": "minSpeed",
+    "type": "text",
+    "placeholders": {}
+  },
+  "periodicSendTime": "periodicSendTime",
+  "@periodicSendTime": {
+    "description": "periodicSendTime",
+    "type": "text",
+    "placeholders": {}
+  },
+  "periodicAccuracy": "periodicAccuracy",
+  "@periodicAccuracy": {
+    "description": "periodicAccuracy",
+    "type": "text",
+    "placeholders": {}
+  },
+  "hardWareVersion": "hardWareVersion",
+  "@hardWareVersion": {
+    "description": "hardWareVersion",
+    "type": "text",
+    "placeholders": {}
+  },
+  "plzEnterChargePassword": "plzEnterChargePassword",
+  "@plzEnterChargePassword": {
+    "description": "plzEnterChargePassword",
+    "type": "text",
+    "placeholders": {}
+  },
+  "iranTitle": "iranTitle",
+  "@iranTitle": {
+    "description": "iranTitle",
+    "type": "text",
+    "placeholders": {}
+  },
+  "services": "services",
+  "@services": {
+    "description": "services",
+    "type": "text",
+    "placeholders": {}
+  },
+  "cancelService": "cancelService",
+  "@cancelService": {
+    "description": "cancelService",
+    "type": "text",
+    "placeholders": {}
+  },
+  "notDoneService": "notDoneService",
+  "@notDoneService": {
+    "description": "notDoneService",
+    "type": "text",
+    "placeholders": {}
+  },
+  "denyRequest": "denyRequest",
+  "@denyRequest": {
+    "description": "denyRequest",
+    "type": "text",
+    "placeholders": {}
+  },
+  "accuracyInfo": "accuracyInfo",
+  "@accuracyInfo": {
+    "description": "accuracyInfo",
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendCommand": "sendCommand",
+  "@sendCommand": {
+    "description": "sendCommand",
+    "type": "text",
+    "placeholders": {}
+  },
+  "sabteInfo": "sabteInfo",
+  "@sabteInfo": {
+    "description": "sabteInfo",
+    "type": "text",
+    "placeholders": {}
+  },
+  "lowLevel": "lowLevel",
+  "@lowLevel": {
+    "description": "lowLevel",
+    "type": "text",
+    "placeholders": {}
+  },
+  "mediumLevel": "mediumLevel",
+  "@mediumLevel": {
+    "description": "mediumLevel",
+    "type": "text",
+    "placeholders": {}
+  },
+  "highLevel": "highLevel",
+  "@highLevel": {
+    "description": "highLevel",
+    "type": "text",
+    "placeholders": {}
+  },
+  "minStopTime": "minStopTime",
+  "@minStopTime": {
+    "description": "minStopTime",
+    "type": "text",
+    "placeholders": {}
+  },
+  "showReport": "showReport",
+  "@showReport": {
+    "description": "showReport",
     "type": "text",
     "placeholders": {}
   },

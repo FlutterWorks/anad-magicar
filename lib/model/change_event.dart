@@ -5,6 +5,6 @@ class ChangeEvent
   String type;
   String fromDate;
   String toDate;
-
-  ChangeEvent({this.message,this.type,this.amount,this.fromDate,this.toDate});
+  int id;
+  ChangeEvent({this.id, this.message,this.type,this.amount,this.fromDate,this.toDate});
 }

@@ -576,6 +576,58 @@ class Translations {
       name: 'payPlan', desc: 'payPlan');
   String actionUsername() => Intl.message('actionUsername',
       name: 'actionUsername', desc: 'actionUsername');
+  String chargeAmount() => Intl.message('chargeAmount',
+      name: 'chargeAmount', desc: 'chargeAmount');
+  String chargeSimCard() => Intl.message('chargeSimCard',
+      name: 'chargeSimCard', desc: 'chargeSimCard');
+  String getHardwareVersion() => Intl.message('getHardwareVersion',
+      name: 'getHardwareVersion', desc: 'getHardwareVersion');
+  String sendInfoAccuracy() => Intl.message('sendInfoAccuracy',
+      name: 'sendInfoAccuracy', desc: 'sendInfoAccuracy');
+  String gethHrdwareVersion() => Intl.message('gethHrdwareVersion',
+      name: 'gethHrdwareVersion', desc: 'gethHrdwareVersion');
+  String forGethwareVersionClickGetButton() => Intl.message('forGethwareVersionClickGetButton',
+      name: 'forGethwareVersionClickGetButton', desc: 'forGethwareVersionClickGetButton');
+  String getChargeAmount() => Intl.message('getChargeAmount',
+      name: 'getChargeAmount', desc: 'getChargeAmount');
+  String maxSpeed() => Intl.message('maxSpeed',
+      name: 'maxSpeed', desc: 'maxSpeed');
+  String minSpeed() => Intl.message('minSpeed',
+      name: 'minSpeed', desc: 'minSpeed');
+  String periodicSendTime() => Intl.message('periodicSendTime',
+      name: 'periodicSendTime', desc: 'periodicSendTime');
+  String periodicAccuracy() => Intl.message('periodicAccuracy',
+      name: 'periodicAccuracy', desc: 'periodicAccuracy');
+  String hardWareVersion() => Intl.message('hardWareVersion',
+      name: 'hardWareVersion', desc: 'hardWareVersion');
+  String plzEnterChargePassword() => Intl.message('plzEnterChargePassword',
+      name: 'plzEnterChargePassword', desc: 'plzEnterChargePassword');
+  String iranTitle() => Intl.message('iranTitle',
+      name: 'iranTitle', desc: 'iranTitle');
+  String services() => Intl.message('services',
+      name: 'services', desc: 'services');
+  String cancelService() => Intl.message('cancelService',
+      name: 'cancelService', desc: 'cancelService');
+  String notDoneService() => Intl.message('notDoneService',
+      name: 'notDoneService', desc: 'notDoneService');
+  String denyRequest() => Intl.message('denyRequest',
+      name: 'denyRequest', desc: 'denyRequest');
+  String accuracyInfo() => Intl.message('accuracyInfo',
+      name: 'accuracyInfo', desc: 'accuracyInfo');
+  String sendCommand() => Intl.message('sendCommand',
+      name: 'sendCommand', desc: 'sendCommand');
+  String sabteInfo() => Intl.message('sabteInfo',
+      name: 'sabteInfo', desc: 'sabteInfo');
+  String lowLevel() => Intl.message('lowLevel',
+      name: 'lowLevel', desc: 'lowLevel');
+  String mediumLevel() => Intl.message('mediumLevel',
+      name: 'mediumLevel', desc: 'mediumLevel');
+  String highLevel() => Intl.message('highLevel',
+      name: 'highLevel', desc: 'highLevel');
+  String minStopTime() => Intl.message('minStopTime',
+      name: 'minStopTime', desc: 'minStopTime');
+  String showReport() => Intl.message('showReport',
+      name: 'showReport', desc: 'showReport');
   String title() => Intl.message('MagiCar',
       name: 'title', desc: 'MagiCar Co.');
 }

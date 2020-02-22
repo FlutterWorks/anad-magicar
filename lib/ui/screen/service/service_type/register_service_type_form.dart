@@ -1,12 +1,15 @@
 import 'package:anad_magicar/bloc/service_type/register.dart';
 import 'package:anad_magicar/bloc/values/notify_value.dart';
 import 'package:anad_magicar/common/constants.dart';
+import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/service_type.dart';
 import 'package:anad_magicar/model/user/user.dart';
 import 'package:anad_magicar/model/viewmodel/noty_loading_vm.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/pref_repository.dart';
+import 'package:anad_magicar/translation_strings.dart';
+import 'package:anad_magicar/ui/screen/service/main_service_page.dart';
 import 'package:anad_magicar/ui/screen/service/service_page.dart';
 
 
@@ -61,9 +64,34 @@ class RegisterServiceTypeFormState extends State<RegisterServiceTypeForm> {
               hasLoaded: false,
               haseError: false,
               hasInternet: true));
-        registerServiceTypeBloc.add(
-              new LoadRegisterServiceTypeEvent(user, service, context));
 
+        if(service!=null) {
+          centerRepository.showProgressDialog(context, Translations.current.loadingdata());
+          restDatasource.saveServiceType(service).then((result) {
+            if (result != null) {
+              centerRepository.dismissDialog(context);
+              centerRepository.showFancyToast(result.Message);
+              if (result.IsSuccessful) {
+
+                loadingNoty.updateValue(new NotyLoadingVM(isLoading: false,
+                    hasLoaded: false,
+                    haseError: false,
+                    hasInternet: true));
+
+                Navigator.pushReplacementNamed(context, MainPageServiceState.route,arguments: new ServiceVM(carId: widget.carId,refresh: false));
+              }
+              else{
+                loadingNoty.updateValue(new NotyLoadingVM(isLoading: false,
+                    hasLoaded: false,
+                    haseError: true,
+                    hasInternet: true));
+              }
+            }
+          });
+
+          /* registerServiceTypeBloc.add(
+              new LoadRegisterServiceTypeEvent(user, service, context));*/
+        }
       }
       else if(data.cancel) {
           Navigator.pop(context);
@@ -98,7 +126,7 @@ class RegisterServiceTypeFormState extends State<RegisterServiceTypeForm> {
 
     double w=MediaQuery.of(context).size.width;
     double h=MediaQuery.of(context).size.height;
-    return BlocListener(
+    return /*BlocListener(
         bloc: registerServiceTypeBloc,
         listener: (BuildContext context, RegisterServiceTypeState state) {
       if(state is RegisteredServiceTypeState){
@@ -112,14 +140,14 @@ class RegisterServiceTypeFormState extends State<RegisterServiceTypeForm> {
         //Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {return SecondScreen();}));
       }
     },
-    child:
+    child:*/
       Stack(
       overflow: Overflow.visible,
       children: <Widget> [
         new Padding(padding: EdgeInsets.only(top: 65.0),
           child:
 
-          BlocBuilder<RegisterServiceTypeBloc, RegisterServiceTypeState>(
+         /* BlocBuilder<RegisterServiceTypeBloc, RegisterServiceTypeState>(
               bloc: registerServiceTypeBloc,
               builder: (
                   BuildContext context,
@@ -145,23 +173,13 @@ class RegisterServiceTypeFormState extends State<RegisterServiceTypeForm> {
                       hasInternet: true));
                   centerRepository.showFancyToast(currentState.errorMessage);
                 }
-                return  new FancyRegisterServiceTypeForm(
+                return*/  new FancyRegisterServiceTypeForm(
                   onSubmit: null,
                 authUser: _authAddCarServiceType,
-                recoverPassword: null,);
-              }
+                recoverPassword: null,),),
 
-          ),
-        ),
-       /* FormsAppBar(
-          onIconFunc: () {
 
-          },
-          actionIcon: null,
-          loadingNoty: loadingNoty,
-          onBackPress:() {} ,)*/
       ],
-      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:anad_magicar/bloc/values/notify_value.dart';
+import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/components/no_data_widget.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
@@ -13,6 +14,7 @@ import 'package:anad_magicar/ui/screen/service/register_service_page.dart';
 import 'package:anad_magicar/ui/screen/service/service_form.dart';
 import 'package:anad_magicar/ui/screen/service/service_item.dart';
 import 'package:anad_magicar/ui/screen/service/service_type/register_service_type_page.dart';
+import 'package:anad_magicar/ui/screen/service/service_type/service_type_page.dart';
 import 'package:anad_magicar/utils/date_utils.dart';
 import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
@@ -32,9 +34,9 @@ class ServicePage extends StatefulWidget {
   }
 }
 
-class ServicePageState extends MainPage<ServicePage> {
+class ServicePageState extends State<ServicePage> {
 
-  static final String route='/servicepage';
+
   String serviceDate='';
   String alarmDate='';
 
@@ -63,17 +65,7 @@ class ServicePageState extends MainPage<ServicePage> {
       return result;
     return null;
   }
-  addService()  {
-    if(centerRepository.getServiceTypes()==null || centerRepository.getServiceTypes().length==0){
-      FlashHelper.informationBar(context, message: Translations.current.noServiceTypes());
-    }
-    else {
-      Navigator.pushNamed(context, RegisterServicePageState.route,
-          arguments: new ServiceVM(carId: widget.serviceVM.carId,
-              editMode: false,
-              service: null));
-    }
-  }
+
 
   @override
   void dispose() {
@@ -81,43 +73,27 @@ class ServicePageState extends MainPage<ServicePage> {
   }
 
 
-
   @override
-  String getCurrentRoute() {
-    return route;
-  }
-
-  @override
-  FloatingActionButton getFab() {
-    return FloatingActionButton(
-      onPressed: (){ addService(); },
-      child: Icon(Icons.add,color: Colors.white,
-      size: 30.0,),
-      backgroundColor: Colors.blueAccent,
-      elevation: 0.0,
-
-    );
-  }
-
-  @override
-  initialize() {
-
+  void initState() {
     fServices=loadCarServices(widget.serviceVM.carId);
-
-    return null;
+    super.initState();
   }
 
+
+
   @override
-  Widget pageContent() {
-    // TODO: implement pageContent
-   return FutureBuilder<List<ApiService>>(
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return FutureBuilder<List<ApiService>>(
         future: fServices,
         builder: (context,snapshot) {
           if (snapshot.hasData && snapshot.data != null) {
             centerRepository.dismissDialog(context);
             servcies = snapshot.data;
+            List<ApiService> newServices=servcies.where((s)=>s.ServiceStatusConstId==Constants.SERVICE_DONE).toList();
             return
-              ServiceForm(carId: widget.serviceVM.carId, serviceVM: widget.serviceVM,servcies: servcies,);
+
+              ServiceForm(carId: widget.serviceVM.carId, serviceVM: widget.serviceVM,servcies: newServices,);
           }
           else {
             if (widget.serviceVM != null && widget.serviceVM.refresh != null &&
@@ -129,30 +105,5 @@ class ServicePageState extends MainPage<ServicePage> {
           }
         }
     );
-  }
-
-  @override
-  List<Widget> actionIcons() {
-    // TODO: implement actionIcons
-    return [
-      IconButton(
-        icon: Icon(Icons.directions_car,color: Colors.indigoAccent,),
-        onPressed: (){
-          Navigator.pushNamed(context, RegisterServicePageTypeState.route);
-        },
-      ),
-      IconButton(
-        icon: Icon(Icons.arrow_forward,color: Colors.indigoAccent,),
-        onPressed: (){
-          Navigator.pushNamed(context, '/home');
-        },
-      ),
-    ];
-  }
-
-  @override
-  int setCurrentTab() {
-    // TODO: implement setCurrentTab
-    return 0;
   }
 }

@@ -1,9 +1,18 @@
 import 'dart:collection';
 
+
+import 'package:anad_magicar/bloc/values/notify_value.dart';
+
 import 'package:anad_magicar/common/constants.dart';
+import 'package:anad_magicar/data/rest_ds.dart';
+import 'package:anad_magicar/model/apis/api_route.dart';
 import 'package:anad_magicar/model/cars/car.dart';
+import 'package:anad_magicar/model/viewmodel/status_noti_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
+import 'package:anad_magicar/repository/pref_repository.dart';
 import 'package:anad_magicar/service/noti_analyze.dart';
+import 'package:anad_magicar/ui/screen/setting/native_settings_screen.dart';
+import 'package:anad_magicar/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 
 enum MaterialColor {RED,BLUE,GREEN,YELLOW,BLACK,WHITE,GREY}
@@ -118,6 +127,10 @@ class CarStateVM {
   int carIndex;
   int carId;
   int colorId;
+  bool isPark=false;
+  bool highSpeed=false;
+  bool isGPSOn=true;
+  bool isGPRSON=true;
 
   String carImage;
   String carDoorImage;
@@ -268,36 +281,36 @@ class CarStateVM {
   }
   CarStatus carStatus;
 
-  setCarStatusImages()
-  {
+ bool setCarStatusImages() {
      carStatus=fetchCarStatus(this);
-    if(carStatus==CarStatus.ONLYDOOROPEN)
-    {
+    if(carStatus==CarStatus.ONLYDOOROPEN) {
       carImage=matStatusColorsMap[color][1]; //carRedStatusList[1];
       carDoorImage=matStatusColorsMap[color][0];//carRedStatusList[0];
       carTrunkImage='';
       carCaputImage= isCaputOpen ? matStatusColorsMap[color][3] : '';
     }
-    if(carStatus==CarStatus.ONLYTRUNKOPEN)
-    {
+
+    if(carStatus==CarStatus.ONLYTRUNKOPEN) {
       carImage=carColorsMap[color];
       carTrunkImage=matStatusColorsMap[color][2];//carRedStatusList[2];
       carCaputImage=isCaputOpen ? matStatusColorsMap[color][3] : '';
       carDoorImage='';
     }
-    if(carStatus==CarStatus.BOTHOPEN)
-    {
+
+    if(carStatus==CarStatus.BOTHOPEN) {
       carImage=matStatusColorsMap[color][1];//carRedStatusList[1];
       carDoorImage=matStatusColorsMap[color][0];//carRedStatusList[0];
       carTrunkImage=matStatusColorsMap[color][2];//carRedStatusList[2]
       carCaputImage= isCaputOpen ? matStatusColorsMap[color][3] : '';
     }
+
     if(carStatus==CarStatus.BOTHCLOSED){
       carImage=carColorsMap[color];
       carDoorImage='';
       carCaputImage=isCaputOpen ? matStatusColorsMap[color][3] : '';
       carTrunkImage='';
     }
+    return true;
   }
 
   fillCarInfo()
@@ -329,10 +342,84 @@ class CarStateVM {
       if(v==true)
         carStatus=k;
     });
-    if(carStatus!=null)
+    if(carStatus!=null) {
       setCarStatusImages();
+
+    }
   }
 
+  fillStatusNotiData(StatusNotiVM status,NotyBloc<CarStateVM> statusNoty){
+    if(status!=null){
+        isDoorOpen=status.door;
+        isCaputOpen=status.hood;
+         isTraunkOpen=status.trunk;
+         isPowerOn=status.engine;
+         //AUX1_On=status;
+         //AUX2_On=false;
+         siren=status.siren;
+       bool result= setCarStatusImages();
+       if(result){
+         statusNoty.updateValue(this);
+       }
+    }
+  }
+
+ Future<bool> getParkAndSpeedStatus(NotyBloc<CarStateVM> notyBloc) async{
+   List<int> carIds=new List();
+   carIds..add(carId);
+   ApiRoute route=new ApiRoute(carId: carId,
+       startDate: null,
+       endDate: null,
+       dateTime: null,
+       speed: null,
+       lat: null, long: null, enterTime: null,
+       carIds: carIds,
+       DeviceId: null,
+       Latitude: null,
+       Longitude: null, Date: null, Time: null, CreatedDateTime: null, gpsDateTime: null, GPSDateTimeGregorian: null);
+    var result= await restDatasource.getLastPositionRoute(route);
+    if(result!=null && result.length>0){
+      ApiRoute apiRoute=result.first;
+        String GPSDateTime=apiRoute.GPSDateTimeGregorian;
+        int speed=apiRoute.speed;
+        String date=apiRoute.Date;
+        String time=apiRoute.Time;
+
+        if(date!=null && time !=null){
+          isGPRSON=true;
+        }
+        else{
+          isGPRSON=false;
+        }
+        DateTime gpsDt=DateTimeUtils.convertIntoDateTimeObject(GPSDateTime);
+        DateTime now= DateTime.now();
+         Duration diff=now.difference(gpsDt);
+         if(diff.inMinutes<=2){
+           isGPSOn=true;
+         }
+         else{
+           isGPSOn=false;
+         }
+
+        int minSpeed=await prefRepository.getMinMaxSpeed(SettingsScreenState.MIN_SPEED_TAG);
+        int maxSpeed=await prefRepository.getMinMaxSpeed(SettingsScreenState.MAX_SPEED_TAG);
+        if(speed > maxSpeed){
+          highSpeed=true;
+        }
+        else if(speed<maxSpeed && speed>minSpeed){
+          highSpeed=false;
+        }
+        if(speed<5){
+          isPark=true;
+        }
+        else{
+          isPark=false;
+        }
+        notyBloc.updateValue(this);
+        return true;
+    }
+    return false;
+  }
   CarStatus fetchCarStatus(CarStateVM stateVM)
   {
     CarStatus carStatus=CarStatus.BOTHCLOSED;

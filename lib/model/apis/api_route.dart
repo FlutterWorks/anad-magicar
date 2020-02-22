@@ -6,11 +6,13 @@ class ApiRoute {
   String startDate;
   String endDate;
   String dateTime;
+  String time;
   int speed;
   String lat;
   String long;
   String enterTime;
-
+  String gpsDateTime;
+  String createdDateTime;
   List<int> carIds;
 
 
@@ -22,7 +24,7 @@ class ApiRoute {
   String Date;
   String Time;
   String CreatedDateTime;
-
+  String GPSDateTimeGregorian;
 
   ApiRoute({
     @required this.carId,
@@ -40,6 +42,8 @@ class ApiRoute {
     @required this.Date,
     @required this.Time,
     @required this.CreatedDateTime,
+    @required this.gpsDateTime,
+    @required this.GPSDateTimeGregorian
   });
 
 
@@ -82,6 +86,8 @@ class ApiRoute {
       'Latitude': this.lat,
       'Longitude': this.long,
       'CreatedDateTime': this.enterTime,
+      'GPSDateTime':this.gpsDateTime,
+      'GPSDateTimeGregorian':this.GPSDateTimeGregorian
     };
   }
   factory ApiRoute.fromMapResult(Map<String, dynamic> map) {
@@ -103,21 +109,15 @@ class ApiRoute {
       Date: map['Date'],
       DeviceId: map['DeviceId'],
       CreatedDateTime: map['CreatedDateTime'],
-      carId: map['CarId']
+      carId: map['CarId'],
+      gpsDateTime: map['GPSDateTime'],
+      GPSDateTimeGregorian: map['GPSDateTimeGregorian']
+
     );
   }
 
   factory ApiRoute.fromJsonResult(Map<String, dynamic> json) {
-   /* String llat=json["Latitude"];
-    String llng=json["Longitude"];
 
-    llat=llat.replaceAll('"', '');
-    llat=llat.replaceAll('.', '');
-    llat=llat.replaceAll('*', '.');
-
-    llng=llng.replaceAll('"', '');
-    llng=llng.replaceAll('.', '');
-    llng=llng.replaceAll('*', '.');*/
     return ApiRoute(dateTime: json["DateTime"],
       speed: json["Speed"],
       lat:json["Latitude"] ,
@@ -125,16 +125,7 @@ class ApiRoute {
       enterTime: json["EnterTime"],);
   }
   factory ApiRoute.fromJsonLastPositionResult(Map<String, dynamic> json) {
-   /* String llat=json["Latitude"];
-    String llng=json["Longitude"];
 
-    llat=llat.replaceAll('"', '');
-    llat=llat.replaceAll('.', '');
-    llat=llat.replaceAll('*', '.');
-
-    llng=llng.replaceAll('"', '');
-    llng=llng.replaceAll('.', '');
-    llng=llng.replaceAll('*', '.');*/
     return ApiRoute(Date: json["Date"],
       speed: json["Speed"],
       Latitude:json["Latitude"],
@@ -143,6 +134,8 @@ class ApiRoute {
     carId: json["CarId"],
     DeviceId: json["DeviceId"],
       CreatedDateTime: json["CreatedDateTime"],
+      gpsDateTime: json["GPSDateTime"],
+      GPSDateTimeGregorian: json["GPSDateTimeGregorian"]
 
     );
   }
@@ -173,6 +166,7 @@ class ApiRoute {
       "Latitude": this.Longitude,
       "Longitude": this.Longitude,
       "CreatedDateTime": this.CreatedDateTime,
+      "GPSDateTimeGregorian": this.GPSDateTimeGregorian
     };
   }
   Map<String, dynamic> toMap() {

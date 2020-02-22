@@ -11,6 +11,7 @@ class CarActionLog {
   String PlanTitle;
   String ActionTitle;
   String UserName;
+  int ActionId;
   CarActionLog({
     @required this.CarActionLogId,
     @required this.CarId,
@@ -22,6 +23,7 @@ class CarActionLog {
     @required this.PlanTitle,
     @required this.ActionTitle,
     @required this.UserName,
+    @required this.ActionId
   });
 
   Map<String, dynamic> toMap() {
@@ -64,10 +66,12 @@ class CarActionLog {
       PlanId: json["PlanId"],
       PlanTitle: json["PlanTitle"],
       ActionTitle: json["ActionTitle"],
+    ActionId: json["ActionId"],
     UserName: json["UserName"]);
   }
 
   Map<String, dynamic> toJson() {
+
     return {
       "CarActionLogId": this.CarActionLogId,
       "CarId": this.CarId,
@@ -78,7 +82,8 @@ class CarActionLog {
       "PlanId": this.PlanId,
       "PlanTitle": this.PlanTitle,
       "ActionTitle": this.ActionTitle,
-      "UserName":this.UserName
+      "UserName":this.UserName,
+      "ActionId":this.ActionId
     };
   }
 

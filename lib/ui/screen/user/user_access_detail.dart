@@ -130,11 +130,8 @@ class _UserAccessPageState extends State<UserAccessPage> {
     String actionName='';
     ActionModel actModel;
     String desc='';
-    bool selected=false;
+    bool selected=true;
     if (widget.accessableActionVM!=null && accessToActions != null) {
-    /*  for (AdminCarModel car in
-      adminCars) {*/
-
         List<CurrentUserAccessableActionModel> actionToAccess=accessToActions.where((ac)=>ac.CarId==carId).toList();
         if(actionToAccess!=null && actionToAccess.length>0) {
          for(CurrentUserAccessableActionModel act in actionToAccess){
@@ -152,8 +149,8 @@ class _UserAccessPageState extends State<UserAccessPage> {
             for (AccessableActions accessableActions in act.accessableActions) {
               List<ActionModel> actionModel = centerRepository.getActions()
                   .where((ac) => ac.ActionId == accessableActions.ActionId &&
-                  ActionsCommand.hasActions(ac.ActionTitle)==true)
-                  .toList();
+                  ActionsCommand.hasActions(ac.ActionTitle)==true).toList();
+
               if (actionModel != null &&
                   actionModel.length > 0) {
                 actModel = actionModel.first;
@@ -172,9 +169,7 @@ class _UserAccessPageState extends State<UserAccessPage> {
                       actModel.selected = !selected;
                     },
                     child: Switch( onChanged: (value) {
-
                     },
-
                       value: false,),
                   ),
                 ),
@@ -224,7 +219,7 @@ class _UserAccessPageState extends State<UserAccessPage> {
       return SwitchItem(
         headerValue: 'Action $index',
         expandedValue: 'No. $index',
-        selected: false,
+        selected: true,
         actionTitle: actionTitle,
         actionCode: actionCode
       );
@@ -368,7 +363,7 @@ class _UserAccessPageState extends State<UserAccessPage> {
             actionCode = actionModel.ActionCode;
             switchItem=new SwitchItem(actionCode: actionCode,
             actionTitle: actionTitle,
-            selected: false);
+            selected: true);
           }
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -422,18 +417,7 @@ class _UserAccessPageState extends State<UserAccessPage> {
         return
           Stack(
             children: <Widget>[
-              /*new Column(
-              children: <Widget>[
-                new Row(
-                  children: <Widget>[
-                    new CircleAvatar(
-                      radius: 68.0,
-                      child: new Image.asset('assets/images/car.png'),
-                    ),
-                    new Text(Translations.current.cars(), style: headerStyle,)
-                    ,
-                  ],
-                ),*/
+
           Padding(padding: EdgeInsets.only(top: 60.0),
       child:
       Container(
@@ -501,9 +485,7 @@ class _UserAccessPageState extends State<UserAccessPage> {
                   backgroundColorAppBar: Colors.transparent,
                   title: new MagicarAppbarTitle(
                     currentColor: Colors.indigoAccent,
-                   actionIcon: (widget.accessableActionVM.isFromMainAppForCommand!=null &&
-                       widget.accessableActionVM.isFromMainAppForCommand) ? null :
-                   Icon(Icons.add, color: Colors.indigoAccent, size: 20.0,),
+                   actionIcon: null,
                     actionFunc: () {},
                   ),
                   actionsAppBar: null,
@@ -542,7 +524,7 @@ class SwitchItem {
     this.expandedValue,
     this.headerValue,
     this.isExpanded = false,
-    this.selected=false,
+    this.selected=true,
     this.actionTitle,
     this.actionCode
   });

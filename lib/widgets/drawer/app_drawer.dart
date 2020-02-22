@@ -418,15 +418,15 @@ class AppDrawer extends StatelessWidget {
           Divider(),
           _createDrawerItem(context: context,icon: Icons.settings, text: Translations.current.settings(),isSelected: currentRoute==SettingsScreenState.route, onTap: (){Navigator.pushReplacementNamed(context, SettingsScreenState.route);}),
           _createDrawerItem(context: context,icon: Icons.person_pin, text: Translations.current.profile(),isSelected: currentRoute==ProfileTwoPageState.route, onTap: (){Navigator.pushReplacementNamed(context, ProfileTwoPageState.route,arguments: centerRepository.getUserInfo());}),
-          _createDrawerItem(context: context,icon: Icons.report, text: Translations.current.report(),isSelected: currentRoute=='', onTap: (){
+         /* _createDrawerItem(context: context,icon: Icons.report, text: Translations.current.report(),isSelected: currentRoute=='', onTap: (){
             //if(_scaffoldKey.currentState.isDrawerOpen){
               Navigator.pop(context);
             //}
             _showReportSheet(context);
-          }),
+          }),*/
           _createDrawerItem(context: context,icon: Icons.exit_to_app,isSelected: false, text: Translations.current.exit(),onTap: () async{
             await animated_dialog_box.showScaleAlertBox(
-                title:Center(child: Text(Translations.current.logoutAccount())) , // IF YOU WANT TO ADD
+                title:Center(child: Text(Translations.current.logoutAccount())) ,
                 context: context,
                 firstButton: MaterialButton(
                   // FIRST BUTTON IS REQUIRED

@@ -1,25 +1,34 @@
 import 'package:anad_magicar/bloc/theme/change_theme_bloc.dart';
 import 'package:anad_magicar/bloc/theme/theme.dart';
+import 'package:anad_magicar/common/actions_constants.dart';
+import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/components/fancy_popup/main.dart';
+import 'package:anad_magicar/data/rest_ds.dart';
+import 'package:anad_magicar/model/send_command_model.dart';
 import 'package:anad_magicar/model/viewmodel/car_page_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/pref_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/home/index.dart';
+import 'package:anad_magicar/ui/screen/login/fancy_login/src/widgets/animated_text_form_field.dart';
 import 'package:anad_magicar/ui/screen/login/reset/fancy_login/src/models/login_data.dart';
 import 'package:anad_magicar/ui/screen/login/reset/reset_password_form.dart';
 import 'package:anad_magicar/ui/theme/app_themes.dart';
+import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
 import 'package:anad_magicar/widgets/curved_navigation_bar.dart';
 import 'package:anad_magicar/widgets/drawer/app_drawer.dart';
 import 'package:anad_magicar/widgets/drawer/drawer.dart';
+import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
 import 'package:anad_magicar/widgets/native_settings/src/settings_section.dart';
 import 'package:anad_magicar/widgets/native_settings/src/settings_tile.dart';
 import 'package:anad_magicar/widgets/native_settings/src/settings_list.dart';
+import 'package:anad_magicar/widgets/range_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
+import 'package:anad_magicar/widgets/animated_dialog_box.dart';
 import 'languages_screen.dart';
+import 'package:anad_magicar/widgets/range_slider/flutter_range_slider.dart' as frs;
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -29,6 +38,50 @@ class SettingsScreen extends StatefulWidget {
 class SettingsScreenState extends State<SettingsScreen> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  static final String CHARGE_AMUONT_TAG='CHARGE_AMUONT';
+  static final String CHARGE_SIMCARD_TAG='CHARGE_SIMCARD';
+  static final String SEND_INFO_ACCURACY_TAG='GETSEND_INFO_ACCURACY';
+  static final String GET_HARDWARE_VERSION_TAG='GET_HARDWARE_VERSION';
+
+  static final String MINMAX_SPEED_TAG='MINMAX_SPEED';
+  static final String MIN_SPEED_TAG='MIN_SPEED';
+  static final String MAX_SPEED_TAG='MAX_SPEED';
+
+  static final String PERIODIC_TIME_TAG='PERIODIC_TIME';
+  static final String PERIODIC_UPDTAE_TIME_TAG='PERIODIC_UPDTAE_TIME';
+
+  static final highLevelText1='در این وضعیت : ارسال اطلاعات هر 20 دقیقه انجام میشود.';
+  static final highLevelText2='ارسال اطلاعات هر 40 متر انجام میشود';
+  static final highLevelText3='ارسال اطلاعات براساس 5 درجه تغییر زاویه است';
+  static final highLevelText4='ارسال اطلاعات در سرعت 110 کیلومتر بر ساعت انجام میشود';
+  static final mediumLevelText1='در این وضعیت';
+  static final mediumLevelText2='ارسال اطلاعات هر 30 دقیقه انجام می شود.';
+  static final mediumLevelText3='ارسال اطلاعات هر 100 متر انجام می شود.';
+  static final mediumLevelText4='ارسال اطلاعات براساس 15 درجه تغییر زاویه است';
+  static final mediumLevelText5='ارسال اطلاعات براساس سرعت غیرفعال است.';
+
+  static final lowLevelText1='در این وضعیت';
+  static final lowLevelText2='ارسال اطلاعات هر 20 دقیقه انجام می شود.';
+  static final lowLevelText3='ارسال اطلاعات هر 40 متر انجام می شود.';
+  static final lowLevelText4='ارسال بر اساس 5 درجه تغییر زاویه است.';
+  static final lowLevelText5='ارسال اطلاعات در سرعت 110 کیلومتر بر ساعت انجام می شود.';
+
+  static final chargeAmountText1=' میزان شارژ شمادر تاریخ ';
+  static final chargeAmountText2='و در ساعت ';
+  static final chargeAmountText3='به میزان ';
+  static final chargeAmountText4='ریال است';
+  static final chargeAmountText='با فشردن کلید زیر و ارسال دستور میزان شارژ<آخرین میزان شارژ سیم کارت خودرو استخراج و در صفحه هشدارها نمایش داده می شود.';
+  static final chargePasswordText1='لطفا رمز شارژ را وارد نمایید';
+  static final hardwareText1='با فشردن کلید زیر نسخه سخت افزار دریافت می شود.';
+
+  String finalText=lowLevelText1+'\\n'+lowLevelText2+'\\n'+lowLevelText3+'\\n'+lowLevelText4+'\\n'+lowLevelText5;
+  List<RangeSliderData> rangeSliders;
+
+  double _lowerValue = 0.0;
+  double _upperValue = 60.0;
+  double _lowerValueFormatter = 20.0;
+  double _upperValueFormatter = 20.0;
 
   String userName='';
   String imageUrl='';
@@ -48,6 +101,20 @@ class SettingsScreenState extends State<SettingsScreen> {
   String mobile;
   bool isDark=false;
   int userId;
+
+  String maxSpeed='';
+  String minSpeed='';
+  String periodicUpdateTime='';
+  String periodicSend='';
+  String chargePassword='';
+  String resultValue='';
+  AnimationController _loadingController;
+  Interval _nameTextFieldLoadingAnimationInterval;
+
+  String mobileNo='';
+  final _passwordFocusNode = FocusNode();
+  final GlobalKey<FormState> _formKey = GlobalKey();
+
   Future<bool> getAppTheme() async{
     int dark=await changeThemeBloc.getOption();
     setState(() {
@@ -88,7 +155,454 @@ class SettingsScreenState extends State<SettingsScreen> {
      }
      return '';
    });
+  }
+
+  chargeSimCard() async {
+      centerRepository.showFancyToast('اارسال شد');
+      Navigator.pop(context);
+  }
+
+  getHardWareVersion() async{
+    int actionId=ActionsCommand.actionCommandsMap[ActionsCommand.HARDWARE_VERSION_NANO_CODE];
+    var result= await restDatasource.sendCommand(new SendCommandModel(UserId: userId,
+        ActionId: actionId, CarId: CenterRepository.getCurrentCarId(), Command: null));
+    if(result!=null){
+      Navigator.pop(context);
     }
+  }
+  getChargeAmount() async{
+    int actionId=ActionsCommand.actionCommandsMap[ActionsCommand.ChargeSimCardCredit_Nano_CODE];
+    var result= await restDatasource.sendCommand(new SendCommandModel(UserId: userId,
+        ActionId: actionId, CarId: CenterRepository.getCurrentCarId(), Command: null));
+    if(result!=null){
+      Navigator.pop(context);
+    }
+  }
+
+  _doAction(String action)async{
+    if(action==GET_HARDWARE_VERSION_TAG){
+      await animated_dialog_box.showScaleAlertBox(
+          title:Center(child: Text(Translations.current.hardWareVersion())) ,
+          context: context,
+          firstButton: MaterialButton(
+            elevation: 0.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              color: Colors.white,
+              child: Text(Translations.current.gethHrdwareVersion()),
+              onPressed: () async {
+                getHardWareVersion();
+              }
+          ),
+          secondButton: MaterialButton(
+            elevation: 0.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            color: Colors.white,
+            child: Text(Translations.current.cancel()),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          icon: Icon(Icons.info_outline,color: Colors.red,),
+          yourWidget: Container(
+            child: Text(hardwareText1),
+          ));
+
+                  }else if(action==SEND_INFO_ACCURACY_TAG){
+      await animated_dialog_box.showScaleAlertBox(
+          title:Center(child: Text(Translations.current.accuracyInfo())) ,
+          context: context,
+          firstButton: MaterialButton(
+              elevation: 0.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              color: Colors.white,
+              child: Text(Translations.current.sabteInfo()),
+              onPressed: () async {
+                  centerRepository.showFancyToast('ارسال دستور انجام شد.');
+                  Navigator.pop(context);
+              }
+          ),
+          secondButton: MaterialButton(
+            elevation: 0.5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            color: Colors.white,
+            child: Text(Translations.current.cancel()),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          icon: Icon(Icons.info_outline,color: Colors.red,),
+          yourWidget: Column(
+            children: <Widget>[
+              Text(finalText,style: TextStyle(fontSize: 10.0),),
+          RangeSliderData(
+              min: 0.0,
+              max: 60.0,
+              lowerValue: 10.0,
+              upperValue: 30.0,
+              showValueIndicator: true,
+              valueIndicatorMaxDecimals: 0,
+              activeTrackColor: Colors.red,
+              inactiveTrackColor: Colors.red[50],
+              valueIndicatorColor: Colors.green).build(context, (l,u) {
+                setState(() {
+                  if(l==10 && u==20){
+                    finalText=lowLevelText1+'\\n'+lowLevelText2+'\\n'+lowLevelText3+'\\n'+lowLevelText4+'\\n'+lowLevelText5;
+                    FlashHelper.successBar(context, message: finalText);
+                  } else if(l==10 && u==20){
+                    String finalText=mediumLevelText1+'\\n'+mediumLevelText2+'\\n'+mediumLevelText3+'\\n'+mediumLevelText4+'\\n'+mediumLevelText5;
+                    FlashHelper.successBar(context, message: finalText);
+                  }else if(l==10 && u==30){
+                    String finalText=highLevelText1+'\\n'+highLevelText2+'\\n'+highLevelText3+'\\n'+highLevelText4;
+                    FlashHelper.successBar(context, message: finalText);
+                  }
+                });
+
+          }),
+      ],
+          ),);
+    }else if(action==CHARGE_SIMCARD_TAG){
+      await animated_dialog_box.showScaleAlertBox(
+          title:Center(child: Text(Translations.current.chargeSimCard())) ,
+          context: context,
+          firstButton: MaterialButton(
+              elevation: 0.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              color: Colors.white,
+              child: Text(Translations.current.chargeSimCard()),
+              onPressed: () async {
+                chargeSimCard();
+              }
+          ),
+          secondButton: MaterialButton(
+            elevation: 0.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            color: Colors.white,
+            child: Text(Translations.current.cancel()),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          icon: Icon(Icons.info_outline,color: Colors.red,),
+          yourWidget: Form(
+            key: _formKey,
+          child:
+          Container(
+            child: _buildTextField(Translations.current.plzEnterChargePassword(), 150.0, chargePassword)),),
+          );
+    }else if(action==CHARGE_AMUONT_TAG){
+      await animated_dialog_box.showScaleAlertBox(
+          title:Center(child: Text(Translations.current.confimDelete())) ,
+          context: context,
+          firstButton: MaterialButton(
+              elevation: 0.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              color: Colors.white,
+              child: Text(Translations.current.getChargeAmount()),
+              onPressed: () async {
+                getChargeAmount();
+              }
+          ),
+          secondButton: MaterialButton(
+            elevation: 0.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            color: Colors.white,
+            child: Text(Translations.current.cancel()),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          icon: Icon(Icons.info_outline,color: Colors.red,),
+          yourWidget: Container(
+            child: Text(Translations.current.forGethwareVersionClickGetButton()),
+          ));
+    }
+  }
+
+  _onConfirmDefaultSettings(String type,BuildContext context) async{
+    _formKey.currentState.save();
+    if(type==MINMAX_SPEED_TAG) {
+      prefRepository.setMinMaxSpeed(MIN_SPEED_TAG, int.tryParse( minSpeed));
+      prefRepository.setMinMaxSpeed(MAX_SPEED_TAG, int.tryParse( maxSpeed));
+      centerRepository.showFancyToast('اطلاعات با موفقیت ذخیره شد.');
+    }
+    else if(type==PERIODIC_TIME_TAG){
+      prefRepository.setMinMaxSpeed(PERIODIC_TIME_TAG, int.tryParse( resultValue));
+      centerRepository.showFancyToast('اطلاعات با موفقیت ذخیره شد.');
+
+    }else if(type==PERIODIC_UPDTAE_TIME_TAG){
+      prefRepository.setMinMaxSpeed(PERIODIC_UPDTAE_TIME_TAG, int.tryParse( resultValue));
+      centerRepository.showFancyToast('اطلاعات با موفقیت ذخیره شد.');
+    }
+
+    Navigator.pop(context);
+  }
+  _showSendingCommandSheet(BuildContext context)
+  {
+    showModalBottomSheetCustom(context: context ,
+        mHeight: 0.70,
+        builder: (BuildContext context) {
+          return Container(
+            height: 350.0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                      Container(
+                        child: FlatButton(
+                          onPressed: (){_doAction(CHARGE_AMUONT_TAG);},
+                          child: Text(Translations.current.chargeAmount()),
+                        )
+                      )
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                        child: FlatButton(
+                          onPressed: (){
+                            _doAction(CHARGE_SIMCARD_TAG);
+                          },
+                          child: Text(Translations.current.chargeSimCard()),
+                        )
+                    )
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                        child: FlatButton(
+                          onPressed: (){_doAction(GET_HARDWARE_VERSION_TAG);},
+                          child: Text(Translations.current.getHardwareVersion()),
+                        )
+                    )
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                        child: FlatButton(
+                          onPressed: (){_doAction(SEND_INFO_ACCURACY_TAG);},
+                          child: Text(Translations.current.sendInfoAccuracy()),
+                        )
+                    )
+                  ],
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  Widget _buildTextField(String hint,double width, String result) {
+    return
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            width: width,
+            height: 50.0,
+            child:
+            AnimatedTextFormField(
+                enabled: true,
+                width: width,
+                loadingController: _loadingController,
+                interval: _nameTextFieldLoadingAnimationInterval,
+                labelText: hint,
+               // prefixIcon: Icon(Icons.confirmation_number),
+                keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (value) {
+                 // FocusScope.of(context).requestFocus(_passwordFocusNode);
+                },
+                validator: (value) {
+                  if(value==null || value.isEmpty)
+                    return Translations.current.allFieldsRequired();
+                  return null;
+                } ,
+                onSaved: (value) async {
+                    resultValue=value;
+
+                }
+            ),
+          ),
+
+        ],
+    );
+  }
+  Widget _buildMaxTextField(String hint,double width, String result) {
+    return
+        new TextFormField(
+        decoration: new InputDecoration(
+        labelText: "حداکثر سرعت",
+        fillColor: Colors.white,
+        border: new OutlineInputBorder(
+        borderRadius: new BorderRadius.circular(2.0),
+    borderSide: new BorderSide(
+    ),
+    ),
+    //fillColor: Colors.green
+    ),
+    validator: (val) {
+    if(val.length==0) {
+    return "نمیتواند خالی باشد";
+    }else{
+    return null;
+    }
+    },
+    onSaved: (value){
+     maxSpeed=value;
+    },
+    keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false) ,
+    style: new TextStyle(
+    fontFamily: "IranSans",
+    ),
+    onFieldSubmitted: (value) {
+
+    },
+    );
+  }
+  Widget _buildMinTextField(String hint,double width, String result) {
+    return
+      new TextFormField(
+              decoration: new InputDecoration(
+                labelText: "حداقل سرعت",
+                fillColor: Colors.white,
+                border: new OutlineInputBorder(
+                  borderRadius: new BorderRadius.circular(2.0),
+                  borderSide: new BorderSide(
+                  ),
+                ),
+                //fillColor: Colors.green
+              ),
+              validator: (val) {
+                if(val.length==0) {
+                  return "نمیتواند خالی باشد";
+                }else{
+                  return null;
+                }
+              },
+              onSaved: (value){
+                  minSpeed=value;
+                 // result=value;
+              },
+              keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false) ,
+              style: new TextStyle(
+                fontFamily: "IranSans",
+              ),
+              onFieldSubmitted: (value) {
+
+              },
+
+    );
+  }
+  _showDefaultSettingsSheet(BuildContext context,String type)
+  {
+    showModalBottomSheetCustom(context: context ,
+        mHeight: 0.90,
+        builder: (BuildContext context) {
+          return Builder( builder:
+          (context) {
+            return  Form(
+                key: _formKey,
+                child:
+              Container(
+                width: MediaQuery.of(context).size.width-10,
+                height: 450.0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    type == MINMAX_SPEED_TAG ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              width: 150.0,
+                              height: 50.0,
+                              child: _buildMaxTextField(
+                                  Translations.current.maxSpeed(), 80.0, maxSpeed),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              width: 150.0,
+                              height: 50.0,
+                              child: _buildMinTextField(
+                                  Translations.current.minSpeed(), 80.0, minSpeed),
+                            )
+                          ],
+                        )
+
+                      ],
+                    ) :
+                    type == PERIODIC_TIME_TAG ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          child: _buildTextField(
+                              Translations.current.periodicSendTime(), 150.0,
+                              maxSpeed),
+                        ),
+                      ],
+                    ) :
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          child: _buildTextField(
+                              Translations.current.periodicAccuracy(), 150.0,
+                              maxSpeed),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                            child: FlatButton(
+                              onPressed: () {
+                                _onConfirmDefaultSettings(type,context);
+                              },
+                              child: Button(title: Translations.current.confirm(),wid: 120.0,color: Colors.green.value,),
+                            )
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              );
+          },
+          );
+        });
+  }
   showPopUp(String message)
   {
     final popup = BeautifulPopup(
@@ -247,6 +761,30 @@ class SettingsScreenState extends State<SettingsScreen> {
                       builder: (BuildContext context) => LanguagesScreen()));*/
                 },
               ),
+              SettingsTile(
+                title: 'زمان دریافت اطلاعات خودرو',
+                subtitle: 'تنظیمات اطلاعات دریافت',
+                leading: Icon(Icons.update),
+                onTap: () {
+                  _showDefaultSettingsSheet(context, PERIODIC_TIME_TAG);
+                },
+              ),
+              SettingsTile(
+                title: 'زمان دریافت وضعیت خودرو',
+                subtitle: 'تنظیمات وضعیت خودرو',
+                leading: Icon(Icons.update),
+                onTap: () {
+                  _showDefaultSettingsSheet(context,PERIODIC_UPDTAE_TIME_TAG);
+                },
+              ),
+              SettingsTile(
+                title: 'تنظیمات سرعت',
+                subtitle: 'حداق حداکثر سرعت',
+                leading: Icon(Icons.shutter_speed),
+                onTap: () {
+                  _showDefaultSettingsSheet(context,MINMAX_SPEED_TAG);
+                },
+              ),
               SettingsTile.switchTile(
                   leftPadding: 25.0,
                   rightPadding: 2.0,
@@ -291,34 +829,19 @@ class SettingsScreenState extends State<SettingsScreen> {
               },),*/
             ],
           ),
-          /*SettingsSection(
-            title: 'امنیتی',
+          SettingsSection(
+            title: 'ارسال فرمان',
             tiles: [
-              SettingsTile.switchTile(
-                title: Translations.current.useLogin(),
+              SettingsTile(
+                title: Translations.current.sendCommand(),
                 leading: Icon(Icons.phonelink_lock),
-                switchValue: loginRequiered,
-                onToggle: (bool value) {
-                  setState(() {
-                    loginRequiered = value;
-                    if(value) {
-                      usePattern = !value;
-                      usePassword = value;
-                      useFinger = !value;
-                    }
-                    else
-                      {
-                        usePattern = value;
-                        usePassword = value;
-                        useFinger = value;
-                      }
-                    if(value)
-                      setAppLogin();
-
-                  });
+                onTap: (){
+                  _showSendingCommandSheet(context);
                 },
               ),
-              SettingsTile.switchTile(
+    ],
+    ),
+             /* SettingsTile.switchTile(
                   title: Translations.current.useFingerPrint(),
                   leading: Icon(Icons.fingerprint),
                   onToggle: (bool value) {
@@ -383,6 +906,169 @@ class SettingsScreenState extends State<SettingsScreen> {
       ),
     ],
     ),
+    );
+  }
+  List<Widget> _buildRangeSliders() {
+    List<Widget> children = <Widget>[];
+    for (int index = 0; index < rangeSliders.length; index++) {
+      children
+          .add(rangeSliders[index].build(context, (double lower, double upper) {
+        // adapt the RangeSlider lowerValue and upperValue
+        setState(() {
+          rangeSliders[index].lowerValue = lower;
+          rangeSliders[index].upperValue = upper;
+        });
+      }));
+      // Add an extra padding at the bottom of each RangeSlider
+      children.add(SizedBox(height: 8.0));
+    }
+
+    return children;
+  }
+  List<RangeSliderData> _rangeSliderDefinitions() {
+    return <RangeSliderData>[
+      RangeSliderData(
+          min: 0.0, max: 100.0, lowerValue: 10.0, upperValue: 100.0),
+      RangeSliderData(
+          min: 0.0,
+          max: 100.0,
+          lowerValue: 25.0,
+          upperValue: 75.0,
+          divisions: 20,
+          overlayColor: Colors.red[100]),
+      RangeSliderData(
+          min: 0.0,
+          max: 100.0,
+          lowerValue: 10.0,
+          upperValue: 30.0,
+          showValueIndicator: false,
+          valueIndicatorMaxDecimals: 0),
+      RangeSliderData(
+          min: 0.0,
+          max: 100.0,
+          lowerValue: 10.0,
+          upperValue: 30.0,
+          showValueIndicator: true,
+          valueIndicatorMaxDecimals: 0,
+          activeTrackColor: Colors.red,
+          inactiveTrackColor: Colors.red[50],
+          valueIndicatorColor: Colors.green),
+      RangeSliderData(
+          min: 0.0,
+          max: 100.0,
+          lowerValue: 25.0,
+          upperValue: 75.0,
+          divisions: 20,
+          thumbColor: Colors.grey,
+          valueIndicatorColor: Colors.grey),
+    ];
+  }
+}
+
+class RangeSliderData {
+  double min;
+  double max;
+  double lowerValue;
+  double upperValue;
+  int divisions;
+  bool showValueIndicator;
+  int valueIndicatorMaxDecimals;
+  bool forceValueIndicator;
+  Color overlayColor;
+  Color activeTrackColor;
+  Color inactiveTrackColor;
+  Color thumbColor;
+  Color valueIndicatorColor;
+  Color activeTickMarkColor;
+
+  static const Color defaultActiveTrackColor = const Color(0xFF0175c2);
+  static const Color defaultInactiveTrackColor = const Color(0x3d0175c2);
+  static const Color defaultActiveTickMarkColor = const Color(0x8a0175c2);
+  static const Color defaultThumbColor = const Color(0xFF0175c2);
+  static const Color defaultValueIndicatorColor = const Color(0xFF0175c2);
+  static const Color defaultOverlayColor = const Color(0x290175c2);
+
+  RangeSliderData({
+    this.min,
+    this.max,
+    this.lowerValue,
+    this.upperValue,
+    this.divisions,
+    this.showValueIndicator: true,
+    this.valueIndicatorMaxDecimals: 1,
+    this.forceValueIndicator: false,
+    this.overlayColor: defaultOverlayColor,
+    this.activeTrackColor: defaultActiveTrackColor,
+    this.inactiveTrackColor: defaultInactiveTrackColor,
+    this.thumbColor: defaultThumbColor,
+    this.valueIndicatorColor: defaultValueIndicatorColor,
+    this.activeTickMarkColor: defaultActiveTickMarkColor,
+  });
+
+  // Returns the values in text format, with the number
+  // of decimals, limited to the valueIndicatedMaxDecimals
+  //
+  String get lowerValueText =>
+      lowerValue.toStringAsFixed(valueIndicatorMaxDecimals);
+  String get upperValueText =>
+      upperValue.toStringAsFixed(valueIndicatorMaxDecimals);
+
+  // Builds a RangeSlider and customizes the theme
+  // based on parameters
+  //
+  Widget build(BuildContext context, frs.RangeSliderCallback callback) {
+    return Container(
+      width: double.infinity,
+      child: Row(
+        children: <Widget>[
+          Container(
+            constraints: BoxConstraints(
+              minWidth: 40.0,
+              maxWidth: 40.0,
+            ),
+            child: Text(lowerValueText),
+          ),
+          Expanded(
+            child: SliderTheme(
+              // Customization of the SliderTheme
+              // based on individual definitions
+              // (see rangeSliders in _RangeSliderSampleState)
+              data: SliderTheme.of(context).copyWith(
+                overlayColor: overlayColor,
+                activeTickMarkColor: activeTickMarkColor,
+                activeTrackColor: activeTrackColor,
+                inactiveTrackColor: inactiveTrackColor,
+                //trackHeight: 8.0,
+                thumbColor: thumbColor,
+                valueIndicatorColor: valueIndicatorColor,
+                showValueIndicator: showValueIndicator
+                    ? ShowValueIndicator.always
+                    : ShowValueIndicator.onlyForDiscrete,
+              ),
+              child: frs.RangeSlider(
+                min: min,
+                max: max,
+                lowerValue: lowerValue,
+                upperValue: upperValue,
+                divisions: divisions,
+                showValueIndicator: showValueIndicator,
+                valueIndicatorMaxDecimals: valueIndicatorMaxDecimals,
+                onChanged: (double lower, double upper) {
+                  // call
+                  callback(lower, upper);
+                },
+              ),
+            ),
+          ),
+          Container(
+            constraints: BoxConstraints(
+              minWidth: 40.0,
+              maxWidth: 40.0,
+            ),
+            child: Text(upperValueText),
+          ),
+        ],
+      ),
     );
   }
 }

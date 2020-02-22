@@ -9,8 +9,29 @@ class DateTimeUtils{
 
  static DateTime convertIntoDateTimeObject(String dateTime)
  {
+   String newDT=dateTime;
    try {
+     if(dateTime.contains('/')){
+       newDT=dateTime.replaceAll('/', '-');
+     }
      DateTime dateTimeObj = new DateFormat("yyyy-MM-dd hh:mm:ss", "en-US")
+         .parse(newDT);
+     if (dateTimeObj != null)
+       return dateTimeObj;
+   }
+   catch(e){
+     print(e.toString());
+     return null;
+   }
+   return null;
+ }
+
+
+
+ static DateTime convertIntoDateObject(String dateTime)
+ {
+   try {
+     DateTime dateTimeObj = new DateFormat("yyyy-MM-dd", "en-US")
          .parse(dateTime);
      if (dateTimeObj != null)
        return dateTimeObj;
@@ -21,10 +42,10 @@ class DateTimeUtils{
    }
    return null;
  }
- static DateTime convertIntoDateObject(String dateTime)
- {
+
+ static DateTime convertIntoTimeOnly(String dateTime) {
    try {
-     DateTime dateTimeObj = new DateFormat("yyyy-MM-dd", "en-US")
+     DateTime dateTimeObj = new DateFormat("hh:mm:ss", "en-US")
          .parse(dateTime);
      if (dateTimeObj != null)
        return dateTimeObj;

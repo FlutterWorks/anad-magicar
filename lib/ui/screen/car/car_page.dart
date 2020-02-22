@@ -13,6 +13,7 @@ import 'package:anad_magicar/model/apis/service_result.dart';
 import 'package:anad_magicar/model/cars/car.dart';
 import 'package:anad_magicar/model/cars/car_model.dart';
 import 'package:anad_magicar/model/change_event.dart';
+import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/user/admin_car.dart';
 import 'package:anad_magicar/model/viewmodel/add_car_vm.dart';
 import 'package:anad_magicar/model/viewmodel/car_info_vm.dart';
@@ -59,7 +60,7 @@ class CarPageState extends MainPage<CarPage> {
   List<AdminCarModel> carsToUserForConfirm;
   ConfirmCarBloc confirmCarBloc;
   List<CarInfoVM> carInfos=new List();
-
+  NotyBloc<Message> carChangedNoty;
 
 
   void registerBus() {
@@ -167,20 +168,11 @@ class CarPageState extends MainPage<CarPage> {
       }
     }
   }
-  _toggle()
-  {
-    Navigator.of(context).pushNamed('/home');
-  }
 
   _deleteCarToUser(int userId,int carId,CarInfoVM car) async{
    ServiceResult result=await restDatasource.deletecarToUser(userId, carId);
-   if(result!=null)
-     {
+   if(result!=null) {
        centerRepository.showFancyToast(result.Message);
-
-       setState(() {
-         carInfos.removeWhere((r)=>r.carId==carId);
-       });
      }
    else
      {
@@ -224,27 +216,30 @@ class CarPageState extends MainPage<CarPage> {
     List<int> cars=new List();
     cars..add(carId);
     ServiceResult result=await restDatasource.deleteCars( cars);
-    if(result!=null)
-    {
+    if(result!=null) {
       centerRepository.showFancyToast(result.Message);
-      setState(() {
-        carInfos.removeWhere((r)=>r.carId==carId);
-      });
+      if(result.IsSuccessful) {
+        carInfos.removeWhere((r) => r.carId == carId);
+        carChangedNoty.updateValue(new Message(type: 'CAR_DELETED'));
+      }
+      else{
+      }
     }
     else
     {
       centerRepository.showFancyToast(Translations.current.hasErrors());
     }
+    Navigator.pop(context);
     return Future.value(0);
   }
-  _addCar(SaveCarModel editModel,int userId, bool edit){
+  _addCar(SaveCarModel editModel,int userId, bool edit) {
 
     Navigator.of(context).pushReplacementNamed('/addcar',
         arguments: new AddCarVM(
         fromMainApp: true,
-    editMode: edit,
-    editCarModel: editModel,
-    notyBloc: widget.carPageVM.carAddNoty));
+        editMode: edit,
+        editCarModel: editModel,
+        notyBloc: widget.carPageVM.carAddNoty));
   }
 
   _showBottomSheetAcceptRole(BuildContext cntext,int carId,int userId)
@@ -451,18 +446,27 @@ class CarPageState extends MainPage<CarPage> {
                       }
                     },
                   ) ,
-                        isAdmin && statusId==Constants.CAR_TO_USER_STATUS_WAITING_TAG ?  FlatButton(
+                        (isAdmin && statusId==Constants.CAR_TO_USER_STATUS_WAITING_TAG ) ?  FlatButton (
                           padding: EdgeInsets.only(left: 0, right: 0),
                           child: Button(title: Translations.current.activateCar(),wid: 90.0,color: Colors.greenAccent.value,),
                           onPressed: () {
                             if(isAdmin) {
-
                              _showBottomSheetAcceptRole(context, c.carId,c.userId);
                             }
                           },
                         ) :
                         Container(width: 0.0,height: 0.0,),
-                        isAdmin ?      FlatButton(
+                        (isAdmin && statusId==Constants.CAR_TO_USER_STATUS_WAITING_TAG ) ?  FlatButton(
+                          padding: EdgeInsets.only(left: 0, right: 0),
+                          child: Button(title: Translations.current.denyRequest(),wid: 90.0,color: Colors.greenAccent.value,),
+                          onPressed: () {
+                            if(isAdmin) {
+                              _deleteCarToUser(c.userId,c.carId,c);
+                            }
+                          },
+                        ) :
+                        Container(width: 0.0,height: 0.0,),
+                        isAdmin ?   FlatButton(
                           padding: EdgeInsets.only(left: 0, right: 0),
                           child: Button(title: Translations.current.delete(),wid: 90.0,color: Colors.pinkAccent.value,),
                           onPressed: () {
@@ -485,7 +489,6 @@ class CarPageState extends MainPage<CarPage> {
   Widget createBody(List<CarInfoVM> cars,
       bool connection)
   {
-
     return
       Stack(
       overflow: Overflow.visible,
@@ -588,6 +591,8 @@ class CarPageState extends MainPage<CarPage> {
 
   @override
   void dispose() {
+    carChangedNoty.dispose();
+    confirmCarBloc.close();
     super.dispose();
   }
 
@@ -600,6 +605,7 @@ class CarPageState extends MainPage<CarPage> {
   @override
   initialize() {
     confirmCarBloc=new ConfirmCarBloc();
+    carChangedNoty=new NotyBloc<Message>();
     if(widget.carPageVM!=null &&
         widget.carPageVM.isSelf!=null && !widget.carPageVM.isSelf)
       carsToUser=factoryCar.loadCarsToUserByUserId(widget.carPageVM.userId);
@@ -645,7 +651,15 @@ class CarPageState extends MainPage<CarPage> {
                       _carCounts = snapshot.data;
                     }
 
-                    return createBody(carInfos, hasInternet);
+                    return StreamBuilder(
+                      stream: carChangedNoty.noty,
+                      builder: (context,snapshot){
+                        if(snapshot.hasData && snapshot.data!=null){
+
+                        }
+                        return createBody(carInfos, hasInternet);
+                      }
+                    );
                   }
 
               ) :
@@ -667,27 +681,20 @@ class CarPageState extends MainPage<CarPage> {
                       }
                       _carCounts = carsToUserForConfirm.length;
                     }
-                    return createBody(carInfos, hasInternet);
+
+                    return StreamBuilder(
+                        stream: carChangedNoty.noty,
+                        builder: (context,snapshot){
+                          if(snapshot.hasData && snapshot.data!=null){
+
+                          }
+                          return createBody(carInfos, hasInternet);
+                        }
+                    );
                   }
               );
           }
-     // ),
-    /*  bottomNavigationBar: CurvedNavigationBar(
-        index: 2,
-        height: 60.0,
-        backgroundColor: Color(0xff424242),//Colors.blueAccent[400],
-        items: <Widget>[
-          Icon(Icons.build, size: 30,color: Color(0xff455a64)),
-          Icon(Icons.pin_drop, size: 30,color: Color(0xff455a64)),
-          Icon(Icons.directions_car , size: 30,color:  Color(0xff455a64)),
-          Icon(Icons.message, size: 30,color: Color(0xff455a64)),
-          Icon(Icons.payment, size: 30,color: Color(0xff455a64),),
-        ],
-        onTap: (index) {
-          //Handle button tap
-          CenterRepository.onNavButtonTap(context, index);
-        },
-      ),*/
+
 
     );
   }

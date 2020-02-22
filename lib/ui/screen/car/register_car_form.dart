@@ -8,9 +8,11 @@ import 'package:anad_magicar/components/custom_progress_dialog.dart';
 import 'package:anad_magicar/components/fancy_popup/main.dart';
 import 'package:anad_magicar/components/flutter_form_builder/flutter_form_builder.dart';
 import 'package:anad_magicar/components/send_data.dart';
+import 'package:anad_magicar/data/ds/car_ds.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/data/rxbus.dart';
 import 'package:anad_magicar/model/apis/api_brand_model.dart';
+import 'package:anad_magicar/model/apis/api_car_mdel_detail.dart';
 import 'package:anad_magicar/model/apis/api_car_model.dart';
 import 'package:anad_magicar/model/apis/api_search_car_model.dart';
 import 'package:anad_magicar/model/apis/api_user_model.dart';
@@ -19,12 +21,14 @@ import 'package:anad_magicar/model/cars/brand.dart';
 import 'package:anad_magicar/model/cars/car.dart';
 import 'package:anad_magicar/model/cars/car_color.dart';
 import 'package:anad_magicar/model/cars/car_model.dart';
+import 'package:anad_magicar/model/cars/car_model_detail.dart';
 import 'package:anad_magicar/model/cars/car_type.dart';
 import 'package:anad_magicar/model/change_event.dart';
 import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/user/admin_car.dart';
 import 'package:anad_magicar/model/user/user.dart';
 import 'package:anad_magicar/model/viewmodel/add_car_vm.dart';
+import 'package:anad_magicar/model/viewmodel/car_page_vm.dart';
 import 'package:anad_magicar/model/viewmodel/init_device_data.dart';
 import 'package:anad_magicar/model/viewmodel/noty_loading_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
@@ -43,8 +47,7 @@ import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
 import 'package:anad_magicar/widgets/flutter_offline/flutter_offline.dart';
 import 'package:anad_magicar/widgets/forms_appbar.dart';
-import 'package:anad_magicar/widgets/magicar_appbar.dart';
-import 'package:anad_magicar/widgets/magicar_appbar_title.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -54,7 +57,7 @@ import 'package:anad_magicar/components/loading_indicator.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 //import 'package:anad_magicar/ui/login/confirm_login.dart';
-
+import 'package:anad_magicar/ui/screen/home/index.dart' as home;
 
 
 class RegisterCarForm extends StatefulWidget
@@ -143,7 +146,7 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
     pelakForSearch=value.toString();
   }
 
-  Future<String> _authAddCar(CarData data)
+  Future<String> _authAddCar(CarData data) async
   {
     return Future.delayed(new Duration(microseconds: 200)).then((_) {
       if((data!=null &&
@@ -151,7 +154,7 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
           data.tip>0) &&
       !data.cancel) {
         if(widget.addCarVM!=null && widget.addCarVM.editMode!=null &&
-            widget.addCarVM.editMode ){
+            widget.addCarVM.editMode ) {
           SaveCarModel carModel = new SaveCarModel(
             carId: widget.addCarVM.editCarModel.carId,
              /* brandId: data.brandId,
@@ -162,9 +165,7 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
               distance: data.distance,
               ConstantId: null,
               DisplayName: null);
-          var result= restDatasource.editCarInfo(carModel);
-          if(result!=null){
-            result.then((value){
+           restDatasource.editCarInfo(carModel).then((value){
               if(value.IsSuccessful){
                 centerRepository.showFancyToast(Translations.current.editCarSuccessful());
                 CenterRepository.onCarPageTap(context, userId);
@@ -173,9 +174,10 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
                 centerRepository.showFancyToast(Translations.current.editCarUnSuccessful());
               }
             });
-          }
+
         }else {
-          SaveCarModel carModel = new SaveCarModel(brandId: data.brandId,
+          SaveCarModel carModel = new SaveCarModel(
+              brandId: data.brandId,
               modelId: data.modelId,
               tip: data.tip,
               pelak: data.pelak,
@@ -188,16 +190,46 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
                 hasLoaded: false,
                 haseError: false,
                 hasInternet: true));*/
-            if (!isRegisterBtnDisabled) widget.registerCarBloc.add(
-                new LoadRegisterEvent(user, carModel, context));
+            /*if (!isRegisterBtnDisabled) widget.registerCarBloc.add(
+                new LoadRegisterEvent(user, carModel, context));*/
+            CarDS carDS = new CarDS();
+             carDS.send(carModel).then((result) {
+
+               if (result != null) {
+                 centerRepository.getCars()
+                   ..add(new Car(carId: result.carId,
+                       carModelDetailId: result.tip,
+                       productDate: null,
+                       colorTypeConstId: result.colorId,
+                       pelaueNumber: result.pelak,
+                       deviceId: 1,
+                       totlaDistance: result.distance,
+                       carStatusConstId: null,
+                       description: null,
+                       isActive: null,
+                       brandTitle: '',
+                       businessUnitId: null,
+                       owner: null,
+                       version: null,
+                       createdDate: null));
+                 prefRepository.setCarId(result.carId);
+                 centerRepository.setCarId(result.carId);
+                 prefRepository.addCarsCount();
+                 Navigator.pushReplacementNamed(context, '/adddevice',arguments: widget.addCarVM.fromMainApp);
+               }
+               else{
+
+               }
+                });
+
           }
           else {
-            loadingNoty.updateValue(new NotyLoadingVM(
+            /*loadingNoty.updateValue(new NotyLoadingVM(
                 isLoading: true,
                 hasLoaded: false,
                 haseError: false,
-                hasInternet: false));
-            //centerRepository.showProgressDialog(context, 'در حال ارسال اطلاعات');
+                hasInternet: false));*/
+
             centerRepository.getCars()
               ..add(new Car(carId: centerRepository
                   .getCars()
@@ -217,13 +249,13 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
                   version: null,
                   createdDate: null));
             //centerRepository.dismissDialog(context);
-            loadingNoty.updateValue(new NotyLoadingVM(isLoading: false,
+            /*loadingNoty.updateValue(new NotyLoadingVM(isLoading: false,
                 hasLoaded: true,
                 haseError: false,
-                hasInternet: false));
+                hasInternet: false));*/
             // Navigator.of(context).pushNamed('/adddevice');
             // loadDeviceModel(false);
-            Navigator.of(context).pushNamed('/adddevice', arguments: true);
+            Navigator.of(context).pushReplacementNamed('/adddevice', arguments: true);
             // widget.changeFormNotyBloc.updateValue(new Message(type: 'DEVICE_FORM',index: 1,text: 'INTERNET',status: false));
           }
 
@@ -231,13 +263,12 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
         }
       }
       else if(data.cancel) {
-        if(widget.fromMainApp!=null &&
-            widget.fromMainApp)
-          {
+        if(widget.addCarVM!=null && widget.addCarVM.fromMainApp!=null &&
+            widget.addCarVM.fromMainApp) {
             Navigator.pop(context);
           }
         else {
-          Navigator.pushReplacementNamed(context, '/login');
+           Navigator.pushReplacementNamed(context, '/login');
           return 'لطفا جهت ورود به برنامه نام کاربری و رمز عبور خود را وارد کنید';
         }
 
@@ -889,9 +920,16 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
     }
   }
 
+  onCarPageTap()
+  {
+    Navigator.of(context).pushNamed('/carpage',arguments: new CarPageVM(
+        userId: userId,
+        isSelf: true,
+        carAddNoty: home.valueNotyModelBloc));
+  }
+
   @override
   void initState() {
-
     super.initState();
     user=new User();
 
@@ -958,7 +996,7 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
     double h=MediaQuery.of(context).size.height;
     //final RegisterBloc _registerBloc=BlocProvider.of<RegisterBloc>(context);
     return
-      BlocListener(
+     /* BlocListener(
         bloc: widget.registerCarBloc,
         listener: (BuildContext context, RegisterState state) {
       if(state is RegisteredState){
@@ -1002,8 +1040,8 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
                 haseError: true,
                 hasInternet: true));
             centerRepository.showFancyToast(currentState.errorMessage);
-          }
-          return  Stack(
+          }*/
+            Stack(
               overflow: Overflow.visible,
               children: <Widget> [
           new Padding(padding: EdgeInsets.only(top: 75.0),
@@ -1017,11 +1055,8 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
                   actionIcon: (widget.addCarVM!=null && widget.addCarVM.editMode!=null && widget.addCarVM.editMode) ? null :
                   Icon(Icons.search,color: Colors.indigoAccent,size: 28.0,),
                   loadingNoty: loadingNoty,
-                  onBackPress:() {showExitDialog();} ,)
+                  onBackPress:() {onCarPageTap();} ,)
           ],
-          );
-        }
-      ),
       );
 
 
@@ -1038,8 +1073,7 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
     super.dispose();
   }
 
-  showSearchCar()
-    {
+  showSearchCar() {
       _showBottomSheetSearchCar(context);
     }
 
@@ -1185,7 +1219,6 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
         var result = await restDS.searchCars(
             int.tryParse(carIdForSearch), pelakForSearch, serialNumberForSearch);
 
-
         if (result != null && result.length>0) {
           Navigator.pop(context);
           Car car=result.first;
@@ -1248,6 +1281,35 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
                                     Text(DartHelper.isNullOrEmptyString(
                                         car.pelaueNumber)),
                                   ],
+                                ),
+                                Container(
+                                  child:
+                                  new FlatButton(onPressed: () {
+                                    int brandId=0;
+                                    int carModelId=0;
+                                    int detailId=0;
+                                    var mDetail=centerRepository.getCarModelDetails().where((c)=>c.carModelDetailId==car.carModelDetailId).toList();
+                                    if(mDetail!=null && mDetail.length>0){
+                                      CarModelDetail carModelDetail=mDetail.first;
+                                      var carModel=centerRepository.getCarModels().where((c)=>c.carModelId==carModelDetail.carModelId).toList();
+                                      if(carModel!=null && carModel.length>0){
+                                        var brands=centerRepository.getCarBrands().where((c)=>c.brandId==carModel.first.brandId).toList();
+                                        if(brands!=null && brands.length>0){
+                                          BrandModel brand=brands.first;
+                                          brandId=brand.brandId;
+                                          carModelId=carModel.first.carModelId;
+                                        }
+                                      }
+                                    }
+                                    CarData data=new CarData(brandId: brandId,
+                                        modelId: carModelId,
+                                        tip: detailId, pelak: car.pelaueNumber,
+                                        colorId: car.colorTypeConstId,
+                                        distance: car.totlaDistance,
+                                        cancel: false);
+                                    _authAddCar(data);
+
+                                  }, child: Button(title: Translations.current.addCar(),color: Colors.lightGreen.value,wid: 120.0,)),
                                 ),
 
                                 Container(

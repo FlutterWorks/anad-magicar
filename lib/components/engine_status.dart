@@ -67,6 +67,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
   bool hasInternet=true;
   RestDatasource restDS;
   bool isDoorOpen=false;
+  static String lastActionCode;
   AudioCache player = AudioCache();
   AudioPlayer advancedPlayer;
 
@@ -106,6 +107,19 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
 
   Color _currentColor;
 
+
+   registerRxBus() {
+     RxBus.register<ChangeEvent>().listen((ChangeEvent event) {
+       if(event!=null && event.type=='COMMAND_SUCCESS'){
+         widget.sendCommandNoty.updateValue(
+             new SendingCommandVM(sending: false,
+                 sent: true, hasError: false));
+         play('', lastActionCode);
+         updateCarStatusAfterCommands();
+       }
+     });
+
+   }
 
   getAppTheme() async{
 
@@ -211,14 +225,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
           ServiceResult result = await restDS.sendCommand(sendCommand);
           if (result != null) {
             if (result.IsSuccessful) {
-              //centerRepository.dismissDialog(context);
-
-              widget.sendCommandNoty.updateValue(
-                  new SendingCommandVM(sending: false,
-                      sent: true, hasError: false));
-              play('', actionCode);
-              updateCarStatusAfterCommands();
-
+              lastActionCode=actionCode;
             }
             else {
               widget.sendCommandNoty.updateValue(
@@ -1166,16 +1173,6 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
       });
     });
 
-    /*_controllerB = AnimationController(
-        vsync: this,
-        lowerBound: 0.5,
-        upperBound: 1.0,
-        duration: Duration(seconds: 1));
-    _controllerB.addListener(() {
-      setState(() {
-        squareScaleB = _controllerB.value;
-      });
-    });*/
 
   }
   play(String sound,String actionCode)  {
@@ -1189,6 +1186,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
   @override
   void initState() {
 
+     registerRxBus();
       getAppTheme();
     restDS=new RestDatasource();
     Constants.createSoundToActionMap();
@@ -1221,38 +1219,10 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
       if(status==AnimationStatus.completed &&
       status!=AnimationStatus.reverse)
         {
-          /*if (temp_engineStatus) {
-             engineImageUrl='assets/images/car_start_3_1.png';
-            BlocProvider
-                .of<GlobalBloc>(context)
-                .messageBloc
-                .addition
-                .add(new Message(
-                text: 'assets/images/car_start_3_1.png',
-                status: false));
-          }
-          else {
-             engineImageUrl='assets/images/car_start_3.png';
-            BlocProvider
-                .of<GlobalBloc>(context)
-                .messageBloc
-                .addition
-                .add(new Message(
-                text: 'assets/images/car_start_3.png',
-                status: true));
-          }
-
-
-          setState(() {
-            temp_engineStatus = !temp_engineStatus;
-            _counter==0 ? _counter++ : _counter=0;
-          });*/
         }
     });
 
     animateEngineStatus();
-    //getColorFromIndexMap(widget.carStateVM.carIndex);
-
     fetchUserId();
 
     super.initState();
@@ -1261,7 +1231,6 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
   @override
   void dispose() {
     _controllerA.dispose();
-   // _controllerB.dispose();
     controller.dispose();
     super.dispose();
   }
@@ -1269,19 +1238,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
 
-    return  /*OfflineBuilder(
-        connectivityBuilder: (
-        BuildContext context,
-        ConnectivityResult connectivity,
-        Widget child,
-    ) {
-          hasInternet=connectivity != ConnectivityResult.none;
-          if (connectivity == ConnectivityResult.none) {
-
-          }
-            return child;
-        },
-      child:*/
+    return
         buildControlRow(context,
             engineImageUrl, null,
             widget.engineStatus,

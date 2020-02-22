@@ -74,6 +74,9 @@ bool lock_status=true;
 bool shock_status=false;
 bool power_status=false;
 bool trunk_status=false;
+bool isPark=true;
+bool isGPSOn=true;
+bool isHighSpeed=false;
 /*final CarouselSlider touchDetectionDemo = CarouselSlider(
   viewportFraction: 1,
   aspectRatio: 2.0,
@@ -949,7 +952,9 @@ return
 int _currebtCarIndex=0;
 buildMapRow(BuildContext context,
     CarStateVM carStateVM,
-    NotyBloc<Message> carPageChangedNoty) {
+    NotyBloc<Message> carPageChangedNoty,
+    NotyBloc<CarStateVM> carStateNoty,
+    AnimationController animController) {
   var _currentColorRow=carStateVM.getCurrentColor();
   double i_w=28.0;
   double i_h=28.0;
@@ -964,207 +969,233 @@ buildMapRow(BuildContext context,
           if (data.data != null && data.hasData) {
             Message msg = data.data;
             if (msg.type == 'CARPAGE') {
-              _currebtCarIndex=msg.index;
-             // _currentColor = colors[msg.index];
+              _currebtCarIndex = msg.index;
+              // _currentColor = colors[msg.index];
 
             }
           }
           return
-            Container(
-              margin: EdgeInsets.only(top: 20.0),
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width / 8.0,
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height*0.50,
-              child:
-              new Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
+            StreamBuilder<CarStateVM>(
+              stream: carStateNoty.noty,
+              initialData: null,
+              builder: (BuildContext c, AsyncSnapshot<CarStateVM> data) {
+                if (data.data != null && data.hasData) {
+                  CarStateVM stateVM = data.data;
+                  isPark=stateVM.isPark;
+                  isGPSOn=stateVM.isGPSOn;
+                  isHighSpeed=stateVM.highSpeed;
+                }
+                return
                   Container(
-                    // color: Color(0xff757575),
-                    margin: EdgeInsets.only(top: m_top,bottom: m_bot ),
+                    margin: EdgeInsets.only(top: 60.0,right: 10),
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width / 8.0,
+                    height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.55,
                     child:
-                    Stack(
-
+                    new Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        new Align(
+
+                        Container(
+                          margin: EdgeInsets.only(top: m_top,bottom: m_bot ),
+                          //color: Colors.white,
                           alignment: Alignment.center,
-                          child: Container(
-                            //color: Colors.white,
-                            alignment: Alignment.center,
-                            height: i_h,
-                            width: i_w,
-                            padding: EdgeInsets.symmetric(horizontal: 1.0),
+                          height:i_h,
+                          width: i_w,
+                          padding: EdgeInsets.symmetric(horizontal: 1.0),
+                          child:
+                          Center(
                             child:
-                            Center(
-                              child:
-                              Container(
-                                //color: Colors.white,
-                                  alignment: Alignment.topCenter,
-                                  height: i_h,
-                                  width: i_w,
-                                  child:
-                                  Image.asset('assets/images/park.png',
-                                    scale: 1.0, fit: BoxFit.cover,
-                                    color: _currentColorRow,)
-                              ),
+
+                            Container(
+                              //color: Colors.white,
+                              margin: EdgeInsets.only(top: 0.0,bottom: 0.0),
+                              alignment: Alignment.center,
+                              height:i_h,
+                              width: i_w,
+                              child:  !isHighSpeed ?
+
+                              Image.asset('assets/images/speed.png',
+                                fit: BoxFit.cover, color:  _currentColorRow  ,) :
+                              BounceAnimationBuilder(
+                                child:  ImageNeonGlow(imageUrl: 'assets/images/speed.png',counter: 0,color: _currentColorRow,),
+                                animationController: animController,
+                                start: isHighSpeed,),
                             ),
                           ),
 
                         ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    // color: Color(0xff757575),
-                    margin: EdgeInsets.only(top: m_top,bottom: m_bot ),
-                    child:
-                    Stack(
-
-                      children: <Widget>[
-                        new Align(
+                        Container(
+                          margin: EdgeInsets.only(top: m_top,bottom: m_bot ),
+                          //color: Colors.white,
                           alignment: Alignment.center,
-                          child: Container(
-                            //color: Colors.white,
-                            alignment: Alignment.center,
-                            height: i_h,
-                            width: i_w,
-                            padding: EdgeInsets.symmetric(horizontal: 1.0),
+                          height:i_h,
+                          width: i_w,
+                          padding: EdgeInsets.symmetric(horizontal: 1.0),
+                          child:
+                          Center(
                             child:
-                            Center(
-                              child:
-                              Container(
-                                //color: Colors.white,
-                                  alignment: Alignment.topCenter,
-                                  height: i_h,
-                                  width: i_w,
-                                  child:
-                                  Image.asset('assets/images/gps.png',
-                                    scale: 1.0, fit: BoxFit.cover,
-                                    color: _currentColorRow,)
-                              ),
+
+                            Container(
+                              //color: Colors.white,
+                              margin: EdgeInsets.only(top: 0.0,bottom: 0.0),
+                              alignment: Alignment.center,
+                              height:i_h,
+                              width: i_w,
+                              child:  !isPark ?
+
+                              Image.asset('assets/images/park.png',
+                                fit: BoxFit.cover, color:  _currentColorRow  ,) :
+                              BounceAnimationBuilder(
+                                child:  ImageNeonGlow(imageUrl: 'assets/images/park.png',counter: 0,color: _currentColorRow,),
+                                animationController: animController,
+                                start: isPark,),
                             ),
                           ),
 
                         ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    // color: Color(0xff757575),
-                    margin: EdgeInsets.only(top: m_top,bottom: m_bot ),
-                    child:
-                    Stack(
 
-                      children: <Widget>[
-                        new Align(
+                        Container(
+                          margin: EdgeInsets.only(top: m_top,bottom: m_bot ),
+                          //color: Colors.white,
                           alignment: Alignment.center,
-                          child: Container(
-                            //color: Colors.white,
-                            alignment: Alignment.center,
-                            height: i_h,
-                            width: i_w,
-                            padding: EdgeInsets.symmetric(horizontal: 1.0),
+                          height:i_h,
+                          width: i_w,
+                          padding: EdgeInsets.symmetric(horizontal: 1.0),
+                          child:
+                          Center(
                             child:
-                            Center(
-                              child:
-                              Container(
-                                //color: Colors.white,
-                                  alignment: Alignment.topCenter,
-                                  height: i_h,
-                                  width: i_w,
-                                  child:
-                                  Image.asset('assets/images/gprs.png',
-                                    scale: 1.0, fit: BoxFit.cover,
-                                    color: _currentColorRow,)
-                              ),
+
+                            Container(
+                              //color: Colors.white,
+                              margin: EdgeInsets.only(top: 0.0,bottom: 0.0),
+                              alignment: Alignment.center,
+                              height:i_h,
+                              width: i_w,
+                              child:  !isGPSOn ?
+
+                              Image.asset('assets/images/gps.png',
+                                fit: BoxFit.cover, color:  _currentColorRow  ,) :
+                              BounceAnimationBuilder(
+                                child:  ImageNeonGlow(imageUrl: 'assets/images/gps.png',counter: 0,color: _currentColorRow,),
+                                animationController: animController,
+                                start: isGPSOn,),
                             ),
                           ),
 
                         ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 20.0),
-                    child:
-                  Container(
-                    // color: Color(0xff757575),
-                    margin: EdgeInsets.only(top: m_top,bottom: m_bot ),
-                    child:
-                    Stack(
 
-                      children: <Widget>[
-                        new Align(
+                        Container(
+                          margin: EdgeInsets.only(top: m_top,bottom: m_bot ),
+                          //color: Colors.white,
                           alignment: Alignment.center,
-                          child: Container(
-                            //color: Colors.white,
-                            alignment: Alignment.center,
-                            height: i_h,
-                            width: i_w,
-                            padding: EdgeInsets.symmetric(horizontal: 1.0),
+                          height:i_h,
+                          width: i_w,
+                          padding: EdgeInsets.symmetric(horizontal: 1.0),
+                          child:
+                          Center(
                             child:
-                            Center(
-                              child:
-                              Container(
-                                //color: Colors.white,
-                                  alignment: Alignment.topCenter,
-                                  height: i_h,
-                                  width: i_w,
-                                  child:
-                                  Image.asset('assets/images/battery_1.png',
-                                    scale: 1.0, fit: BoxFit.cover,
-                                  color: _currentColorRow,)
-                              ),
+
+                            Container(
+                              //color: Colors.white,
+                              margin: EdgeInsets.only(top: 0.0,bottom: 0.0),
+                              alignment: Alignment.center,
+                              height:i_h,
+                              width: i_w,
+                              child:  !isGPSOn ?
+
+                              Image.asset('assets/images/gprs.png',
+                                fit: BoxFit.cover, color:  _currentColorRow  ,) :
+                              BounceAnimationBuilder(
+                                child:  ImageNeonGlow(imageUrl: 'assets/images/gprs.png',counter: 0,color: _currentColorRow,),
+                                animationController: animController,
+                                start: isGPSOn,),
                             ),
                           ),
 
                         ),
-                      ],
-                    ),
-                  ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: m_top,bottom: m_bot ),
-                    // color: Color(0xff757575),
-                    child:
-                    Stack(
 
-                      children: <Widget>[
-                        new Align(
-                          alignment: Alignment.center,
-                          child: Container(
-                            //color: Colors.white,
-                            alignment: Alignment.center,
-                            height: i_h,
-                            width: i_w,
-                            padding: EdgeInsets.symmetric(horizontal: 1.0),
+                          Container(
+                            // color: Color(0xff757575),
+                            margin: EdgeInsets.only(top: m_top, bottom: m_bot),
                             child:
-                            Center(
-                              child:
-                              Container(
-                                //color: Colors.white,
-                                  alignment: Alignment.topCenter,
-                                  height: i_h,
-                                  width: i_w,
-                                  child:
-                                  Image.asset('assets/images/celsius.png',
-                                    scale: 1.0, fit: BoxFit.cover,
-                                    color: _currentColorRow,)
-                              ),
+                            Stack(
+
+                              children: <Widget>[
+                                new Align(
+                                  alignment: Alignment.center,
+                                  child: Container(
+                                    //color: Colors.white,
+                                    alignment: Alignment.center,
+                                    height: i_h,
+                                    width: i_w,
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 1.0),
+                                    child:
+                                    Center(
+                                      child:
+                                      Container(
+                                        //color: Colors.white,
+                                          alignment: Alignment.center,
+                                          height: i_h,
+                                          width: i_w,
+                                          child:
+                                          Image.asset(
+                                            'assets/images/battery_1.png',
+                                            scale: 1.0, fit: BoxFit.cover,
+                                            color: _currentColorRow,)
+                                      ),
+                                    ),
+                                  ),
+
+                                ),
+                              ],
                             ),
                           ),
 
+                        Container(
+                          margin: EdgeInsets.only(top: m_top, bottom: m_bot),
+                          // color: Color(0xff757575),
+                          child:
+                          Stack(
+
+                            children: <Widget>[
+                              new Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  //color: Colors.white,
+                                  alignment: Alignment.center,
+                                  height: i_h,
+                                  width: i_w,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 1.0),
+                                  child:
+                                  Center(
+                                    child:
+                                    Container(
+                                      //color: Colors.white,
+                                        alignment: Alignment.center,
+                                        height: i_h,
+                                        width: i_w,
+                                        child:
+                                        Image.asset('assets/images/celsius.png',
+                                          scale: 1.0, fit: BoxFit.cover,
+                                          color: _currentColorRow,)
+                                    ),
+                                  ),
+                                ),
+
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                 /* Container(
+                        /* Container(
                     margin: EdgeInsets.only(top: m_top,bottom: m_bot ),
                     //color: Color(0xff757575),
                     child:
@@ -1197,7 +1228,7 @@ buildMapRow(BuildContext context,
                                         carCounts: centerRepository.getCarsToAdmin().length,
                                       cars: centerRepository.getCarsToAdmin(),
                                     ));
-                                    *//*RxBus.post(new ChangeEvent(message: 'MAP_PAGE'));*//* *//*Navigator.of(context).pushNamed('/map');*//*
+                                    */ /*RxBus.post(new ChangeEvent(message: 'MAP_PAGE'));*/ /* */ /*Navigator.of(context).pushNamed('/map');*/ /*
                                   },
                                   child:
                                   new Image.asset(
@@ -1210,9 +1241,11 @@ buildMapRow(BuildContext context,
                         ),*/
                       ],
                     ),
-                 // ),
-               // ],
-              //),
+                    // ),
+                    // ],
+                    //),
+                  );
+              },
             );
         },
     );

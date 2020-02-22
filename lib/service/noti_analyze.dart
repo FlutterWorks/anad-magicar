@@ -39,6 +39,13 @@ class NotiAnalyze {
 
  List<List<int>> decodeStatusIntoBytes(){
     List<List<int>> status=new List();
+    List<int> temp_data=new List();
+    for(var i=0;i<=7;i++){
+      for(var j=0;j<=7;j++){
+        temp_data..add(0);
+      }
+        status..add(temp_data);
+      }
     for(var i=0;i<=7;i++){
       for(var j=0;j<=7;j++){
         status[i][7-j]=getBit(data, i, j);
@@ -47,52 +54,60 @@ class NotiAnalyze {
     return status;
   }
 
- int  getBit(Uint8List data,int posByte,int posBit){
-   int valByte=data[posByte];
-   int valInt=(valByte >> ((8 - (posBit+1)) & 0x0001));
+ /*int  getBit(Uint8List data,int posByte,int posBit){
+    int valByte=data[posByte];
+    int valInt=(valByte >> ((8 - (posBit+1)) & 0x0001));
    return valInt;
-  }
+  }*/
+  int getBit( Uint8List data,int posByte,int position) {
+    int valByte=data[posByte];
+   return (valByte >> position) & 1;
+ }
 
+  int getByte(Uint8List data,int posByte,int position){
+    int valByte=data[posByte];
+    return valByte;
+  }
   StatusNotiVM decodeStatus(List<List<int>> statusBits, int index) {
-   statusNotiVM=new StatusNotiVM();
-   if(index==1)
+
+   if(index==0)
      {
        decodeStatus1(statusBits[0]);
 
      }
-   if(index==2)
+   if(index==1)
    {
      decodeStatus2(statusBits[1]);
 
    }
-   if(index==3)
+   if(index==2)
    {
      decodeStatus3(statusBits[2]);
 
    }
 
-   if(index==4)
+   if(index==3)
    {
      decodeFeature1(statusBits[3]);
 
    }
-   if(index==5)
+   if(index==4)
    {
      decodeFeature2(statusBits[4]);
 
    }
-   if(index==6)
+   if(index==5)
    {
      decodeFeature3(statusBits[5]);
    }
-   if(index==7)
+   if(index==6)
    {
-     decodeData6(statusBits[6]);
+     decodeData6(getByte(data, 6, 0));
 
    }
-   if(index==8)
+   if(index==7)
    {
-     decodeData7(statusBits[7]);
+     decodeData7(getByte(data, 7, 0));
    }
   return statusNotiVM;
  }
@@ -231,20 +246,21 @@ class NotiAnalyze {
        statusNotiVM.startEngineMinute=-10;
  }
 
- static decodeData6(List<int> data){
-  // statusNotiVM.temp=int.tryParse(data);
+ static decodeData6(int data){
+   statusNotiVM.temp=data;
  }
- static decodeData7(List<int> data){
-  // statusNotiVM.batteryValue=int.tryParse(data);
+ static decodeData7( data){
+   statusNotiVM.batteryValue=data;
  }
 
   StatusNotiVM analyzeStatusNoti() {
-   double notiItemSize=(noti.length / 8);
-   //int notiSize=noti.length;
-   if(notiItemSize!=null &&notiItemSize>0)
+
+    if(statusNotiVM==null)
+      statusNotiVM=new StatusNotiVM();
+   if(data!=null && data.length>0)
      {
-       for(var i=0;i<notiItemSize;i++) {
-           String statusTemp=noti.substring(i*8,((i+1)*8-1));
+       for(var i=0;i<data.length;i++) {
+          // String statusTemp=noti.substring(i*8,((i+1)*8-1));
            //decodeStatus(statusTemp, i);
            List<List<int>> state=decodeStatusIntoBytes();
            decodeStatus(state, i);

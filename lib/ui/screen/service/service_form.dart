@@ -5,6 +5,7 @@ import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/api_service.dart';
 import 'package:anad_magicar/model/apis/service_type.dart';
 import 'package:anad_magicar/model/change_event.dart';
+import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
@@ -14,6 +15,7 @@ import 'package:anad_magicar/utils/date_utils.dart';
 import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:anad_magicar/ui/screen/service/service_item_slideable.dart';
 
 class ServiceForm extends StatefulWidget {
   int carId;
@@ -29,12 +31,7 @@ class ServiceForm extends StatefulWidget {
 
 class _ServiceFormState extends State<ServiceForm> {
 
-
   List<ServiceType> servcieTypes=new List();
-
-
-
-
 
   @override
   void initState() {
@@ -52,25 +49,42 @@ class _ServiceFormState extends State<ServiceForm> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return
-            new Padding(padding: EdgeInsets.only(top: 60.0),
+            new Padding(padding: EdgeInsets.only(top: 6.0),
               child:
               Container(
-                child: ListView.builder(
-                    physics: BouncingScrollPhysics(),
-                    itemCount: widget.servcies.length,
-                    itemBuilder: (context, index) {
-                      ApiService sTemp=widget.servcies[index];
-                      var sT= servcieTypes.where((s)=>s.ServiceTypeId==widget.servcies[index].ServiceTypeId).toList();
-                      ServiceType sType;
-                      if(sT!=null && sT.length>0) {
-                        sType = sT.first;
-                        sTemp.serviceType=sType;
+                child: StreamBuilder<Message>(
+                  stream: changeServiceNotyBloc.noty,
+                  builder: (context,snapshot) {
+                    if(snapshot.hasData && snapshot.data!=null){
+                      Message msg=snapshot.data;
+                      if(msg.type=='SERVICE_DELETED'){
+                        widget.servcies.removeWhere((s)=>s.ServiceId==msg.index);
                       }
-                      return ServiceItem(serviceItem: sTemp);
-                    }),
+                    }
+                    return
+                    ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        itemCount: widget.servcies.length,
+                        itemBuilder: (context, index) {
+                          ApiService sTemp = widget.servcies[index];
+                          var sT = servcieTypes.where((s) =>
+                          s.ServiceTypeId ==
+                              widget.servcies[index].ServiceTypeId).toList();
+                          ServiceType sType;
+                          if (sT != null && sT.length > 0) {
+                            sType = sT.first;
+                            sTemp.serviceType = sType;
+                          }
+                         // return ServiceItem(serviceItem: sTemp);
+                          return ServiceItemSlideable(serviceItem: sTemp);
+                        });
+                  }
+    ),
               ),
             );
 
 
   }
 }
+
+NotyBloc<Message> changeServiceNotyBloc=new NotyBloc<Message>();

@@ -163,6 +163,7 @@ void _loadItemsInCart() async {
     checkInternet();
     widget.messageHandler.initMessageHandler();
     ActionsCommand.createActionsTitleMap();
+   ActionsCommand.createActionIconsURlMap();
     _loadingInProgress = true;
     _showBottomSheetCallback=_showPersistBottomSheet;
     registerBus();

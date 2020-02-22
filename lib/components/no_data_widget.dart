@@ -21,14 +21,14 @@ class NoDataWidget extends StatelessWidget {
         child: (noCarCount==null || !noCarCount) ?
         Container(
           width:MediaQuery.of(context).size.width * 0.70,
-          height: MediaQuery.of(context).size.height * 0.70,
+          height: MediaQuery.of(context).size.height * 0.50,
           child: new Center(
               child: Text(Translations.current.noDatatoShow(),style: TextStyle(fontSize: 14.0,color: Colors.pinkAccent),) ) ) :
            Column(
              children: <Widget>[
                Container(
                  width : MediaQuery.of(context).size.width * 0.70,
-                 height : MediaQuery.of(context).size.height * 0.70,
+                 height : MediaQuery.of(context).size.height * 0.50,
            child:
                Image.asset('assets/images/car.png'),
                ),

@@ -95,6 +95,35 @@ class PrefRepository
     }
     return '';
   }
+  Future<bool> setMinMaxSpeed(String tag,int value) async {
+    prefs = await SharedPreferences.getInstance();
+    if(prefs!=null) {
+      prefs.setInt(tag,value);
+      return true;
+    }
+    return false;
+  }
+  Future<bool> setPeriodicTime(String tag,int value) async {
+    prefs = await SharedPreferences.getInstance();
+    if(prefs!=null) {
+      prefs.setInt(tag,value);
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> setPeriodicUpdate(String tag,int value) async {
+    prefs = await SharedPreferences.getInstance();
+    if(prefs!=null) {
+      prefs.setInt(tag,value);
+      return true;
+    }
+    return false;
+  }
+
+
+
+
   Future<bool> setLoginedUserName(String userName) async {
     prefs = await SharedPreferences.getInstance();
     if(prefs!=null) {
@@ -153,6 +182,35 @@ class PrefRepository
     }
     return false;
   }
+
+  Future<int> getMinMaxSpeed(String tag) async {
+    prefs = await SharedPreferences.getInstance();
+    if(prefs!=null) {
+      int minMax= prefs.getInt(tag);
+      if(minMax!=null)
+        return minMax;
+    }
+    return 0;
+  }
+  Future<int> getPeriodicTime(String tag) async {
+    prefs = await SharedPreferences.getInstance();
+    if(prefs!=null) {
+      int periodic= prefs.getInt(tag);
+      if(periodic!=null)
+        return periodic;
+    }
+    return 0;
+  }
+  Future<int> getPeriodicUpdate(String tag) async {
+    prefs = await SharedPreferences.getInstance();
+    if(prefs!=null) {
+      int periodic= prefs.getInt(tag);
+      if(periodic!=null)
+        return periodic;
+    }
+    return 0;
+  }
+
   Future<bool> getLoginedIsAdmin() async {
     prefs = await SharedPreferences.getInstance();
     if(prefs!=null) {

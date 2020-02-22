@@ -3,6 +3,7 @@ import 'package:anad_magicar/components/flutter_form_builder/flutter_form_builde
 import 'package:anad_magicar/components/flutter_form_builder/src/form_builder_custom_field.dart';
 import 'package:anad_magicar/components/flutter_form_builder/src/form_builder_validators.dart';
 import 'package:anad_magicar/components/loading_indicator.dart';
+import 'package:anad_magicar/components/no_data_widget.dart';
 import 'package:anad_magicar/components/send_data.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/api_device_model.dart';
@@ -337,32 +338,7 @@ class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderS
         ),
         onSaved: (value)=> confirmDeviceModel.password=value,
         validator: _validateName);
-    return  /* OfflineBuilder(
-      debounceDuration: Duration.zero,
-
-        connectivityBuilder: (
-        BuildContext context,
-        ConnectivityResult connectivity,
-        Widget child,
-    ) {
-      hasInternet=connectivity != ConnectivityResult.none;
-      if (connectivity == ConnectivityResult.none) {
-
-          initDeviceData = loadDeviceModel(hasInternet);
-
-        *//*return createBody(hasInternet,
-            simNumberField,
-            serialNumberField,
-            passwordField
-
-        );*//*
-      }else {
-        initDeviceData = loadDeviceModel(true);
-      }
-        return child;
-
-    },
-    child:*/
+    return
       Stack(
         children: <Widget>[
           new Center(
@@ -519,9 +495,9 @@ class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderS
                                            if (widget.fromMainApp==null || widget.fromMainApp==false) {
                                             Navigator.pushReplacementNamed(context, '/login'); }
                                            else {
-                                             widget.changeFormNotyBloc
+                                             /*widget.changeFormNotyBloc
                                                  .updateValue(
-                                                 new Message(type: 'CAR_FORM'));
+                                                 new Message(type: 'CAR_FORM'));*/
                                              Navigator.pushReplacementNamed(context, CarPageState.route,arguments: new CarPageVM(
                                                 userId: widget.userId,
                                                 isSelf: true,
@@ -541,7 +517,7 @@ class AddDeviceFormState extends State<AddDeviceForm> with SingleTickerProviderS
                         ],
                       );
                   }
-                  return Container();
+                  return NoDataWidget();
                 }
             ),
           ),

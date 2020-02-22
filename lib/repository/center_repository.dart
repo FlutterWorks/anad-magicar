@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+import 'package:anad_magicar/bloc/values/notify_value.dart';
+import 'package:anad_magicar/common/actions_constants.dart';
 import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/components/custom_progress_dialog.dart';
 import 'package:anad_magicar/components/pull_refresh/src/internals/indicator_wrap.dart';
@@ -21,6 +24,7 @@ import 'package:anad_magicar/model/apis/api_car_color.dart';
 import 'package:anad_magicar/model/apis/api_car_model.dart';
 import 'package:anad_magicar/model/apis/api_device_model.dart';
 import 'package:anad_magicar/model/apis/api_related_user_model.dart';
+import 'package:anad_magicar/model/apis/api_route.dart';
 import 'package:anad_magicar/model/apis/api_user_model.dart';
 import 'package:anad_magicar/model/apis/current_user_accessable_action.dart';
 import 'package:anad_magicar/model/apis/device_model.dart';
@@ -34,6 +38,7 @@ import 'package:anad_magicar/model/gender.dart';
 import 'package:anad_magicar/model/invoice/invoice.dart';
 import 'package:anad_magicar/model/invoice/invoice_detail.dart';
 import 'package:anad_magicar/model/plan_model.dart';
+import 'package:anad_magicar/model/send_command_model.dart';
 import 'package:anad_magicar/model/settings/settings_model.dart';
 import 'package:anad_magicar/model/user/admin_car.dart';
 import 'package:anad_magicar/model/user/role.dart';
@@ -47,6 +52,7 @@ import 'package:anad_magicar/model/viewmodel/map_vm.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/fake_server.dart';
 import 'package:anad_magicar/repository/pref_repository.dart';
+import 'package:anad_magicar/service/noti_analyze.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/home/index.dart';
 import 'package:flutter/material.dart';
@@ -191,8 +197,58 @@ class CenterRepository{
   return userId;
  }
 
+ checkGPSStatus(int carId) async{
+
+   ApiRoute apiRoute=new ApiRoute(carId: null,
+       startDate: null,
+       endDate: null,
+       dateTime: null,
+       speed: null,
+       lat: null,
+       long: null,
+       enterTime: null,
+       carIds: carIds,
+       DeviceId: null,
+       Latitude: null,
+       Longitude: null,
+       Date: null,
+       Time: null,
+       CreatedDateTime: null);
+   var result=await restDatasource.getLastPositionRoute(apiRoute);
+   if(result!=null && result.length>0) {
+     double lat = double.tryParse(result[0].Latitude);
+     double lng = double.tryParse(result[0].Longitude);
+   }
+ }
+
  static setUserId(int usrId){
    userId=usrId;
+ }
+
+ static sendCarStatusCommand() async{
+   int actionId=ActionsCommand.actionCommandsMap[ActionsCommand.STATUS_CAR_TAG];
+   var result= await restDatasource.sendCommand(new SendCommandModel(UserId: userId,
+       ActionId: actionId, CarId: currentCarId, Command: null));
+   if(result!=null) {
+
+   }
+ }
+
+
+   checkCarStatusPeriodic(int min)  {
+    Timer.periodic(Duration(minutes: min), (t) => sendCarStatusCommand());
+
+ }
+
+ fetchGPSStatus() async {
+   CarStateVM stateVM=centerRepository.getCarStateVMByCarId(currentCarId);
+   if(stateVM!=null){
+     stateVM.getParkAndSpeedStatus(statusChangedNoty);
+   }
+ }
+   checkParkGPSStatusPeriodic(int min)  {
+    Timer.periodic(Duration(minutes: min), (t) => fetchGPSStatus());
+
  }
 
   static onCarPageTap(BuildContext context,int userId) {
@@ -206,7 +262,7 @@ class CenterRepository{
   static int onNavButtonTap(BuildContext context, int index,{int carId}) {
    int currentBottomNaviSelected=index;
     if (index == 4) {
-      Navigator.of(context).pushNamed('/plans');
+      Navigator.of(context).pushReplacementNamed('/plans');
     }
     else if(index==0)
     {
@@ -214,7 +270,7 @@ class CenterRepository{
     }
     else if(index==1)
     {
-      Navigator.of(context).pushNamed(
+      Navigator.of(context).pushReplacementNamed(
           '/mappage',arguments: new MapVM(
         carId: 0,
         carCounts: centerRepository.getCarsToAdmin().length,
@@ -228,7 +284,7 @@ class CenterRepository{
     }
     else if(index==3)
     {
-      Navigator.pushNamed(context, '/messages',arguments: carId);
+      Navigator.pushReplacementNamed(context, '/messages',arguments: carId);
     }
     return currentBottomNaviSelected;
   }

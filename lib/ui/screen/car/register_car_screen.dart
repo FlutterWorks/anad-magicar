@@ -35,14 +35,10 @@ class _RegisterCarScreenState extends State<RegisterCarScreen>
 {
 
   bool hasInternet=true;
-  int _count=0;
   ValueChanged<String> onChanged;
- // RegisterCarBloc registerCarBloc;
-
-  bool _showDeviceForm=false;
-
   Future<InitDataVM> initDataVM;
   InitDataVM _initDataVM;
+
   Future<InitDataVM> loadInitData() async {
     centerRepository.showProgressDialog(context, Translations.current.plzWaiting());
     if(widget.addCarVM!=null && widget.addCarVM.fromMainApp!=null && !widget.addCarVM.fromMainApp)
@@ -81,13 +77,10 @@ class _RegisterCarScreenState extends State<RegisterCarScreen>
                       if (data != null && data.hasData) {
                         Message message = data.data;
                         if (message.type == 'CAR_FORM') {
-                          _showDeviceForm = false;
-                          //registerCarBloc=new RegisterCarBloc();
+
                         }
                         if (message.type == 'DEVICE_FORM') {
-                          _showDeviceForm = true;
-                          //registerCarBloc=new RegisterCarBloc();
-                          _count = message.index;
+
                           if (message.text == 'INTERNET')
                             hasInternet = message.status;
 
@@ -96,14 +89,14 @@ class _RegisterCarScreenState extends State<RegisterCarScreen>
 
 
                       return
-                        _showDeviceForm ?  RegisterDeviceScreen(
+                       /* _showDeviceForm ?  RegisterDeviceScreen(
                         hasConnection: hasInternet,
                         fromMainApp: widget.fromMainApp,
                         userId: widget.addCarVM.userId,
-                        changeFormNotyBloc: changeFormNotyBloc,) :
+                        changeFormNotyBloc: changeFormNotyBloc,) :*/
                       new RegisterCarForm(
                           addCarVM: widget.addCarVM,
-                          registerCarBloc: new RegisterCarBloc(),
+                         // registerCarBloc: new RegisterCarBloc(),
                           changeFormNotyBloc: changeFormNotyBloc,
                           carAddNotyBloc: widget.addCarVM.notyBloc,
                           fromMainApp: widget.addCarVM.fromMainApp,);
@@ -114,9 +107,9 @@ class _RegisterCarScreenState extends State<RegisterCarScreen>
               new NoDataWidget();
           }
       ),
-
     );
   }
+
   @override
   void initState() {
     super.initState();

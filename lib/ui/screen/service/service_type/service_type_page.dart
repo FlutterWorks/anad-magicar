@@ -3,11 +3,14 @@ import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/components/no_data_widget.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/api_service.dart';
+import 'package:anad_magicar/model/apis/service_type.dart';
 import 'package:anad_magicar/model/change_event.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/base/main_page.dart';
 import 'package:anad_magicar/ui/screen/service/service_item.dart';
+import 'package:anad_magicar/ui/screen/service/service_type/register_service_type_page.dart';
+import 'package:anad_magicar/ui/screen/service/service_type/service_type_item.dart';
 import 'package:anad_magicar/utils/date_utils.dart';
 import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
 import 'package:flutter/material.dart';
@@ -32,13 +35,13 @@ class ServiceTypePageState extends MainPage<ServiceTypePage> {
   String serviceDate='';
   String alarmDate='';
 
-  Future<List<ApiService>>  fServices;
-  List<ApiService> servcies=new List();
+  Future<List<ServiceType>>  fServices;
+  List<ServiceType> servcies=new List();
 
   NotyBloc<ChangeEvent> notyDateBloc;
-  Future<List<ApiService>> loadCarServices(int carId) async {
+  Future<List<ServiceType>> loadCarServiceTypes() async {
     centerRepository.showProgressDialog(context, '');
-    var result=await restDatasource.getCarService(carId);
+    var result=await restDatasource.getCarServiceTypes();
     if(result!=null && result.length>0)
       return result;
     return null;
@@ -114,9 +117,10 @@ class ServiceTypePageState extends MainPage<ServiceTypePage> {
         });
   }
 
-  addService() async {
-
+  addServiceType() async {
+    Navigator.pushNamed(context, RegisterServicePageTypeState.route,arguments: widget.carId);
   }
+
   @override
   void dispose() {
     super.dispose();
@@ -132,7 +136,7 @@ class ServiceTypePageState extends MainPage<ServiceTypePage> {
   @override
   FloatingActionButton getFab() {
     return FloatingActionButton(
-      onPressed: (){ addService(); },
+      onPressed: (){ addServiceType(); },
       child: Icon(Icons.add,color: Colors.white,
       size: 30.0,),
       backgroundColor: Colors.blueAccent,
@@ -143,14 +147,14 @@ class ServiceTypePageState extends MainPage<ServiceTypePage> {
 
   @override
   initialize() {
-    fServices=loadCarServices(widget.carId);
+    fServices=loadCarServiceTypes();
     return null;
   }
 
   @override
   Widget pageContent() {
     // TODO: implement pageContent
-    return FutureBuilder<List<ApiService>>(
+    return FutureBuilder<List<ServiceType>>(
       future: fServices,
       builder: (context,snapshot) {
         if(snapshot.hasData && snapshot.data!=null) {
@@ -164,7 +168,7 @@ class ServiceTypePageState extends MainPage<ServiceTypePage> {
                   physics: BouncingScrollPhysics(),
                   itemCount: servcies.length,
                   itemBuilder: (context, index) {
-                    return ServiceItem(serviceItem: servcies[index]);
+                    return ServiceTypeItem(serviceItem: servcies[index]);
                   }),
             ),
             );

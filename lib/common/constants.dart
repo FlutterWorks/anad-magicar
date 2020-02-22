@@ -11,9 +11,9 @@ class Constants {
   static final int ROWSTATE_TYPE_UPDATE=2;
   static final int ROWSTATE_TYPE_DELETE=4;
 
-  static final int SERVICE_DONE=152364;
-  static final int SERVICE_FAILD=152374;
-  static final int SERVICE_NEAR=152375;
+  static final int SERVICE_DONE=15236;
+  static final int SERVICE_FAILD=15237;
+  static final int SERVICE_NEAR=15237;
   static final int SERVICE_NOTDONE=152376;
   static final int SERVICE_CANCEL=152377;
 

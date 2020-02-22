@@ -1,16 +1,20 @@
 import 'package:anad_magicar/Routes.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
+import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/user/user_repo.dart';
 import 'package:anad_magicar/service/locator.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/login/login_page.dart';
 import 'package:anad_magicar/ui/screen/login/login_screen.dart';
 import 'package:anad_magicar/utils/check_status_connection.dart';
+import 'package:android_alarm_manager/android_alarm_manager.dart';
 
 import 'package:flutter/material.dart';
 import 'package:anad_magicar/Routes.dart' as myApp;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 Future<void> main() async {
+  final int checkStatusAlarmID = 0;
+  final int checkParkGPSStatusAlarmID = 1;
 
   setupLocator();
   ConnectionStatusSingleton connectionStatus = ConnectionStatusSingleton.getInstance();
@@ -32,7 +36,11 @@ Future<void> main() async {
         }
         selectNotificationSubject.add(payload);
       });
+  await AndroidAlarmManager.initialize();
   new Routes();
+ /* await AndroidAlarmManager.periodic(const Duration(minutes: 1), checkStatusAlarmID, centerRepository.checkCarStatusPeriodic());
+  await AndroidAlarmManager.periodic(const Duration(minutes: 1), checkParkGPSStatusAlarmID, centerRepository.checkParkGPSStatusPeriodic());*/
+
 }//=> runApp(MyApp());
 
 class MyApp extends StatelessWidget {

@@ -132,8 +132,8 @@ class SaveUserModel {
   }
   Map<String, dynamic> toJsonForForgotPassword() {
     return {
-      "UserId": this.UserId,
-      "MobileNo": this.MobileNo,
+     // "UserId": this.UserId,
+      "MobileNumber": this.MobileNo,
       //"Password": this.Password,
     };
   }

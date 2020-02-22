@@ -2,6 +2,12 @@ import 'package:anad_magicar/utils/dart_helper.dart';
 import 'package:flutter/material.dart';
 
 class PlanModel {
+
+  static final int PLAN_TYPE_CONST_ID_FUNCTIONAL=152336;
+  static final int PLAN_TYPE_CONST_ID_DURATIONAL=152335;
+  static final int PLAN_TYPE_CONST_ID_DURATIONAL_FUNCTIONAL=152334;
+
+
   int PlanId;
   String PlanCode;
   String PlanTitle;
@@ -12,7 +18,7 @@ class PlanModel {
   int DayCount;
   String CreatedDate;
   String Description;
-
+  int PlanTypeConstId;
   PlanModel({
     this.PlanId,
     @required this.PlanCode,
@@ -24,6 +30,7 @@ class PlanModel {
     @required this.DayCount,
     @required this.CreatedDate,
     @required this.Description,
+    @required this.PlanTypeConstId
   });
 
   Map<String, dynamic> toMap() {
@@ -38,6 +45,7 @@ class PlanModel {
       'DayCount': this.DayCount,
       'CreatedDate': this.CreatedDate,
       'Description': this.Description,
+      'PlanTypeConstId':this.PlanTypeConstId
     };
   }
 
@@ -53,6 +61,7 @@ class PlanModel {
       DayCount: map['DayCount'] ,
       CreatedDate: map['CreatedDate'] ,
       Description: map['Description'] ,
+      PlanTypeConstId: map['PlanTypeConstId']
     );
   }
 
@@ -67,6 +76,7 @@ class PlanModel {
       Cost: json["Cost"],
       DayCount: json["DayCount"],
       CreatedDate: json["CreatedDate"],
+      PlanTypeConstId: json["PlanTypeConstId"],
       Description: DartHelper.isNullOrEmptyString( json["Description"]) ,);
   }
 
@@ -82,6 +92,7 @@ class PlanModel {
       "DayCount": this.DayCount,
       "CreatedDate": this.CreatedDate,
       "Description": this.Description,
+      "PlanTypeConstId": this.PlanTypeConstId
     };
   }
 

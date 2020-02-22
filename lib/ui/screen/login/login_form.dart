@@ -826,15 +826,16 @@ _buildExit() {
         });
   }
 
-  Future<String> _recoverFunc(String data) async
-  {
+  Future<String> _recoverFunc(String data) async {
     return Future.delayed(new Duration(microseconds: 100)).then((_) {
       if (data != null ) {
         if(isOnline) {
           mobileNo=data;
           SaveUserModel userModel=new SaveUserModel(MobileNo: data,UserId: 0);
-       var result=  restDatasource.forgotPassword(userModel);
+          centerRepository.showProgressDialog(context, Translations.current.send());
+       var result= restDatasource.forgotPassword(userModel);
        if(result!=null) {
+         centerRepository.dismissDialog(context);
          result.then((res){
            if(res.IsSuccessful){
              FlashHelper.successBar(context, message: res.Message);
@@ -847,6 +848,9 @@ _buildExit() {
 
              }
          });
+       }else{
+         centerRepository.dismissDialog(context);
+         FlashHelper.errorBar(context, message: Translations.current.hasErrors());
        }
         }
         else
@@ -1163,7 +1167,7 @@ _buildExit() {
             signUpDone=true;
             securityCode=state.code;
             recCode=state.code;
-            _securityCodeTextEditController.text=recCode.toString();
+            //_securityCodeTextEditController.text=recCode.toString();
          }
        else if(state is SignUpFaild)
          {

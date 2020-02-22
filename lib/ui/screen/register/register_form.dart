@@ -4,12 +4,15 @@ import 'package:anad_magicar/components/add_car_button.dart';
 import 'package:anad_magicar/components/flushbar/flushbar.dart';
 import 'package:anad_magicar/components/skip_button.dart';
 import 'package:anad_magicar/components/slide_button.dart';
+import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/data/rxbus.dart';
 import 'package:anad_magicar/model/apis/api_user_model.dart';
+import 'package:anad_magicar/model/apis/save_user_result.dart';
 import 'package:anad_magicar/model/change_event.dart';
 import 'package:anad_magicar/model/user/user.dart';
 import 'package:anad_magicar/model/viewmodel/add_car_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
+import 'package:anad_magicar/repository/pref_repository.dart';
 import 'package:anad_magicar/repository/user/user_repo.dart';
 import 'package:anad_magicar/ui/screen/car/register_car_screen.dart';
 import 'package:anad_magicar/ui/screen/login/confirm_login.dart';
@@ -499,8 +502,7 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
     );
   }
 
-  Future<String> _addUser(LoginData data)
-  {
+  Future<String> _addUser(LoginData data) async{
     return Future.delayed(new Duration(microseconds: 200)).then((_) {
       if(data!=null &&
           data.name.isNotEmpty &&
@@ -515,16 +517,66 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
             MobileNo: data.mobile,
             Password: data.password
         );
-        //BlocProvider.of<RegisterBloc>(context).dispatch(new LoadRegisterEvent(user,context));
-        if(widget.isEdit!=null &&
-        widget.isEdit){
-          widget.bloc.add(new LoadRegisterEvent(user, context,true));
-        }
-        else {
-          widget.bloc.add(new LoadRegisterEvent(user, context,false));
-        }
 
-        //isRegisterBtnDisabled=true;
+
+        try {
+          centerRepository.showProgressDialog(
+              context, Translations.current.loadingdata());
+          if ((widget.isEdit != null && !widget.isEdit) ||
+              widget.isEdit == null) {
+            UserRepository userRepository = new UserRepository();
+            userRepository.register(
+                user: user).then((result) {
+              SaveMagicarResponeQuery savedUser=result;
+              centerRepository.dismissDialog(context);
+
+              if (savedUser != null &&
+                  savedUser.isSuccessful) {
+                centerRepository.showFancyToast(savedUser.message);
+                if (savedUser.carId != null &&
+                    savedUser.carId > 0) {
+                  centerRepository.setCarIds(savedUser.carId);
+                }
+
+                if (savedUser.userId != null &&
+                    savedUser.userId > 0) {
+                  CenterRepository.setUserId(savedUser.userId);
+                  centerRepository.setUserIds(savedUser.userId);
+                  prefRepository.setLoginedUserId(savedUser.userId);
+                  prefRepository.setLoginedUserName(user.UserName);
+                  prefRepository.setLoginedFirstName(user.FirstName);
+                  prefRepository.setLoginedLastName(user.LastName);
+                  prefRepository.setLoginedMobile(user.MobileNo);
+                  prefRepository.setLoginedPassword(user.Password);
+                  prefRepository.setUserRoleId(savedUser.roleId);
+                }
+
+                Navigator.pushNamed(context,'/addcar',arguments:  new AddCarVM(
+                    notyBloc: null,
+                    fromMainApp: false) );
+
+              }
+              else {
+                centerRepository.showFancyToast(savedUser.message);
+              }
+            });
+          }
+          else {
+            restDatasource.editUserProfile(user).then((result) {
+              if (result != null) {
+                centerRepository.showFancyToast(result.Message);
+                if (result.IsSuccessful) {
+                  Navigator.pushNamed(context, ProfileTwoPageState.route,
+                      arguments: centerRepository.getUserInfo());
+                }
+                else {
+                  return result.Message;
+                }
+              }
+            });
+          }
+        }
+        catch(ex) {}
       }
       else
       {
@@ -540,6 +592,7 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
    if(result!=null) {
      centerRepository.dismissDialog(context);
      return RegisterCarScreen(fromMainApp: false, addCarVM: new AddCarVM(
+
          notyBloc: null,
          fromMainApp: false));
    }
@@ -602,7 +655,7 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
   Widget build(BuildContext context) {
     double w=MediaQuery.of(context).size.width;
     double h=MediaQuery.of(context).size.height;
-    return BlocListener(
+    return /*BlocListener(
         bloc: widget.bloc,
         listener: (BuildContext context, RegisterState state) {
       if(state is RegisteredState){
@@ -655,16 +708,15 @@ class _RegisterContainerState extends State<RegisterForm> with TickerProviderSta
             //RxBus.post(new ChangeEvent(type: 'REGISTER_FAILED',message: currentState.errorMessage));
            // FlashHelper.errorBar(context, message: currentState.errorMessage);
             centerRepository.showFancyToast(currentState.errorMessage);
-          }
-          return  FancyRegisterForm(
+          }*/
+            FancyRegisterForm(
             isEdit: widget.isEdit,
             mobile: widget.mobile,
             authUser: _addUser,
             recoverPassword: null,
             onSubmit: () { /*gotoAddCar();*/ },
-          );
-        }
-      ),
+
+
     );
 
   }

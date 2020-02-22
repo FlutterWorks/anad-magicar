@@ -1,6 +1,7 @@
 import 'dart:async';
 
 
+import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -96,15 +97,87 @@ class FlashHelper {
       },
     );
   }
+  static Future<T> successBarInCenter<T>(
+      BuildContext context, {
+        Widget title,
+        String titleText,
+        @required String message,
+        @required String body,
+        @required String moreInfo,
+        flashStyle = FlashStyle.floating,
+        Duration duration,// = const Duration(seconds: 10),
+      }) {
+    return showFlash<T>(
+      context: context,
+      duration: duration,
+      builder: (_, controller) {
+        return Flash(
+          alignment: Alignment.center,
+          controller: controller,
+          style: flashStyle,
+          horizontalDismissDirection: HorizontalDismissDirection.horizontal,
+          backgroundColor: Colors.black87,
+          barrierDismissible: true,
+          position: FlashPosition.top,
+          child: FlashBar(
+            title: title == null
+                ? null
+                : Text(titleText, style: _titleStyle(context, Colors.white)),
+            message:  Text(message, style: _contentStyle(context, Colors.white)),/*Container(
+              child: Column(children: <Widget>[
+                Text(message, style: _contentStyle(context, Colors.white)),
+                Text(body, style: _contentStyle(context, Colors.white)),
+                Text(moreInfo, style: _contentStyle(context, Colors.white)),
+              ],),),*/
+            icon: Icon(Icons.check_circle, color: Colors.green[300]),
+            leftBarIndicatorColor: Colors.green[300],
+            primaryAction: FlatButton(
+              onPressed: () => controller.dismiss(),
+              child: Text(Translations.current.close(), style: TextStyle(color: Colors.amber)),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
 
-
-  static Future<T> informationBar<T>(
+  static Future<T> informationBar2<T>(
     BuildContext context, {
     String title,
     @required String message,
-    Duration duration = const Duration(seconds: 3),
+    Duration duration ,
   }) {
+    return showFlash<T>(
+      context: context,
+      duration: duration,
+      builder: (_, controller) {
+        return Flash(
+          controller: controller,
+          horizontalDismissDirection: HorizontalDismissDirection.horizontal,
+          backgroundColor: Colors.black87,
+          child: FlashBar(
+            title: title == null
+                ? null
+                : Text(title, style: _titleStyle(context, Colors.white)),
+            message: Text(message, style: _contentStyle(context, Colors.white)),
+            icon: Icon(Icons.info_outline, color: Colors.blue[300]),
+            leftBarIndicatorColor: Colors.blue[300],
+            primaryAction: FlatButton(
+              onPressed: () => controller.dismiss(),
+              child: Text(Translations.current.close(), style: TextStyle(color: Colors.amber)),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  static Future<T> informationBar<T>(
+      BuildContext context, {
+        String title,
+        @required String message,
+        Duration duration = const Duration(seconds: 3),
+      }) {
     return showFlash<T>(
       context: context,
       duration: duration,
@@ -125,7 +198,6 @@ class FlashHelper {
       },
     );
   }
-
   static Future<T> errorBar<T>(
     BuildContext context, {
     String title,

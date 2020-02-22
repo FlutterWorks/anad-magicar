@@ -65,8 +65,7 @@ class MessageExpandPanelState extends State<MessageExpandPanel> {
               scrollDirection: Axis.vertical,
               itemCount: msgs.length,
               itemBuilder: (context, index) {
-                return
-            Card(
+                return Card(
             margin: new EdgeInsets.only(
                 left: 5.0, right: 5.0, top: 8.0, bottom: 5.0),
             shape: RoundedRectangleBorder(
@@ -160,8 +159,8 @@ class MessageExpandPanelState extends State<MessageExpandPanel> {
                       Image.asset('assets/images/read.png',color: Colors.blueAccent,) ,),),
         new Padding(padding: EdgeInsets.only(right: 10.0,left: 10.0),
           child:
-        Text( message.MessageStatusConstId!=ApiMessage.MESSAGE_STATUS_AS_READ_TAG ?
-        message.MessageStatusConstTitle : Translations.current.messageRead() ),),
+        Text( /*message.MessageStatusConstId!=ApiMessage.MESSAGE_STATUS_AS_READ_TAG ?*/
+        message.MessageStatusConstTitle /*: Translations.current.messageRead()*/ ),),
 
       ],
     ),
@@ -181,7 +180,7 @@ class MessageExpandPanelState extends State<MessageExpandPanel> {
                 FlatButton(
                   child: Text(Translations.current.replyMessage(),style: TextStyle(color: Colors.white,fontSize: 12.0),),
                   onPressed: (){
-                    _showBottomSheetNewMessage(context, message, message.ReceiverUserId);
+                    _showBottomSheetNewMessage(context, message, message.SenderUserId);
                   },),),
             ],
           ),
@@ -526,9 +525,12 @@ class MessageExpandPanelState extends State<MessageExpandPanel> {
     itemCount: widget.messages.length,
     itemBuilder: (context, index) {
           int senderId=recIds[index];
+          int unReadItems=0;
           List<Map<String,dynamic>> newList=widget.messages[senderId];
           ApiMessage apiMessage=ApiMessage.fromMap( newList[0]);
           List<ApiMessage> apiMsgs=newList.map<ApiMessage>((m)=>ApiMessage.fromMap(m)).toList();
+          var uri=apiMsgs.where((m)=>m.MessageStatusConstId==ApiMessage.MESSAGE_STATUS_AS_READ_TAG).toList();
+          unReadItems=uri==null  ? 0 : uri.length;
       return
         ExpandableNotifier(
           child: Padding(

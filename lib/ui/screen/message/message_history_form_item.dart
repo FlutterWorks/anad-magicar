@@ -1,3 +1,4 @@
+import 'package:anad_magicar/common/actions_constants.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/car_action_log.dart';
 import 'package:anad_magicar/translation_strings.dart';
@@ -10,10 +11,18 @@ class MessageHistoryItem extends StatelessWidget {
   CarActionLog carActionLog;
 
   MessageHistoryItem({Key key, this.carActionLog}) : super(key: key);
-
+  String iconURL='assets/images/action.png';
 
   @override
   Widget build(BuildContext context) {
+
+    if(carActionLog.ActionId!=null)
+       iconURL=ActionsCommand.getActionIconURL(carActionLog.ActionId);
+    else
+      iconURL='assets/images/action.png';
+    if(iconURL==null || iconURL.isEmpty){
+      iconURL='assets/images/action.png';
+    }
     return new Card(
       margin: new EdgeInsets.only(
           left: 5.0, right: 5.0, top: 2.0, bottom: 5.0),
@@ -57,7 +66,7 @@ class MessageHistoryItem extends StatelessWidget {
                       width: 34.0,
                       height: 34.0,
                       child:
-                      Image.asset('assets/images/action.png',
+                      Image.asset(iconURL,
                         color: Colors.pinkAccent,),),),
 
                 ],

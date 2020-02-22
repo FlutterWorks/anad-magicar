@@ -50,33 +50,17 @@ class _RegisterDeviceState extends State<RegisterDeviceScreen>
         body: Stack(
             overflow: Overflow.visible,
             children: <Widget>[
-        /*OfflineBuilder(
-          debounceDuration:  Duration.zero,
-    connectivityBuilder: (
-    BuildContext context,
-    ConnectivityResult connectivity,
-    Widget child,
-    ) {
-      hasInternet = connectivity != ConnectivityResult.none;
-      if (connectivity == ConnectivityResult.none) {
-          _notyBloc.updateValue(new NotyLoadingVM(isLoading: false,
-              hasLoaded: false,
-              haseError: false,
-              hasInternet: false));
-      }
-        return child;
-    },
-    child:*/
-        BlocProvider<RegisterDeviceBloc>(
+
+        /*BlocProvider<RegisterDeviceBloc>(
           create: (context) => RegisterDeviceBloc(),
-          child: new AddDeviceForm(hasConnection: true,
+          child:*/ new AddDeviceForm(hasConnection: true,
             fromMainApp: widget.fromMainApp,
             userId: widget.userId,
             changeFormNotyBloc: widget.changeFormNotyBloc,),
-        ),
+       // ),
        // ),
               FormsAppBar( actionIcon: Icon(Icons.directions_car),loadingNoty: _notyBloc,
-              onBackPress: widget.fromMainApp!=null && widget.fromMainApp ? Navigator.of(context).pop(false) : showPopUp() ,)
+              onBackPress:null),// widget.fromMainApp!=null && widget.fromMainApp ? Navigator.of(context).pop(false) : Navigator.pushReplacementNamed(context, '/login') ,)
     ],
         ),
         );
@@ -97,36 +81,7 @@ class _RegisterDeviceState extends State<RegisterDeviceScreen>
     super.dispose();
   }
 
-  showPopUp()
-  {
-    final popup = BeautifulPopup(
-      context: context,
-      template: TemplateNotification,
-    );
-    popup.show(
-      title: Translations.current.exit(),
-      content: Translations.current.areYouSureToExit(),
-      actions: [
-        new Column(
-          children: <Widget>[
-            Container(
-              height: 100.0,
-              child:
-              new Center(
-                child: new Text(Translations.current.areYouSureToExit()),
-              ),
-            ),
-            popup.button(
-              label: Translations.current.exit(),
-              onPressed: (){ SystemNavigator.pop();},
-            ),
-          ],
-        )
-      ],
-// bool barrierDismissible = false,
-// Widget close,
-    );
-  }
+
 
 
 }

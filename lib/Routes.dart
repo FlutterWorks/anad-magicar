@@ -45,6 +45,7 @@ import 'package:anad_magicar/ui/screen/register/register_screen.dart';
 import 'package:anad_magicar/ui/screen/service/register_service_page.dart';
 import 'package:anad_magicar/ui/screen/service/service_page.dart';
 import 'package:anad_magicar/ui/screen/service/service_type/register_service_type_page.dart';
+import 'package:anad_magicar/ui/screen/service/service_type/service_type_page.dart';
 import 'package:anad_magicar/ui/screen/setting/global_setting_page.dart';
 import 'package:anad_magicar/ui/screen/setting/native_settings_screen.dart';
 import 'package:anad_magicar/ui/screen/setting/security_screen.dart';
@@ -55,6 +56,7 @@ import 'package:anad_magicar/ui/screen/user/users_page.dart';
 import 'package:anad_magicar/utils/check_status_connection.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
+import 'package:android_alarm_manager/android_alarm_manager.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -68,17 +70,12 @@ import 'package:anad_magicar/TranslationsDelegate.dart';
 import 'package:anad_magicar/authentication/authentication.dart';
 import 'package:anad_magicar/bloc/basic/global_bloc.dart';
 import 'package:anad_magicar/common/common.dart';
-import 'package:anad_magicar/components/bottom_menu_bar.dart';
-
-import 'package:anad_magicar/components/transformation_example.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:anad_magicar/bloc/basic/bloc_provider.dart' as gbloc;
 import 'package:anad_magicar/firebase/message/message_handler.dart' as msgHdlr;
-import 'package:flutter/physics.dart';
-import 'components/flushbar/flushbar_helper.dart';
-
+import 'package:anad_magicar/ui/screen/service/main_service_page.dart';
 
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -137,6 +134,8 @@ class Routes {
 
 
     runApp(new ScopeModelWrapperState(userRepository: UserRepository(),));
+
+
   }
 }
 
@@ -243,9 +242,13 @@ class _MyAppState extends State<MyApp>
    String title=message['notification']['title'];
    String messageBody=message['notification']['body'];
    messageBody+='\n'+title;
-  String data=message['data']['body'];
+   String data_title=message['data']['title'];
+   String data=message['data']['body'];
    if(data!=null && data.isNotEmpty){
-     RxBus.post(new ChangeEvent(type: 'FCM_STATUS',message: data));
+     if(data_title=='command') {
+       String carid=message['data']['carId'];
+       RxBus.post(new ChangeEvent(type: 'FCM_STATUS', message: data,id: int.tryParse(carid)));
+     }
    }else {
      RxBus.post(new ChangeEvent(type: 'FCM', message: messageBody));
    }
@@ -496,7 +499,12 @@ class _MyAppState extends State<MyApp>
                                               );
                                             case '/servicepage':
                                               return new MyCustomRoute(
-                                                builder: (_) => new ServicePage(serviceVM: settings.arguments,),
+                                                builder: (_) => new MainPageService(serviceVM: settings.arguments,),
+                                                settings: settings,
+                                              );
+                                            case '/servicetypepage':
+                                              return new MyCustomRoute(
+                                                builder: (_) => new ServiceTypePage(carId: settings.arguments,),
                                                 settings: settings,
                                               );
                                             case '/registerservicepage':
@@ -512,7 +520,7 @@ class _MyAppState extends State<MyApp>
                                             case '/adddevice':
                                               return new MyCustomRoute(
                                                 builder: (_) => new RegisterDeviceScreen(hasConnection: true,
-                                                  userId: 0,
+                                                  userId: CenterRepository.getUserId(),
                                                   changeFormNotyBloc: changeFormNotyBloc,
                                                   fromMainApp: settings.arguments,),
                                                 settings: settings,

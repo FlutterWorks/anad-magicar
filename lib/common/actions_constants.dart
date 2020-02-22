@@ -5,8 +5,6 @@ import 'package:anad_magicar/model/viewmodel/car_state.dart' as carEnum;
 class ActionsCommand {
 
 
-
-
   static String TurboMode='Turbo Mode';
   static String TimeStart='Time Start';
   static String RemoteStart='Remote Start';
@@ -73,9 +71,13 @@ class ActionsCommand {
   static int OffMode_OFF=31;
   static int LowVoltageState_OFF=33;
 
+  static int Check_Status_Car=60;
+
   static String HARDWARE_VERSION_NANO_CODE='HardWareVersion_Nano';
   static String READ_IMEI_NANO_CODE='ReadIMEI_Nano';
   static String ChargeSimCardCredit_Nano_CODE='ChargeSimCardCredit_Nano';
+  static String CheckSimCardCredit_Nano_CODE='CheckSimCardCredit_Nano';
+
   static String RequestTestSMS_Nano_CODE='RequestTestSMS_Nano';
   static String SetTiming_Nano_CODE='SetTiming_Nano';
   static String RemoteStartOn_Nano_CODE='RemoteStartOn_Nano';
@@ -90,6 +92,9 @@ class ActionsCommand {
   static String UnlockAndDisArm_Nano_CODE='UnlockAndDisArm_Nano';
   static String DriveLock_ONOrOFF_Nano_CODE='DriveLock_ONOrOFF_Nano';
   static String SIREN_Nano_CODE='Siren_Nano';
+
+
+
 
   static final String CAR_ID_TAG='CARId';
   static final String CAR_PAGE_TAG='CAR_PAGE';
@@ -129,12 +134,34 @@ class ActionsCommand {
   static HashMap<carEnum.CarStatus,int> carNotiMap=new HashMap();
   static HashMap<String,List<String>> actionsTitleMap=new HashMap();
   static HashMap<String,int> actionsTitleValueMap=new HashMap();
+  static HashMap<int,String> actionsIconsURLMap=new HashMap();
 
 
  static bool hasActions(String title)
   {
     bool result=actionsTitleMap.containsValue(title);
     return result;
+  }
+
+
+  static String getActionIconURL(int actionId) {
+    if(actionsIconsURLMap.containsKey(actionId)) {
+      return actionsIconsURLMap[actionId];
+    }
+  }
+
+  static createActionIconsURlMap(){
+   if(actionsIconsURLMap==null)
+     actionsIconsURLMap=new HashMap();
+   actionsIconsURLMap.putIfAbsent(OPEN_DOOR_VALUE_TAG, ()=>'assets/images/unlock_22.png');
+   actionsIconsURLMap.putIfAbsent(CLOSE_DOOR_VALUE_TAG, ()=>'assets/images/lock_11.png');
+   actionsIconsURLMap.putIfAbsent(OPEN_TRUNK_VALUE_TAG, ()=>'assets/images/trunk.png');
+   actionsIconsURLMap.putIfAbsent(OPEN_HOOD_VALUE_TAG, ()=>'assets/images/trunk.png');
+   actionsIconsURLMap.putIfAbsent(CLOSE_HOOD_VALUE_TAG, ()=>'assets/images/trunk.png');
+   actionsIconsURLMap.putIfAbsent(CLOSE_TRUNK_VALUE_TAG, ()=>'assets/images/trunk.png');
+   actionsIconsURLMap.putIfAbsent(RemoteStart_OFF, ()=>'assets/images/stop_engine.png');
+   actionsIconsURLMap.putIfAbsent(RemoteStart_ON, ()=>'assets/images/start_engine.png');
+
   }
   static createActionsTitleMap()
   {
@@ -180,6 +207,9 @@ class ActionsCommand {
     actionCommandsMap.putIfAbsent(AUX2_Output_ON_CODE, ()=> 21);
     actionCommandsMap.putIfAbsent(AUX2_Output_OFF_CODE, ()=> 21);
     actionCommandsMap.putIfAbsent(SIREN_Nano_CODE, ()=> 23);
+    actionCommandsMap.putIfAbsent(HARDWARE_VERSION_NANO_CODE, ()=> 5);
+    actionCommandsMap.putIfAbsent(CheckSimCardCredit_Nano_CODE, ()=> 7);
+    actionCommandsMap.putIfAbsent(ChargeSimCardCredit_Nano_CODE, ()=> 115);
 
 
     actionCommandsMap.putIfAbsent(TurboMode_ON_TAG, ()=> TurboMode_ON);

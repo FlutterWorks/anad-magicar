@@ -9,12 +9,14 @@ import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
 import io.flutter.plugins.GeneratedPluginRegistrant
 import io.flutter.plugins.firebasemessaging.FlutterFirebaseMessagingService
 //import com.google.firebase.messaging.FirebaseMessagingService
+import io.flutter.plugins.androidalarmmanager.AlarmService;
 
 class Application : FlutterApplication() , PluginRegistrantCallback {
 
     override fun onCreate() {
         super.onCreate();
         FlutterFirebaseMessagingService.setPluginRegistrant(this);
+        AlarmService.setPluginRegistrant(this);
     }
 
     override fun registerWith( registry: PluginRegistry) {

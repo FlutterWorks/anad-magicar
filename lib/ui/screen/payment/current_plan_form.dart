@@ -107,11 +107,9 @@ class CurrentPlanFormState extends MainPage<CurrentPlanForm>
               .length > 0) {
         List<PlanModel> plans = centerRepository.getPlans();
         for (var invs in invoices) {
-
           List<PlanModel> findPlan = plans.where((p) => p.PlanId == invs.PlanId)
               .toList();
           if (findPlan != null && findPlan.length > 0) {
-
             PlanModel planModel = findPlan.first;
             invs.planModel = planModel;
           }
@@ -237,6 +235,9 @@ class CurrentPlanFormState extends MainPage<CurrentPlanForm>
 
   Widget _mainListBuilder(BuildContext context, int index,List<InvoiceModel> planModel) {
      return ExpansionTile(
+
+       leading: null,
+       trailing: null,
          title: Card1(invoices:invoices,invoiceModel: invoices[index],),
          children: getInvoiceDetailsTiles(context, invoices[index]),
     );
@@ -454,8 +455,7 @@ class CurrentPlanFormState extends MainPage<CurrentPlanForm>
     // TODO: implement initialize
     _notygetCurrentPlans=new NotyBloc<Message>();
 
-    if(widget.user==null || widget.user.UserId==null)
-    {
+    if(widget.user==null || widget.user.UserId==null) {
       prefRepository.getLoginedUserId().then((res){
         if(res!=null)
           userId=res;
@@ -481,8 +481,7 @@ class CurrentPlanFormState extends MainPage<CurrentPlanForm>
     return StreamBuilder<Message>(
       stream: _notygetCurrentPlans.noty,
       initialData: null,
-      builder: (BuildContext c, AsyncSnapshot<Message> data)
-      {
+      builder: (BuildContext c, AsyncSnapshot<Message> data) {
         if (data != null && data.hasData) {
           Message msg=data.data;
           if(msg!=null &&
@@ -514,10 +513,6 @@ class CurrentPlanFormState extends MainPage<CurrentPlanForm>
                               ),
                             ),
                           ),
-                          /*Container(
-                  margin:EdgeInsets.only(top:60.0),
-                  height: MediaQuery.of(context).size.height-10,
-                  child:*/
                           Padding(padding: EdgeInsets.only(top: 60.0),
                             child:
                             ListView.builder(
@@ -727,6 +722,16 @@ class Card1 extends StatelessWidget {
   Widget build(BuildContext context) {
     isActive=(invoiceModel.StartDate!=null &&
         invoiceModel.StartDate!='');
+    bool isDurational=false;
+    bool isBoth=false;
+    if(centerRepository.getPlans()!=null){
+      var plan=centerRepository.getPlans().where((p)=>p.PlanId==invoiceModel.PlanId).toList();
+      if(plan!=null && plan.length>0){
+        PlanModel planModel=plan.first;
+        isDurational=planModel.PlanTypeConstId==PlanModel.PLAN_TYPE_CONST_ID_DURATIONAL;
+        isBoth=planModel.PlanTypeConstId==PlanModel.PLAN_TYPE_CONST_ID_DURATIONAL_FUNCTIONAL;
+      }
+    }
     return new Padding(
       padding: EdgeInsets.only(top: 10.0,bottom: 10.0),
       child: new Stack(
@@ -750,7 +755,6 @@ class Card1 extends StatelessWidget {
                                                     fontSize: 18.0,
                                                   )
                                               ),
-
                                             ],
                                           ),
     ),
@@ -764,7 +768,6 @@ class Card1 extends StatelessWidget {
                                               border: Border.all(color: Colors.indigoAccent.withOpacity(0.0),width: .5)
                                             ),
                                             constraints: new BoxConstraints.expand(
-
                                               height: 340.0,
                                               width: MediaQuery.of(context).size.width*0.95,
                                             ),
@@ -772,12 +775,10 @@ class Card1 extends StatelessWidget {
                                               padding: EdgeInsets.only(right: 5.0,left: 5.0),
                                               child:
                                             new Column(
-
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: <Widget>[
                                                   Row(
                                             mainAxisAlignment: MainAxisAlignment.center ,
-
                                             children: <Widget>[
                                                       new Text(DartHelper.isNullOrEmptyString( invoiceModel.DisplayName),
                                                           style: new TextStyle(
@@ -858,39 +859,16 @@ class Card1 extends StatelessWidget {
                                                   ),
                                                   ],
                                               ),
-                                              /*Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween ,
 
-                                                children: <Widget>[
-                                                  new Text(Translations.current.fromDate() ,style: new TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18.0,
-                                            )),
-                                             new Text( invoiceModel.planModel!=null ?   DartHelper.isNullOrEmptyString( invoiceModel.planModel.FromDate) : ''),
-                                                ],
-                                             ),
-                                              Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween ,
-                                                  children: <Widget>[
-                                                     new Text( Translations.current.toDate(),style: new TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18.0,
-                                          )),
-                                                     new Text( (invoiceModel.planModel!=null ? DartHelper.isNullOrEmptyString( invoiceModel.planModel.ToDate): ''),
-                                                      style: new TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 18.0,
-                                                      )
-                                                  ),
-                                                  ],
-                                              ),*/
                                                   Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: <Widget>[
-                                                      remainDayProgress (
+                                                      (isDurational || isBoth) ?  remainDayProgress (
                                                         DateTimeUtils.diffDaysFromDateToDate(invoiceModel.StartDate,invoiceModel.EndDate),
-                                                          DateTimeUtils.diffDaysFromDateToDate2(invoiceModel.StartDate,invoiceModel.EndDate)),
-                                                      remainAmountProgress((calcSumAmount(invoiceModel.invoiceDetailModel) / (invoiceModel.Amount!=null ? invoiceModel.Amount : calcSumAmount(invoiceModel.invoiceDetailModel)))),
+                                                          DateTimeUtils.diffDaysFromDateToDate2(invoiceModel.StartDate,invoiceModel.EndDate)) :
+                                                          Container(),
+                                                      (!isDurational || isBoth) ? remainAmountProgress((calcSumAmount(invoiceModel.invoiceDetailModel) / (invoiceModel.Amount!=null ? invoiceModel.Amount : calcSumAmount(invoiceModel.invoiceDetailModel)))) :
+                                                          Container(),
                                                             ],
                                                   ),
                                                  new Padding(
@@ -938,29 +916,8 @@ class Card1 extends StatelessWidget {
                                             ),
                                           ),
 
-                                          /*new Positioned(
-                                            right: 10.0,
-                                            bottom: 20.0,
-                                            child: new Row(
-                                                mainAxisAlignment: MainAxisAlignment.end,
-                                                children: <Widget>[
-                                                *//*isActive ?  new Icon(Icons.stars, color: Colors.greenAccent,
-                                                    size: 28.0,) :*//*
-                                              Button(
-                                                title: Translations.current.showDetails(),
-                                                color: Colors.indigoAccent.value,
-                                                wid: 100,)
-                                                ]
-                                            ),
-                                          ),*/
+
                                         ],
-
-
-
-
-
-
-
 
       ),
     );
@@ -1231,17 +1188,11 @@ class CurrentPlansForm extends StatelessWidget {
         ),*/
       ],
 
-
-
-
-
-
 ),
 
     );
     return item;
   }
-
 
 
 }

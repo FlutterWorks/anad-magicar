@@ -1,10 +1,12 @@
 import 'package:anad_magicar/model/apis/api_service.dart';
+import 'package:anad_magicar/model/apis/service_type.dart';
 import 'package:anad_magicar/translation_strings.dart';
+import 'package:anad_magicar/utils/dart_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ServiceTypeItem extends StatelessWidget {
-  ApiService serviceItem;
+  ServiceType serviceItem;
   ServiceTypeItem({Key key,this.serviceItem}) : super(key: key);
 
   @override
@@ -16,7 +18,7 @@ class ServiceTypeItem extends StatelessWidget {
         elevation: 0.0,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white30,
+            //color: Colors.white30,
             borderRadius: BorderRadius.all(Radius.circular(5.0)),
           ),
           child: Column(
@@ -27,7 +29,7 @@ class ServiceTypeItem extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-               Text(serviceItem.Description),
+               Text(DartHelper.isNullOrEmptyString( serviceItem.ServiceTypeTitle)),
               ],
             ),),
         new Padding(padding: EdgeInsets.only(right: 10.0),
@@ -35,8 +37,8 @@ class ServiceTypeItem extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(Translations.current.serviceDate(),style: TextStyle(fontSize: 16.0),),
-                Text(serviceItem.ServiceDate,style: TextStyle(fontSize: 16.0))
+                Text(Translations.current.serviceTypeCode(),style: TextStyle(fontSize: 16.0),),
+                Text(DartHelper.isNullOrEmptyString(serviceItem.ServiceTypeCode),style: TextStyle(fontSize: 16.0))
               ],
             ),),
         new Padding(padding: EdgeInsets.only(right: 10.0),
@@ -44,16 +46,15 @@ class ServiceTypeItem extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(Translations.current.alarmDate(),style: TextStyle(fontSize: 16.0),),
-                Text(serviceItem.AlarmDate,style: TextStyle(fontSize: 16.0)),
+                Text(Translations.current.description(),style: TextStyle(fontSize: 16.0),),
+                Text(DartHelper.isNullOrEmptyString(serviceItem.Description),style: TextStyle(fontSize: 16.0)),
                 Container(
                   width: 34.0,
                   height: 34.0,
                   decoration: BoxDecoration(
-                    color: Colors.white30,
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    color: Colors.transparent
                   ),
-                  child:  Image.asset('assets/images/scar2.png'),color: Colors.pinkAccent),
+                  child:  Image.asset('assets/images/scar2.png',color: Colors.pinkAccent),),
               ],
             ),),
         new Padding(padding: EdgeInsets.only(right: 10.0),
@@ -62,7 +63,7 @@ class ServiceTypeItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(Translations.current.alarmCount(),style: TextStyle(fontSize: 16.0),),
-                Text(serviceItem.AlarmCount.toString(),style: TextStyle(fontSize: 16.0))
+                Text(DartHelper.isNullOrEmptyString(serviceItem.AlarmCount.toString()),style: TextStyle(fontSize: 16.0))
               ],
             ),),
           ],
