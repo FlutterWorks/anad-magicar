@@ -61,6 +61,9 @@ class CarPageState extends MainPage<CarPage> {
   ConfirmCarBloc confirmCarBloc;
   List<CarInfoVM> carInfos=new List();
   NotyBloc<Message> carChangedNoty;
+=======
+  NotyBloc<Message> carActionsNoty;
+>>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
 
 
   void registerBus() {
@@ -218,16 +221,23 @@ class CarPageState extends MainPage<CarPage> {
     ServiceResult result=await restDatasource.deleteCars( cars);
     if(result!=null) {
       centerRepository.showFancyToast(result.Message);
+<<<<<<< HEAD
       if(result.IsSuccessful) {
         carInfos.removeWhere((r) => r.carId == carId);
         carChangedNoty.updateValue(new Message(type: 'CAR_DELETED'));
       }
       else{
       }
+=======
+        carInfos.removeWhere((r)=>r.carId==carId);
+        Navigator.pop(context);
+        carActionsNoty.updateValue(new Message(type: 'CAR_DELETED'));
+>>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
     }
     else
     {
       centerRepository.showFancyToast(Translations.current.hasErrors());
+      Navigator.pop(context);
     }
     Navigator.pop(context);
     return Future.value(0);
@@ -589,6 +599,7 @@ class CarPageState extends MainPage<CarPage> {
     );
   }
 
+
   @override
   void dispose() {
     carChangedNoty.dispose();
@@ -605,7 +616,11 @@ class CarPageState extends MainPage<CarPage> {
   @override
   initialize() {
     confirmCarBloc=new ConfirmCarBloc();
+<<<<<<< HEAD
     carChangedNoty=new NotyBloc<Message>();
+=======
+    carActionsNoty=new NotyBloc<Message>();
+>>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
     if(widget.carPageVM!=null &&
         widget.carPageVM.isSelf!=null && !widget.carPageVM.isSelf)
       carsToUser=factoryCar.loadCarsToUserByUserId(widget.carPageVM.userId);
@@ -651,6 +666,7 @@ class CarPageState extends MainPage<CarPage> {
                       _carCounts = snapshot.data;
                     }
 
+<<<<<<< HEAD
                     return StreamBuilder(
                       stream: carChangedNoty.noty,
                       builder: (context,snapshot){
@@ -658,6 +674,15 @@ class CarPageState extends MainPage<CarPage> {
 
                         }
                         return createBody(carInfos, hasInternet);
+=======
+                    return  StreamBuilder(
+                      stream: carActionsNoty.noty,
+                      builder: (context,snapshot) {
+                        if(snapshot.hasData && snapshot.data!=null){
+
+                        }
+                       return createBody(carInfos, hasInternet);
+>>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
                       }
                     );
                   }
