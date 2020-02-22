@@ -60,6 +60,7 @@ class CarPageState extends MainPage<CarPage> {
   List<AdminCarModel> carsToUserForConfirm;
   ConfirmCarBloc confirmCarBloc;
   List<CarInfoVM> carInfos=new List();
+<<<<<<< HEAD
   NotyBloc<Message> carChangedNoty;
 =======
   NotyBloc<Message> carActionsNoty;
