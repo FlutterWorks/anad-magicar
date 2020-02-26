@@ -88,7 +88,7 @@ class RestDatasource extends BaseRest {
   static final GetCurrentUserAccessableActions_URL=BASE_URL+BASE_USER_POLICY_URL+'/GetCurrentUserAccessableActions';
   static final ResetCurrentPassword_URL= BASE_URL+BASE_USER_URL+ "/ResetCurrentPassword";
   static final ValidationSMSCode_URL= BASE_URL+BASE_USER_URL+ "/ValidationSMSCode";
-
+  static final Save_Car_To_User_URL=BASE_URL+BASE_CAR_TO_USER_URL+'/Save';
   static final SAVE_USER_MAGICAR_URL = BASE_URL + BASE_USER_URL+"/saveMagicarUser";
   static final SAVE_CAR_URL = BASE_URL + BASE_CAR_URL+ "/SaveCarInfo";
   static final _API_KEY = "somerandomkey";
@@ -179,6 +179,7 @@ class RestDatasource extends BaseRest {
     return _netUtil.getWithDio(BASE_URL_FOR_LOGIN+LOGIN_URL2,
         theaders: getHeaders(),
         params: userParams).then(( res) {
+          String tt=res.toString();
        return ServiceResult.fromJson(res);
      });
          }
@@ -336,6 +337,13 @@ class RestDatasource extends BaseRest {
   }
   Future<ServiceResult> sendCommand(SendCommandModel model) async{
     return _netUtil.post(SEND_COMMAND_URL, body: model.toJson() )
+        .then(( res) {
+      return ServiceResult.fromJson(res);
+    });
+  }
+  Future<ServiceResult> saveCarToUser(int userid,int carId) async{
+    Map<String ,dynamic> params={"UserId":userid,"CarId":carId};
+    return _netUtil.post(Save_Car_To_User_URL, body: params )
         .then(( res) {
       return ServiceResult.fromJson(res);
     });
@@ -699,7 +707,7 @@ class RestDatasource extends BaseRest {
 
   Future<ServiceResult> savePairedCar(ApiPairedCar entity) async{
 
-    return _netUtil.post(SaveServiceType_URL,body: entity.toJson()).then((res) {
+    return _netUtil.post(SavePairedCar_URL,body: entity.toJson()).then((res) {
       try {
         if (res != null )
           return  ServiceResult.fromJson(res);

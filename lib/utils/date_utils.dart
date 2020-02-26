@@ -31,6 +31,9 @@ class DateTimeUtils{
  static DateTime convertIntoDateObject(String dateTime)
  {
    try {
+     if(dateTime.contains('/')){
+       dateTime=dateTime.replaceAll('/', '-');
+     }
      DateTime dateTimeObj = new DateFormat("yyyy-MM-dd", "en-US")
          .parse(dateTime);
      if (dateTimeObj != null)
@@ -98,6 +101,42 @@ class DateTimeUtils{
        return 0;
 
  }
+ static int diffMinsFromDateToDate4(DateTime fromDate,DateTime toDate) {
+
+   Duration duration = fromDate.difference(toDate);
+   int result = duration.inMinutes;
+   return result;
+ }
+ static int diffDaysFromDateToDate3(String fromDate,String toDate) {
+   String fromDate_temp = DartHelper.isNullOrEmptyString(fromDate);
+   String toDate_temp = DartHelper.isNullOrEmptyString(toDate);
+   if (fromDate_temp == null || fromDate_temp.isEmpty)
+     fromDate_temp = '0/0/0';
+   if (toDate_temp == null || toDate_temp.isEmpty)
+     toDate_temp = '0/0/0';
+
+   var fDate = fromDate_temp.split('/');
+   var tDate = toDate_temp.split('/');
+
+   int fy = int.tryParse(DartHelper.isNullOrEmpty(fDate[0]) ? 0 : fDate[0]);
+   int ty = int.tryParse(DartHelper.isNullOrEmpty(tDate[0]) ? 0 : tDate[0]);
+
+   int fm = int.tryParse(DartHelper.isNullOrEmpty(fDate[1]) ? 0 : fDate[1]);
+   int tm = int.tryParse(DartHelper.isNullOrEmpty(tDate[1]) ? 0 : tDate[1]);
+
+   int fd = int.tryParse(DartHelper.isNullOrEmpty(fDate[2]) ? 0 : fDate[2]);
+   int td = int.tryParse(DartHelper.isNullOrEmpty(tDate[2]) ? 0 : tDate[2]);
+
+   Jalali fromJ = Jalali(fy, fm, fd);
+   Jalali toJ = Jalali(ty, tm, td);
+
+   DateTime fdt = fromJ.toDateTime();
+   DateTime tdt = toJ.toDateTime();
+
+   Duration duration = tdt.difference(fdt);
+   int result = duration.inDays;
+   return result;
+ }
  static int diffDaysFromDateToDate2(String fromDate,String toDate)
  {
    String fromDate_temp=DartHelper.isNullOrEmptyString(fromDate);
@@ -151,6 +190,12 @@ class DateTimeUtils{
    String result=fromJ.hour.toString()+':'+fromJ.minute.toString()+':'+fromJ.second.toString();
    return result;
  }
+ static String getDateJalaliFromDateTimeObj(DateTime now){
+  Jalali j=Jalali.fromDateTime(now);
+   String result=j.year.toString()+'/'+j.month.toString()+'/'+j.day.toString();
+   return result;
+ }
+
  static String getDateJalaliThis(Jalali now){
 
    String result=now.year.toString()+'/'+now.month.toString()+'/'+now.day.toString();

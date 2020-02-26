@@ -217,7 +217,7 @@ class CarWidgetFactoryState extends State<CarWidgetFactory> {
                       },
                     ) ) :
                     Container(width: 0.0,height: 0.0,),
-                    isAdmin ?   Container(
+                   /* isAdmin ?   Container(
                       width: 100.0,
                       height: 48.0,
                       decoration: BoxDecoration(
@@ -232,7 +232,7 @@ class CarWidgetFactoryState extends State<CarWidgetFactory> {
                             _deleteCarToUser(c.userId, c.carId);
                       },
                     ) ) :
-                    Container(width: 0.0,height: 0.0,)
+                    Container(width: 0.0,height: 0.0,)*/
                   ],
                 ),
               ),

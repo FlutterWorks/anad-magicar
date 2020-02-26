@@ -3,6 +3,7 @@ import 'package:anad_magicar/bloc/values/notify_value.dart';
 import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/components/no_data_widget.dart';
+import 'package:anad_magicar/data/ds/car_ds.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/data/rxbus.dart';
 import 'package:anad_magicar/model/apis/api_brand_model.dart';
@@ -55,16 +56,13 @@ class CarPageState extends MainPage<CarPage> {
   int _carCounts=0;
   bool hasInternet=true;
   Future<int> carCounts;
+  CarDS carDS;
   Future<List<AdminCarModel>> carsToUser;
   List<AdminCarModel> carsToUserSelf;
   List<AdminCarModel> carsToUserForConfirm;
   ConfirmCarBloc confirmCarBloc;
   List<CarInfoVM> carInfos=new List();
-<<<<<<< HEAD
   NotyBloc<Message> carChangedNoty;
-=======
-  NotyBloc<Message> carActionsNoty;
->>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
 
 
   void registerBus() {
@@ -72,14 +70,14 @@ class CarPageState extends MainPage<CarPage> {
 
       if(event.type=='CAR_ADDED')
       {
-        setState(() {
+
           if(widget.carPageVM!=null &&
               widget.carPageVM.isSelf!=null && !widget.carPageVM.isSelf)
             carsToUser=factoryCar.loadCarsToUserByUserId(widget.carPageVM.userId);
           else{
             carCounts = getCarInfo();
           }
-        });
+          carChangedNoty.updateValue(new Message(type: 'CAR_ADDED'));
 
       }
 
@@ -88,15 +86,26 @@ class CarPageState extends MainPage<CarPage> {
   }
 
  Future<int> getCarInfo() async {
+
    centerRepository.showProgressDialog(context, Translations.current.loadingdata());
-   carsToUserSelf= centerRepository.getCarsToAdmin();
-    _carCounts=await prefRepository.getCarsCount();
+
+   carsToUserSelf = await carDS.getAllCarsByUserId(userId);
+   if (carsToUserSelf != null) {
+     _carCounts=carsToUserSelf.length;
+     fillCarInfo(carsToUserSelf);
+     centerRepository.setCarsToAdmin(carsToUserSelf);
+     prefRepository.setCarsCount(carsToUserSelf.length);
+   }
+   else {
+     prefRepository.setCarsCount(0);
+   }
     if(_carCounts==0) {
 
         if(centerRepository.getCarsToAdmin()!=null)
           _carCounts=centerRepository.getCarsToAdmin().length;
         fillCarInfo(carsToUserSelf);
       }
+
     return _carCounts;
   }
 
@@ -155,6 +164,7 @@ class CarPageState extends MainPage<CarPage> {
             car: car_info,
             carColor: null,
             carModel: null,
+            isActive: car.IsActive,
             pelak: car_info.pelaueNumber,
             distance: car_info.totlaDistance.toString(),
             carModelDetail: null,
@@ -222,23 +232,16 @@ class CarPageState extends MainPage<CarPage> {
     ServiceResult result=await restDatasource.deleteCars( cars);
     if(result!=null) {
       centerRepository.showFancyToast(result.Message);
-<<<<<<< HEAD
       if(result.IsSuccessful) {
         carInfos.removeWhere((r) => r.carId == carId);
         carChangedNoty.updateValue(new Message(type: 'CAR_DELETED'));
       }
       else{
       }
-=======
-        carInfos.removeWhere((r)=>r.carId==carId);
-        Navigator.pop(context);
-        carActionsNoty.updateValue(new Message(type: 'CAR_DELETED'));
->>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
     }
     else
     {
       centerRepository.showFancyToast(Translations.current.hasErrors());
-      Navigator.pop(context);
     }
     Navigator.pop(context);
     return Future.value(0);
@@ -250,6 +253,7 @@ class CarPageState extends MainPage<CarPage> {
         fromMainApp: true,
         editMode: edit,
         editCarModel: editModel,
+        addNotyBloc: carChangedNoty,
         notyBloc: widget.carPageVM.carAddNoty));
   }
 
@@ -297,6 +301,7 @@ class CarPageState extends MainPage<CarPage> {
         String colortitle=DartHelper.isNullOrEmptyString(c.color);
         bool isAdmin=c.isAdmin;
         int statusId=c.CarToUserStatusConstId;
+        bool active=c.isActive;
         list.add(
           Container(
             margin: EdgeInsets.only(bottom: 2.0),
@@ -446,7 +451,7 @@ class CarPageState extends MainPage<CarPage> {
                       children: <Widget>[
                         FlatButton(
                           padding: EdgeInsets.only(left: 0, right: 0),
-                          child: Button(title: Translations.current.edit(),wid: 90.0,color: Colors.blueAccent.value,),
+                          child: Button(title: Translations.current.edit(),wid: 80.0,clr: Colors.blueAccent,),
                     onPressed: () {
                       if(isAdmin) {
 
@@ -457,9 +462,9 @@ class CarPageState extends MainPage<CarPage> {
                       }
                     },
                   ) ,
-                        (isAdmin && statusId==Constants.CAR_TO_USER_STATUS_WAITING_TAG ) ?  FlatButton (
+                        ((isAdmin && statusId==Constants.CAR_TO_USER_STATUS_WAITING_TAG ) || (!active) ) ?  FlatButton (
                           padding: EdgeInsets.only(left: 0, right: 0),
-                          child: Button(title: Translations.current.activateCar(),wid: 90.0,color: Colors.greenAccent.value,),
+                          child: Button(title: Translations.current.activateCar(),wid: 80.0,color: Colors.greenAccent.value,),
                           onPressed: () {
                             if(isAdmin) {
                              _showBottomSheetAcceptRole(context, c.carId,c.userId);
@@ -467,9 +472,9 @@ class CarPageState extends MainPage<CarPage> {
                           },
                         ) :
                         Container(width: 0.0,height: 0.0,),
-                        (isAdmin && statusId==Constants.CAR_TO_USER_STATUS_WAITING_TAG ) ?  FlatButton(
+                        ( (isAdmin && statusId==Constants.CAR_TO_USER_STATUS_WAITING_TAG ) || (!active))?  FlatButton(
                           padding: EdgeInsets.only(left: 0, right: 0),
-                          child: Button(title: Translations.current.denyRequest(),wid: 90.0,color: Colors.greenAccent.value,),
+                          child: Button(title: Translations.current.denyRequest(),wid: 50.0,color: Colors.greenAccent.value,),
                           onPressed: () {
                             if(isAdmin) {
                               _deleteCarToUser(c.userId,c.carId,c);
@@ -479,7 +484,7 @@ class CarPageState extends MainPage<CarPage> {
                         Container(width: 0.0,height: 0.0,),
                         isAdmin ?   FlatButton(
                           padding: EdgeInsets.only(left: 0, right: 0),
-                          child: Button(title: Translations.current.delete(),wid: 90.0,color: Colors.pinkAccent.value,),
+                          child: Button(title: Translations.current.delete(),wid: 50.0,clr: Colors.pinkAccent,),
                           onPressed: () {
                             _deleteCars( c.carId);
                           },
@@ -600,7 +605,6 @@ class CarPageState extends MainPage<CarPage> {
     );
   }
 
-
   @override
   void dispose() {
     carChangedNoty.dispose();
@@ -617,11 +621,8 @@ class CarPageState extends MainPage<CarPage> {
   @override
   initialize() {
     confirmCarBloc=new ConfirmCarBloc();
-<<<<<<< HEAD
+    carDS=new CarDS();
     carChangedNoty=new NotyBloc<Message>();
-=======
-    carActionsNoty=new NotyBloc<Message>();
->>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
     if(widget.carPageVM!=null &&
         widget.carPageVM.isSelf!=null && !widget.carPageVM.isSelf)
       carsToUser=factoryCar.loadCarsToUserByUserId(widget.carPageVM.userId);
@@ -654,7 +655,31 @@ class CarPageState extends MainPage<CarPage> {
                   Translations.current.confirmCarSuccessful(),
                   false);
             }
-            return
+            return StreamBuilder<Message>(
+              initialData: new Message(type: 'CAR_ADDED'),
+                stream: carChangedNoty.noty,
+                builder: (context,snapshot){
+                  if(snapshot.hasData && snapshot.data!=null){
+                    _carCounts=carInfos.length;
+                    Message msg=snapshot.data;
+                   // if(msg.type=='CAR_ADDED'){
+                      centerRepository.dismissDialog(context);
+                      if(widget.carPageVM!=null &&
+                          widget.carPageVM.isSelf!=null && !widget.carPageVM.isSelf) {
+                        carsToUser = factoryCar.loadCarsToUserByUserId(
+                            widget.carPageVM.userId);
+                        carCounts = getCarInfo();
+                       // fillCarInfo(carsToUserSelf);
+                      }
+                      else {
+                        carCounts = getCarInfo();
+                      }
+                   //}
+                    if(msg.type=='CAR_DELETED'){
+
+                    }
+                  }
+                  return
               (widget.carPageVM == null ||
                   widget.carPageVM.isSelf == null ||
                   widget.carPageVM.isSelf) ? FutureBuilder<int>(
@@ -667,26 +692,8 @@ class CarPageState extends MainPage<CarPage> {
                       _carCounts = snapshot.data;
                     }
 
-<<<<<<< HEAD
-                    return StreamBuilder(
-                      stream: carChangedNoty.noty,
-                      builder: (context,snapshot){
-                        if(snapshot.hasData && snapshot.data!=null){
-
-                        }
                         return createBody(carInfos, hasInternet);
-=======
-                    return  StreamBuilder(
-                      stream: carActionsNoty.noty,
-                      builder: (context,snapshot) {
-                        if(snapshot.hasData && snapshot.data!=null){
-
-                        }
-                       return createBody(carInfos, hasInternet);
->>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
                       }
-                    );
-                  }
 
               ) :
               FutureBuilder<List<AdminCarModel>>(
@@ -708,22 +715,14 @@ class CarPageState extends MainPage<CarPage> {
                       _carCounts = carsToUserForConfirm.length;
                     }
 
-                    return StreamBuilder(
-                        stream: carChangedNoty.noty,
-                        builder: (context,snapshot){
-                          if(snapshot.hasData && snapshot.data!=null){
-
-                          }
-                          return createBody(carInfos, hasInternet);
-                        }
-                    );
+                    return createBody(carInfos, hasInternet);
                   }
-              );
+                    );
           }
 
-
     );
-  }
+  });
+            }
 
   @override
   FloatingActionButton getFab() {

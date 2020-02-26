@@ -1,9 +1,11 @@
 import 'package:anad_magicar/bloc/theme/change_theme_bloc.dart';
 import 'package:anad_magicar/bloc/theme/theme.dart';
+import 'package:anad_magicar/bloc/values/notify_value.dart';
 import 'package:anad_magicar/common/actions_constants.dart';
 import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/components/fancy_popup/main.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
+import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/send_command_model.dart';
 import 'package:anad_magicar/model/viewmodel/car_page_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
@@ -77,7 +79,7 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   String finalText=lowLevelText1+'\\n'+lowLevelText2+'\\n'+lowLevelText3+'\\n'+lowLevelText4+'\\n'+lowLevelText5;
   List<RangeSliderData> rangeSliders;
-
+  NotyBloc<Message> changeLevel=new NotyBloc<Message>();
   double _lowerValue = 0.0;
   double _upperValue = 60.0;
   double _lowerValueFormatter = 20.0;
@@ -85,6 +87,12 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   String userName='';
   String imageUrl='';
+
+  static int lowLevel=5;
+  static int mLevel=15;
+  static int hLevel=30;
+  static int level=5;
+
   static final route='/appsettings';
   List<String> themeOptions = <String>[Translations.current.darkTheme(), Translations.current.lightTheme()];
   String selectedThemeOption = Translations.current.lightTheme();
@@ -108,6 +116,7 @@ class SettingsScreenState extends State<SettingsScreen> {
   String periodicSend='';
   String chargePassword='';
   String resultValue='';
+  String resultValueh='';
   AnimationController _loadingController;
   Interval _nameTextFieldLoadingAnimationInterval;
 
@@ -158,10 +167,59 @@ class SettingsScreenState extends State<SettingsScreen> {
   }
 
   chargeSimCard() async {
-      centerRepository.showFancyToast('اارسال شد');
-      Navigator.pop(context);
-  }
+    int actionId=115;
+    String command='';
+    if(resultValue!=null && resultValue.isNotEmpty) {
+      command = '*141*#' + resultValue + '#';
+    }
+    else if(resultValueh!=null && resultValueh.isNotEmpty) {
+      command = '*140*#' + resultValueh + '#';
+    }
+      var result= await restDatasource.sendCommand(new SendCommandModel(UserId: userId,
+          ActionId: actionId, CarId: CenterRepository.getCurrentCarId(), Command: command));
+      if(result!=null){
+        centerRepository.showFancyToast('دستور شارژ ارسال شد');
+        Navigator.pop(context);
+      }
+      else{
+        centerRepository.showFancyToast('خطا  در ارسال دستور شارژ');
+      }
+    }
 
+    sendLevel() async {
+      int actionId=46;
+      String command=level.toString();
+
+      var result= await restDatasource.sendCommand(new SendCommandModel(UserId: userId,
+          ActionId: actionId, CarId: CenterRepository.getCurrentCarId(), Command: command));
+      if(result!=null){
+        centerRepository.showFancyToast('دستور  ارسال شد');
+
+      }
+      else{
+        centerRepository.showFancyToast('خطا  در ارسال دستور ');
+      }
+    }
+  setLevel(int l){
+    if(l==1) {
+
+      level = 5;
+      finalText=lowLevelText1+'\\n'+lowLevelText2+'\\n'+lowLevelText3+'\\n'+lowLevelText4
+          +'\\n'+lowLevelText5;
+      changeLevel.updateValue(new Message(type: 'LEVEL_CHANGED'));
+    }
+    if(l==2) {
+      level = 15;
+      finalText=mediumLevelText1+'\\n'+mediumLevelText2+'\\n'+mediumLevelText3+'\\n'+mediumLevelText4
+          +'\\n'+mediumLevelText5;
+      changeLevel.updateValue(new Message(type: 'LEVEL_CHANGED'));
+    }
+    if(l==3) {
+      level = 30;
+      finalText=highLevelText1+'\\n'+highLevelText2+'\\n'+highLevelText3+'\\n'+highLevelText4;
+      changeLevel.updateValue(new Message(type: 'LEVEL_CHANGED'));
+    }
+  }
   getHardWareVersion() async{
     int actionId=ActionsCommand.actionCommandsMap[ActionsCommand.HARDWARE_VERSION_NANO_CODE];
     var result= await restDatasource.sendCommand(new SendCommandModel(UserId: userId,
@@ -173,7 +231,7 @@ class SettingsScreenState extends State<SettingsScreen> {
   getChargeAmount() async{
     int actionId=ActionsCommand.actionCommandsMap[ActionsCommand.ChargeSimCardCredit_Nano_CODE];
     var result= await restDatasource.sendCommand(new SendCommandModel(UserId: userId,
-        ActionId: actionId, CarId: CenterRepository.getCurrentCarId(), Command: null));
+        ActionId: actionId, CarId: CenterRepository.getCurrentCarId(), Command: '*141*1#'));
     if(result!=null){
       Navigator.pop(context);
     }
@@ -212,62 +270,10 @@ class SettingsScreenState extends State<SettingsScreen> {
           ));
 
                   }else if(action==SEND_INFO_ACCURACY_TAG){
-      await animated_dialog_box.showScaleAlertBox(
-          title:Center(child: Text(Translations.current.accuracyInfo())) ,
-          context: context,
-          firstButton: MaterialButton(
-              elevation: 0.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              color: Colors.white,
-              child: Text(Translations.current.sabteInfo()),
-              onPressed: () async {
-                  centerRepository.showFancyToast('ارسال دستور انجام شد.');
-                  Navigator.pop(context);
-              }
-          ),
-          secondButton: MaterialButton(
-            elevation: 0.5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            color: Colors.white,
-            child: Text(Translations.current.cancel()),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          icon: Icon(Icons.info_outline,color: Colors.red,),
-          yourWidget: Column(
-            children: <Widget>[
-              Text(finalText,style: TextStyle(fontSize: 10.0),),
-          RangeSliderData(
-              min: 0.0,
-              max: 60.0,
-              lowerValue: 10.0,
-              upperValue: 30.0,
-              showValueIndicator: true,
-              valueIndicatorMaxDecimals: 0,
-              activeTrackColor: Colors.red,
-              inactiveTrackColor: Colors.red[50],
-              valueIndicatorColor: Colors.green).build(context, (l,u) {
-                setState(() {
-                  if(l==10 && u==20){
-                    finalText=lowLevelText1+'\\n'+lowLevelText2+'\\n'+lowLevelText3+'\\n'+lowLevelText4+'\\n'+lowLevelText5;
-                    FlashHelper.successBar(context, message: finalText);
-                  } else if(l==10 && u==20){
-                    String finalText=mediumLevelText1+'\\n'+mediumLevelText2+'\\n'+mediumLevelText3+'\\n'+mediumLevelText4+'\\n'+mediumLevelText5;
-                    FlashHelper.successBar(context, message: finalText);
-                  }else if(l==10 && u==30){
-                    String finalText=highLevelText1+'\\n'+highLevelText2+'\\n'+highLevelText3+'\\n'+highLevelText4;
-                    FlashHelper.successBar(context, message: finalText);
-                  }
-                });
 
-          }),
-      ],
-          ),);
+        _showSendingLevelSheet(context);
+
+
     }else if(action==CHARGE_SIMCARD_TAG){
       await animated_dialog_box.showScaleAlertBox(
           title:Center(child: Text(Translations.current.chargeSimCard())) ,
@@ -280,6 +286,7 @@ class SettingsScreenState extends State<SettingsScreen> {
               color: Colors.white,
               child: Text(Translations.current.chargeSimCard()),
               onPressed: () async {
+                _formKey.currentState.save();
                 chargeSimCard();
               }
           ),
@@ -303,7 +310,7 @@ class SettingsScreenState extends State<SettingsScreen> {
           );
     }else if(action==CHARGE_AMUONT_TAG){
       await animated_dialog_box.showScaleAlertBox(
-          title:Center(child: Text(Translations.current.confimDelete())) ,
+          title:Center(child: Text(Translations.current.chargeAmount())) ,
           context: context,
           firstButton: MaterialButton(
               elevation: 0.0,
@@ -329,7 +336,7 @@ class SettingsScreenState extends State<SettingsScreen> {
           ),
           icon: Icon(Icons.info_outline,color: Colors.red,),
           yourWidget: Container(
-            child: Text(Translations.current.forGethwareVersionClickGetButton()),
+            child: Text(Translations.current.forGetChargeAmount()),
           ));
     }
   }
@@ -352,6 +359,61 @@ class SettingsScreenState extends State<SettingsScreen> {
 
     Navigator.pop(context);
   }
+
+  _showSendingLevelSheet(BuildContext context) {
+    showModalBottomSheetCustom(context: context,
+        mHeight: 0.70,
+        builder: (BuildContext context) {
+          return StreamBuilder<Message>(
+              stream: changeLevel.noty,
+              builder: (context,snapshot){
+                return
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(finalText,style: TextStyle(fontSize: 10.0),),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+
+                          FlatButton(
+                            padding: EdgeInsets.all(0.0),
+                            onPressed: (){
+                              setLevel(1);
+                            },
+                            child: Button(wid: 35,clr: level==5 ? Colors.blueAccent : Colors.white,title: 'پایین',color: Colors.black.value,),
+                          ),
+                          FlatButton(
+                            padding: EdgeInsets.all(0.0),
+                            onPressed: (){
+                              setLevel(2);
+                            },
+                            child: Button(wid: 35,clr: level==15 ?  Colors.amber : Colors.white,title: 'متوسط',color: Colors.black.value),
+                          ),
+                          FlatButton(
+                            padding: EdgeInsets.all(0.0),
+                            onPressed: (){
+                              setLevel(3);
+                            },
+                            child: Button(wid: 35,clr: level==30 ? Colors.red : Colors.white,title: 'بالا',color: Colors.black.value),
+                          )
+                        ],),
+                      FlatButton(
+                        padding: EdgeInsets.all(0.0),
+                        onPressed: (){
+                          sendLevel();
+                          Navigator.pop(context);
+                        },
+                        child: Button(wid: 80,clr: Colors.blueAccent ,title: 'ارسال اطلاعات',color: Colors.black.value),
+                      )
+                    ],
+                  );
+              });
+        }
+    );
+  }
+
   _showSendingCommandSheet(BuildContext context)
   {
     showModalBottomSheetCustom(context: context ,
@@ -417,7 +479,7 @@ class SettingsScreenState extends State<SettingsScreen> {
   Widget _buildTextField(String hint,double width, String result) {
     return
       Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
             width: width,
@@ -428,7 +490,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                 width: width,
                 loadingController: _loadingController,
                 interval: _nameTextFieldLoadingAnimationInterval,
-                labelText: hint,
+                labelText:'رمز شارژ ایرانسل',
                // prefixIcon: Icon(Icons.confirmation_number),
                 keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
                 textInputAction: TextInputAction.next,
@@ -436,8 +498,6 @@ class SettingsScreenState extends State<SettingsScreen> {
                  // FocusScope.of(context).requestFocus(_passwordFocusNode);
                 },
                 validator: (value) {
-                  if(value==null || value.isEmpty)
-                    return Translations.current.allFieldsRequired();
                   return null;
                 } ,
                 onSaved: (value) async {
@@ -446,9 +506,70 @@ class SettingsScreenState extends State<SettingsScreen> {
                 }
             ),
           ),
+          Container(
+            width: width,
+            height: 50.0,
+            child:
+            AnimatedTextFormField(
+                enabled: true,
+                width: width,
+                loadingController: _loadingController,
+                interval: _nameTextFieldLoadingAnimationInterval,
+                labelText: 'رمز شارژ همراه اول',
+                // prefixIcon: Icon(Icons.confirmation_number),
+                keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (value) {
+                  // FocusScope.of(context).requestFocus(_passwordFocusNode);
+                },
+                validator: (value) {
 
+                  return null;
+                } ,
+                onSaved: (value) async {
+                  resultValueh=value;
+
+                }
+            ),
+          ),
         ],
     );
+  }
+
+
+  Widget _buildTextField2(String hint,double width, String result) {
+    return
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            width: width,
+            height: 50.0,
+            child:
+            AnimatedTextFormField(
+                enabled: true,
+                width: width,
+                loadingController: _loadingController,
+                interval: _nameTextFieldLoadingAnimationInterval,
+                labelText:hint,
+                // prefixIcon: Icon(Icons.confirmation_number),
+                keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (value) {
+                  // FocusScope.of(context).requestFocus(_passwordFocusNode);
+                },
+                validator: (value) {
+                  return null;
+                } ,
+                onSaved: (value) async {
+                  resultValue=value;
+
+                }
+            ),
+          ),
+
+        ],
+      );
   }
   Widget _buildMaxTextField(String hint,double width, String result) {
     return
@@ -566,7 +687,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Container(
-                          child: _buildTextField(
+                          child: _buildTextField2(
                               Translations.current.periodicSendTime(), 150.0,
                               maxSpeed),
                         ),
@@ -576,7 +697,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Container(
-                          child: _buildTextField(
+                          child: _buildTextField2(
                               Translations.current.periodicAccuracy(), 150.0,
                               maxSpeed),
                         ),
@@ -590,7 +711,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                               onPressed: () {
                                 _onConfirmDefaultSettings(type,context);
                               },
-                              child: Button(title: Translations.current.confirm(),wid: 120.0,color: Colors.green.value,),
+                              child: Button(title: Translations.current.confirm(),wid: 120.0,color: Colors.white.value,clr:Colors.green,),
                             )
                         )
                       ],
@@ -777,14 +898,14 @@ class SettingsScreenState extends State<SettingsScreen> {
                   _showDefaultSettingsSheet(context,PERIODIC_UPDTAE_TIME_TAG);
                 },
               ),
-              SettingsTile(
+              /*SettingsTile(
                 title: 'تنظیمات سرعت',
-                subtitle: 'حداق حداکثر سرعت',
+                subtitle: 'حداقل حداکثر سرعت',
                 leading: Icon(Icons.shutter_speed),
                 onTap: () {
                   _showDefaultSettingsSheet(context,MINMAX_SPEED_TAG);
                 },
-              ),
+              ),*/
               SettingsTile.switchTile(
                   leftPadding: 25.0,
                   rightPadding: 2.0,

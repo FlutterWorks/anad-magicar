@@ -25,6 +25,7 @@ class CarInfoVM{
   String color;
   int carId;
   bool isAdmin;
+  bool isActive;
   int userId;
   String fromDate;
   String Description;
@@ -54,7 +55,8 @@ class CarInfoVM{
     @required this.editModel,
     @required this.imageUrl,
     @required this.pelak,
-    @required this.distance
+    @required this.distance,
+    @required this.isActive
   });
 
 

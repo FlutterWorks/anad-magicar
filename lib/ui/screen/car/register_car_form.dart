@@ -1,4 +1,3 @@
-
 import 'package:anad_magicar/bloc/car/register.dart';
 import 'package:anad_magicar/bloc/search/search_result_screen.dart';
 import 'package:anad_magicar/bloc/values/notify_value.dart';
@@ -1285,7 +1284,7 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
                                 Container(
                                   child:
                                   new FlatButton(onPressed: () {
-                                    int brandId=0;
+                                    /*int brandId=0;
                                     int carModelId=0;
                                     int detailId=0;
                                     var mDetail=centerRepository.getCarModelDetails().where((c)=>c.carModelDetailId==car.carModelDetailId).toList();
@@ -1303,11 +1302,11 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
                                     }
                                     CarData data=new CarData(brandId: brandId,
                                         modelId: carModelId,
-                                        tip: detailId, pelak: car.pelaueNumber,
+                                        tip: car.carModelDetailId, pelak: car.pelaueNumber,
                                         colorId: car.colorTypeConstId,
                                         distance: car.totlaDistance,
-                                        cancel: false);
-                                    _authAddCar(data);
+                                        cancel: false);*/
+                                    _addCarToUser(null, car.carId);
 
                                   }, child: Button(title: Translations.current.addCar(),color: Colors.lightGreen.value,wid: 120.0,)),
                                 ),
@@ -1343,7 +1342,21 @@ class _RegisterCarFormState extends State<RegisterCarForm> with TickerProviderSt
         errorMessage=error.toString();
       }
   }
-
+  _addCarToUser(CarData data,int carId) async {
+    if(carId!=null){
+      int userId=CenterRepository.getUserId();
+     var result=await restDatasource.saveCarToUser(userId,carId);
+     if(result!=null){
+       if(result.IsSuccessful){
+         centerRepository.showFancyToast('خودرو با موفقیت افزوده شد.');
+         Navigator.pop(context);
+       }else
+         {
+           centerRepository.showFancyToast('خودرو با مشکل مواجه شد.');
+         }
+     }
+    }
+  }
   showExitDialog()
   {
     if(widget.fromMainApp==null ||

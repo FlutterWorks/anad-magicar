@@ -43,9 +43,16 @@ class RegisterServiceFormState extends State<RegisterServiceForm> {
 
   Future<String> _authAddCarService(CarServiceData data)
   {
+
     return Future.delayed(new Duration(microseconds: 200)).then((_) {
       if(data!=null &&
           !data.cancel) {
+        int type=ApiService.ServiceStatusConstId_Tag;
+        int rowState=Constants.ROWSTATE_TYPE_INSERT;
+        if(widget.editMode!=null && widget.editMode){
+          type=widget.service.ServiceStatusConstId;
+          rowState=widget.service.RowStateType;
+        }
         ApiService service=new ApiService(
             ServiceId: data.serviceId,
             CarId: widget.carId,
@@ -53,13 +60,13 @@ class RegisterServiceFormState extends State<RegisterServiceForm> {
             ServiceDate: DateTimeUtils.convertIntoDateTime( data.serviceDate),
             ActionDate: DateTimeUtils.convertIntoDateTime(data.actionDate),
             AlarmDate: DateTimeUtils.convertIntoDateTime(data.alarmDate),
-            ServiceStatusConstId: ApiService.ServiceStatusConstId_Tag,
+            ServiceStatusConstId: type,
             ServiceCost: data.cost,
             AlarmCount: data.alarmCount,
             Description: data.description,
             CreatedDate: null,
-            RowStateType: (widget.editMode!=null && widget.editMode) ?  Constants.ROWSTATE_TYPE_UPDATE :
-            Constants.ROWSTATE_TYPE_INSERT);
+            RowStateType: rowState
+            );
 
         centerRepository.showProgressDialog(context, Translations.current.loadingdata());
           loadingNoty.updateValue(new NotyLoadingVM(isLoading: true,
@@ -98,7 +105,8 @@ class RegisterServiceFormState extends State<RegisterServiceForm> {
 
       }
       else if(data.cancel) {
-          Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, MainPageServiceState.route,arguments: new ServiceVM(carId: widget.carId,refresh: false));
+
       }
       else {
         return 'لطفا اطلاعات را بطور کامل وارد نمایید!';

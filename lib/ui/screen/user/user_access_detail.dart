@@ -168,13 +168,7 @@ class _UserAccessPageState extends State<UserAccessPage> {
                     onTap: () {
                       actModel.selected = !selected;
                     },
-<<<<<<< HEAD
                     child: Switch( onChanged: (value) {
-=======
-                    child: Switch(
-                      onChanged: (value) {
-
->>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
                     },
                       value: false,),
                   ),

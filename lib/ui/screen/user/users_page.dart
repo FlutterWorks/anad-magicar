@@ -62,15 +62,12 @@ class UserPageState extends MainPage<UsersPage> {
     roleId=await prefRepository.getUserRoleId();
     relatedUsers=await restDatasource.getRelatedUser(userId.toString());
     if(relatedUsers!=null) {
-
       _userCounts=relatedUsers.length;
       for(var us in relatedUsers) {
         List<SaveUserModel> usinfos=await restDatasource.getUserInfo(us.userId.toString());
         if(usinfos!=null &&
             usinfos.length>0)
         {
-
-
           userInfos.add(usinfos.first);
         }
       }
@@ -98,16 +95,21 @@ class UserPageState extends MainPage<UsersPage> {
       {
         _userCounts=1;
         roleId=await prefRepository.getUserRoleId();
-        String rolTitle='';
+        String roleTitle='';
         if(centerRepository.getRoles()!=null && centerRepository.getRoles().length>0) {
           var roles = centerRepository.getRoles().where((r) =>
           r.roleId == roleId).toList();
           if (roles != null && roles.length > 0) {
-            rolTitle = roles.first.roleName;
+            roleTitle = roles.first.roleName;
           }
+
+        }
+        if(roleTitle==null || roleTitle.isEmpty){
+          if(userInfos.first.roles!=null && userInfos.first.roles.length>0)
+            roleTitle=userInfos.first.roles.first.RoleTitle;
         }
         relatedUsers.add(new ApiRelatedUserModel(userId: userInfos.first.UserId,
-            userName: userInfos.first.UserName, roleTitle: rolTitle, roleId: roleId));
+            userName: userInfos.first.UserName, roleTitle: roleTitle, roleId: roleId));
         resultData=new InitDataVM(
             carColor: null,
             carModel: null,
@@ -158,6 +160,10 @@ class UserPageState extends MainPage<UsersPage> {
     }
     return null;
   }
+  /*getUserCounts() async {
+    if(centerRepository.getCachedUserLoginedInfo()!=null)
+      _userCounts=centerRepository.getCachedUserLoginedInfo().userCounts;
+  }*/
 
   _toggle()
   {
@@ -351,6 +357,7 @@ class UserPageState extends MainPage<UsersPage> {
   List<Widget> getUsersTiles(List<ApiRelatedUserModel> users) {
     List<Widget> list = [];
     if (users != null) {
+
       for (ApiRelatedUserModel u in users) {
 
         SaveUserModel userInfo;
@@ -550,8 +557,10 @@ class UserPageState extends MainPage<UsersPage> {
                                     .textTheme
                                     .headline),
                             onTap: () {
-
+                             /* Navigator.of(context).pushNamed('/addcar',arguments: new AddCarVM(notyBloc: null,
+                                  fromMainApp: true));*/
                             },
+
                           ),
 
                         ),
@@ -565,6 +574,8 @@ class UserPageState extends MainPage<UsersPage> {
                                           " ) "),
                                   children: getUsersTiles(relatedUsersResult)),
                             ),
+
+
                           ] ,) :
                         Card(
                           child: ExpansionTile(
@@ -584,6 +595,30 @@ class UserPageState extends MainPage<UsersPage> {
           ) :
           NoDataWidget(noCarCount: false,),
         ),
+      /*  Positioned(
+          child:
+          new MagicarAppbar(
+            backgroundColorAppBar: hasInternet ? Colors.transparent : Colors.transparent,
+            title: new MagicarAppbarTitle(
+              currentColor: Colors.indigoAccent,
+              actionIcon: Icon(
+                Icons.account_circle, color: Colors.indigoAccent,
+                size: 20.0,),
+              actionFunc: null,
+            ),
+            actionsAppBar: hasInternet ? null : [
+              new Row(
+                children: <Widget>[
+                  Image.asset('assets/images/no_internet.png'),
+                ],
+              )
+            ],
+            elevationAppBar: 0.0,
+            iconMenuAppBar: Icon(
+              Icons.arrow_back, color: Colors.indigoAccent,),
+            toggle: _toggle,
+          ),
+        ),*/
       ],
     );
   }

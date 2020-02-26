@@ -53,6 +53,7 @@ import 'package:anad_magicar/ui/screen/setting/setting_screen.dart';
 import 'package:anad_magicar/ui/screen/user/user_access_detail.dart';
 import 'package:anad_magicar/ui/screen/user/user_page.dart';
 import 'package:anad_magicar/ui/screen/user/users_page.dart';
+//import 'package:anad_magicar/ui/screen/user/users_page.dart';
 import 'package:anad_magicar/utils/check_status_connection.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
@@ -514,7 +515,7 @@ class _MyAppState extends State<MyApp>
                                               );
                                             case '/registerservicetypepage':
                                               return new MyCustomRoute(
-                                                builder: (_) => new RegisterServiceTypePage(carId: settings.arguments,),
+                                                builder: (_) => new RegisterServiceTypePage(regServiceTypeVM: settings.arguments,),
                                                 settings: settings,
                                               );
                                             case '/adddevice':

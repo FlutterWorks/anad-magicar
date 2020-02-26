@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2020-02-21T23:06:37.064919",
+  "@@last_modified": "2020-02-26T08:11:46.627510",
   "confirm": "confirm",
   "@confirm": {
     "description": "Confirm Security Code",
@@ -1743,6 +1743,18 @@
   "showReport": "showReport",
   "@showReport": {
     "description": "showReport",
+    "type": "text",
+    "placeholders": {}
+  },
+  "remaindToNextService": "remaindToNextService",
+  "@remaindToNextService": {
+    "description": "remaindToNextService",
+    "type": "text",
+    "placeholders": {}
+  },
+  "forGetChargeAmount": "forGetChargeAmount",
+  "@forGetChargeAmount": {
+    "description": "forGetChargeAmount",
     "type": "text",
     "placeholders": {}
   },

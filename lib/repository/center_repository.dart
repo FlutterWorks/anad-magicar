@@ -55,6 +55,7 @@ import 'package:anad_magicar/repository/pref_repository.dart';
 import 'package:anad_magicar/service/noti_analyze.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/home/index.dart';
+import 'package:anad_magicar/ui/screen/setting/native_settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -197,6 +198,12 @@ class CenterRepository{
   return userId;
  }
 
+  initCarMinMaxSpeed() async{
+
+    prefRepository.setMinMaxSpeed(SettingsScreenState.MIN_SPEED_TAG, 60);
+    prefRepository.setMinMaxSpeed(SettingsScreenState.MAX_SPEED_TAG, 100);
+
+  }
  checkGPSStatus(int carId) async{
 
    ApiRoute apiRoute=new ApiRoute(carId: null,
@@ -346,6 +353,8 @@ class CenterRepository{
    setServiceTypes(List<ServiceType> sTypes){
     if(serviceTypes==null)
       serviceTypes=new List();
+    if(serviceTypes!=null && serviceTypes.length>0)
+      serviceTypes.clear();
     serviceTypes=sTypes;
    }
 

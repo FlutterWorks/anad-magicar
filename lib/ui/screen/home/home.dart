@@ -958,8 +958,8 @@ buildMapRow(BuildContext context,
   var _currentColorRow=carStateVM.getCurrentColor();
   double i_w=28.0;
   double i_h=28.0;
-  double m_top=10.0;
-  double m_bot=10.0;
+  double m_top=0.0;
+  double m_bot=5.0;
 
   return
     StreamBuilder<Message>(
@@ -1128,6 +1128,20 @@ buildMapRow(BuildContext context,
                             Stack(
 
                               children: <Widget>[
+                                Padding(
+                                  padding: EdgeInsets.only(top:0.0),
+                                  child:
+                                  Container(
+                height: 20.0,
+                                    child:
+                                    Center(
+
+                                    child: Text( DartHelper.isNullOrEmptyString( (carStateVM.battery_value/10).toString(),),textAlign: TextAlign.center,style: TextStyle(fontSize: 12.0),),
+                                  ),),
+                                ),
+                Padding(
+                padding: EdgeInsets.only(top:25.0),
+                child:
                                 new Align(
                                   alignment: Alignment.center,
                                   child: Container(
@@ -1155,6 +1169,7 @@ buildMapRow(BuildContext context,
                                   ),
 
                                 ),
+                ),
                               ],
                             ),
                           ),
@@ -1166,6 +1181,18 @@ buildMapRow(BuildContext context,
                           Stack(
 
                             children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.only(top:0.0),
+                                child:
+                                Container(
+                                  height: 15.0,
+                                  child: Center(
+
+                child:Text(DartHelper.isNullOrEmptyString( carStateVM.tempreture.toString()),textAlign: TextAlign.center,style: TextStyle(fontSize: 12.0)),),
+                                ),),
+                Padding(
+                padding: EdgeInsets.only(top:25.0),
+                child:
                               new Align(
                                 alignment: Alignment.center,
                                 child: Container(
@@ -1190,8 +1217,9 @@ buildMapRow(BuildContext context,
                                     ),
                                   ),
                                 ),
-
                               ),
+                              ),
+
                             ],
                           ),
                         ),

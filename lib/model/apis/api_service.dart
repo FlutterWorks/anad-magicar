@@ -1,6 +1,7 @@
 import 'package:anad_magicar/bloc/values/notify_value.dart';
 import 'package:anad_magicar/date/helper/shamsi_date.dart' as sh;
 import 'package:anad_magicar/model/apis/service_type.dart';
+import 'package:anad_magicar/model/cars/car.dart';
 import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/widgets/persian_datepicker/jalaali_js.dart';
 import 'package:anad_magicar/widgets/persian_datepicker/persian_datetime.dart';
@@ -8,7 +9,7 @@ import 'package:flutter/material.dart';
 
 class ApiService {
 
-  static final int ServiceStatusConstId_Tag=15236;
+  static final int ServiceStatusConstId_Tag=152376;
 
   int ServiceId;
   int CarId;
@@ -23,7 +24,7 @@ class ApiService {
   String CreatedDate;
   int RowStateType;
   ServiceType serviceType;
-
+  Car car;
   NotyBloc<Message> changedNotyBloc;
 
   ApiService({
@@ -40,7 +41,8 @@ class ApiService {
     @required this.CreatedDate,
     @required this.RowStateType,
     @required this.serviceType,
-    @required this.changedNotyBloc
+    @required this.changedNotyBloc,
+    @required this.car
   });
 
   Map<String, dynamic> toMap() {

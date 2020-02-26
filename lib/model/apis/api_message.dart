@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 class ApiMessage {
 
-  static final int MESSAGE_STATUS_AS_READ_TAG=152372;
+  static final int MESSAGE_STATUS_AS_READ_TAG=152373;
   static final int MESSAGE_STATUS_AS_INSERT_TAG=152360;
   static final int MESSAGE_TYPE_CONST_ID_TAG=152355;
 

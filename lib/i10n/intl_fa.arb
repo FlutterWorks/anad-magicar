@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2020-02-21T23:06:37.064919",
+  "@@last_modified": "2020-02-26T08:11:46.627510",
   "confirm": "تایید",
   "@confirm": {
     "description": "Confirm Security Code",
@@ -576,7 +576,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "distance": "کارکرد خودروه",
+  "distance": "کارکرد خودرو",
   "@distance": {
     "description": "distance",
     "type": "text",
@@ -1200,7 +1200,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "actionDate": "تاریخ عملیات",
+  "actionDate": "تاریخ انجام سرویس",
   "@actionDate": {
     "description": "actionDate",
     "type": "text",
@@ -1416,7 +1416,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "durationFunctionalCountValue": "تعداد",
+  "durationFunctionalCountValue": "کارکرد",
   "@durationFunctionalCountValue": {
     "description": "durationFunctionalCountValue",
     "type": "text",
@@ -1746,6 +1746,18 @@
     "type": "text",
     "placeholders": {}
   },
+  "remaindToNextService": "مانده روز تا سرویس :",
+  "@remaindToNextService": {
+    "description": "remaindToNextService",
+    "type": "text",
+    "placeholders": {}
+  },
+  "forGetChargeAmount": "با فشردن کلید زیر، آخرین میزان شارژ سیم کارت خودرو استخراج و در صفحه هشدارها نمایش داده می شود.",
+    "@forGetChargeAmount": {
+      "description": "forGetChargeAmount",
+      "type": "text",
+      "placeholders": {}
+    },
   "title": "MagiCar",
   "@title": {
     "description": "MagiCar Co.",

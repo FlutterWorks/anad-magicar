@@ -75,6 +75,7 @@ class _ServiceFormState extends State<ServiceForm> {
                             sType = sT.first;
                             sTemp.serviceType = sType;
                           }
+                          sTemp.car=widget.serviceVM.car;
                          // return ServiceItem(serviceItem: sTemp);
                           return ServiceItemSlideable(serviceItem: sTemp);
                         });

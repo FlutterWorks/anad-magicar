@@ -780,11 +780,11 @@ _buildExit() {
         try {
            result = await restDatasource.validateSMSCode(mobileNo, value);
         } catch(ex) {
-          FlashHelper.informationBar(context, message: ex.toString());
-          showValidateCode();
+          //FlashHelper.informationBar(context, message: ex.toString());
+          //showValidateCode();
         }
         if((result!=null && result) /*|| (result==null || !result)*/) {
-          FlashHelper.successBar(context, message: Translations.current.passwordHasChanged());
+          FlashHelper.informationBar(context, message: Translations.current.passwordHasChanged());
           showValidateCode();
         } else {
           FlashHelper.errorBar(context, message: Translations.current.changePasswordError());
@@ -833,11 +833,7 @@ _buildExit() {
           mobileNo=data;
           SaveUserModel userModel=new SaveUserModel(MobileNo: data,UserId: 0);
           centerRepository.showProgressDialog(context, Translations.current.send());
-<<<<<<< HEAD
        var result= restDatasource.forgotPassword(userModel);
-=======
-       var result=  restDatasource.forgotPassword(userModel);
->>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
        if(result!=null) {
          centerRepository.dismissDialog(context);
          result.then((res){
@@ -852,15 +848,9 @@ _buildExit() {
 
              }
          });
-<<<<<<< HEAD
        }else{
          centerRepository.dismissDialog(context);
          FlashHelper.errorBar(context, message: Translations.current.hasErrors());
-=======
-       } else{
-         centerRepository.dismissDialog(context);
-         FlashHelper.errorBar(context, message: Translations.current.noData());
->>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
        }
         }
         else

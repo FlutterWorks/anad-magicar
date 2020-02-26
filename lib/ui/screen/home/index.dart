@@ -442,14 +442,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin ,
 
         ],
       ),
-          /*Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[*/
-             // buildArrowRow(context,carIndex,true),
-              //buildArrowRow(context,carIndex,false),
-            /*],
-          ),*/
+
       ],
       ),
        ],
@@ -885,7 +878,7 @@ void registerBus() {
     centerRepository.initCarColorsMap();
     getEngineStatus();
     getLockStatus();
-    //initCustomer();
+    centerRepository.initCarMinMaxSpeed();
     getCarCounts();
     getUserName();
     registerBus();
@@ -904,25 +897,18 @@ void registerBus() {
     _solidBottomSheetController=new SolidController();
     player = AudioCache();
     advancedPlayer=new AudioPlayer();
-    //player.load('car_door_lock.mp3');
 
-    /*_assetsAudioPlayer.open(AssetsAudio(
-      asset: "car_door_lock.mp3",
-      folder: "assets/audios/",
-    ));*/
     rotationController = AnimationController(duration: const Duration(milliseconds: 7000), vsync: this);
     rotationController.addListener(() {
 
     });
 
-    /*_progressAnimation = CurvedAnimation(
-        curve: Curves.linear, parent: progressIndicatorController);*/
 
     progressIndicatorBackgroundColor=Colors.indigoAccent;
 
     animController = AnimationController(duration: const Duration(milliseconds: 3000), vsync: this);
    // animController.repeat(reverse: true);
-    animProgressController = AnimationController(duration: const Duration(milliseconds: 5000), vsync: this);
+    animProgressController = AnimationController(duration: const Duration(milliseconds: 1000), vsync: this);
     animProgressController.addListener((){
       setState(() {
         if(commandProgressValue>5)
@@ -942,8 +928,8 @@ void registerBus() {
       });
     });
 
-    centerRepository.checkCarStatusPeriodic(1);
-    centerRepository.checkParkGPSStatusPeriodic(1);
+    centerRepository.checkCarStatusPeriodic(5);
+    centerRepository.checkParkGPSStatusPeriodic(6);
 
     super.initState();
 
@@ -956,17 +942,11 @@ void registerBus() {
     _buttonController.dispose();
     carLockPanelNoty.dispose();
     carPageChangedNoty.dispose();
-    //_subscription.cancel();
 
     RxBus.destroy();
     super.dispose();
   }
 
-  Future<Null> _playAnimation() async {
-    try {
-      await _buttonController.forward();
-    } on TickerCanceled {}
-  }
 
 
  Future<bool> _onWillPop(BuildContext ctx) {
@@ -1420,7 +1400,9 @@ void registerBus() {
     }
     else if(index==0)
     {
-      Navigator.pushNamed(context, '/servicepage',arguments: new ServiceVM(carId: _currentCarId, editMode: null, service: null, refresh: false) );
+      Car car=centerRepository.getCarByCarId(_currentCarId);
+      Navigator.pushNamed(context, '/servicepage',arguments: new ServiceVM( car: car,
+          carId: _currentCarId, editMode: null, service: null, refresh: false) );
     }
     else if(index==1)
     {

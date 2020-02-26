@@ -1,10 +1,11 @@
+import 'package:anad_magicar/model/viewmodel/reg_service_type_vm.dart';
 import 'package:anad_magicar/ui/screen/base/main_page.dart';
 import 'package:anad_magicar/ui/screen/service/service_type/register_service_type_form.dart';
 import 'package:flutter/material.dart';
 
 class RegisterServiceTypePage extends StatefulWidget {
-  int carId;
-  RegisterServiceTypePage({Key key,this.carId}) : super(key: key);
+  RegServiceTypeVM regServiceTypeVM;
+  RegisterServiceTypePage({Key key,this.regServiceTypeVM}) : super(key: key);
 
   @override
   RegisterServicePageTypeState createState() {
@@ -49,7 +50,7 @@ class RegisterServicePageTypeState extends MainPage<RegisterServiceTypePage> {
   @override
   Widget pageContent() {
     // TODO: implement pageContent
-    return new RegisterServiceTypeForm(carId: widget.carId,);
+    return new RegisterServiceTypeForm(serviceTypeVM:new RegServiceTypeVM(carId: widget.regServiceTypeVM.carId, route: widget.regServiceTypeVM.route),);
   }
 
   @override

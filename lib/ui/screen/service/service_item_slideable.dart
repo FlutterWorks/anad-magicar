@@ -7,6 +7,7 @@ import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/service/register_service_page.dart';
 import 'package:anad_magicar/ui/screen/service/service_form.dart';
+import 'package:anad_magicar/utils/date_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:anad_magicar/widgets/slidable_list/flutter_slidable.dart';
@@ -155,7 +156,8 @@ class _ServiceItemSlideableState extends State<ServiceItemSlideable> {
       child: Builder(
         builder: (BuildContext context) {
           return HorizontalListItem(widget.serviceItem);},),
-      actionDelegate: SlideActionBuilderDelegate(
+      actionDelegate: (widget.serviceItem.ServiceStatusConstId==Constants.SERVICE_DONE) ? null  :
+      SlideActionBuilderDelegate(
           actionCount: 3,
           builder: (context, index, animation, renderingMode) {
             if(index==0){
@@ -188,7 +190,7 @@ class _ServiceItemSlideableState extends State<ServiceItemSlideable> {
               );
             }
           }),
-      secondaryActionDelegate: SlideActionBuilderDelegate(
+      secondaryActionDelegate: (widget.serviceItem.ServiceStatusConstId==Constants.SERVICE_DONE) ? null : SlideActionBuilderDelegate(
           actionCount: 2,
 
           builder: (context, index, animation, renderingMode) {
@@ -315,11 +317,39 @@ class HorizontalListItem extends StatelessWidget {
     else{
       serviceTypeTitle=Translations.current.serviceTypeIsFunctionality();
     }
+
+
+    int count=0;
+    if(isDurational) {
+
+      if(item.serviceType.DurationTypeConstId==Constants.SERVICE_DURATION_DAY){
+        String sDate=item.ServiceDate;
+        String todayeDate=DateTimeUtils.getDateJalali();
+       count= DateTimeUtils.diffDaysFromDateToDate3(todayeDate, sDate);
+      }else if(item.serviceType.DurationTypeConstId==Constants.SERVICE_DURATION_MONTH){
+        String sDate=item.ServiceDate;
+        String todayeDate=DateTimeUtils.getDateJalali();
+        count= DateTimeUtils.diffDaysFromDateToDate3(todayeDate, sDate);
+      } else if(item.serviceType.DurationTypeConstId==Constants.SERVICE_DURATION_YEAR){
+        String sDate=item.ServiceDate;
+        String todayeDate=DateTimeUtils.getDateJalali();
+        count= DateTimeUtils.diffDaysFromDateToDate3(todayeDate, sDate);
+      }
+    }
+    else {
+      int distance=0;
+      int coutnvalue=0;
+      if(item.car!=null && item.car.totlaDistance!=null)
+        distance=item.car.totlaDistance;
+      if(item.serviceType.DurationCountValue!=null)
+        coutnvalue=item.serviceType.DurationCountValue;
+        count= coutnvalue-distance;
+    }
     return Container(
       alignment: Alignment.centerLeft,
       color: Colors.white,
       width: MediaQuery.of(context).size.width-10,
-      height: 100.0,
+      height: 160.0,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
        //mainAxisSize: MainAxisSize.max,
@@ -338,22 +368,26 @@ class HorizontalListItem extends StatelessWidget {
         backgroundColor: item.ServiceStatusConstId==Constants.SERVICE_DONE ? Colors.greenAccent :
         item.ServiceStatusConstId==Constants.SERVICE_NOTDONE ? Colors.white :
         item.ServiceStatusConstId==Constants.SERVICE_CANCEL ? Colors.pinkAccent : Colors.amberAccent,
-        child: Text(DartHelper.isNullOrEmptyString( item.serviceType.ServiceTypeTitle),style: TextStyle(fontSize: 10.0)),
+        child: Text(DartHelper.isNullOrEmptyString( item.serviceType.ServiceTypeTitle),style: TextStyle(fontSize: 10.0,color: item.ServiceStatusConstId==Constants.SERVICE_NOTDONE ? Colors.black : Colors.white)),
         foregroundColor: Colors.white,
       ),
       ],
     ),
           ),
           ),
-          /*Expanded(
-            child: CircleAvatar(
-              radius: 50.0,
-              backgroundColor: item.ServiceStatusConstId==Constants.SERVICE_DONE ? Colors.greenAccent :
-              item.ServiceStatusConstId==Constants.SERVICE_NOTDONE ? Colors.white : Colors.amberAccent,
-              child: Text(DartHelper.isNullOrEmptyString( item.serviceType.ServiceTypeTitle),style: TextStyle(fontSize: 10.0)),
-              foregroundColor: Colors.white,
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: 10.0,right: 10.0),
+              child:
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(Translations.current.remaindToNextService(),style: TextStyle(fontSize: 15.0)),
+                  Text(DartHelper.isNullOrEmptyString(count.toString()),style: TextStyle(fontSize: 15.0),),
+                ],
+              ),
             ),
-          ),*/
+          ),
 
           Expanded(
             child: Padding(

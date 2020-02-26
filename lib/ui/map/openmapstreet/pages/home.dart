@@ -9,12 +9,15 @@ import 'package:anad_magicar/components/no_data_widget.dart';
 import 'package:anad_magicar/components/send_data.dart';
 import 'package:anad_magicar/data/database_helper.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
+import 'package:anad_magicar/data/rxbus.dart';
+import 'package:anad_magicar/date/helper/shamsi_date.dart';
 import 'package:anad_magicar/model/apis/api_car_model.dart';
 import 'package:anad_magicar/model/apis/api_route.dart';
 import 'package:anad_magicar/model/apis/api_search_car_model.dart';
 import 'package:anad_magicar/model/apis/paired_car.dart';
 import 'package:anad_magicar/model/apis/slave_paired_car.dart';
 import 'package:anad_magicar/model/cars/car.dart';
+import 'package:anad_magicar/model/change_event.dart';
 import 'package:anad_magicar/model/join_car_model.dart';
 import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/user/admin_car.dart';
@@ -52,6 +55,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:user_location/user_location.dart';
 import 'package:flutter/material.dart';
 import "package:collection/collection.dart";
+import 'package:anad_magicar/widgets/persian_datepicker/persian_datepicker.dart';
 import 'package:flutter/services.dart';
 final List<String> carImgList = [
   "assets/images/car_red.png",
@@ -89,11 +93,23 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   static const String route = '/mappage';
+  static final String MINMAX_SPEED_TAG='MINMAX_SPEED';
+  static final String MIN_SPEED_TAG='MIN_SPEED';
+  static final String MAX_SPEED_TAG='MAX_SPEED';
   String userName='';
   int userId=0;
-  int minSpeed;
-  int maxSpeed;
+  int minSpeed=30;
+  int maxSpeed=100;
+  int minDelay=0;
+  static bool forAnim=false;
+  static int lastCarIdSelected=0;
   bool _showInfoPopUp=false;
+  final TextEditingController textEditingController = TextEditingController();
+  String fromDate='';
+  String toDate='';
+  String minStopTime1='';
+  String mStopTime2='';
+  PersianDatePickerWidget persianDatePicker;
   final String imageUrl = 'assets/images/user_profile.png';
   final String markerRed='assets/images/m_red.png';
   final String markerGreen='assets/images/m_green.png';
@@ -102,10 +118,17 @@ class MapPageState extends State<MapPage> {
 
 
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey2 = new GlobalKey<FormState>();
+
   bool _autoValidate=false;
   bool isDark=false;
   List<CarInfoVM> carInfos=new List();
   NotyBloc<Message> reportNoty=new NotyBloc<Message>();
+  NotyBloc<Message> moreButtonNoty=new NotyBloc<Message>();
+  NotyBloc<Message> pairedChangedNoty=new NotyBloc<Message>();
+  NotyBloc<Message> animateNoty=new NotyBloc<Message>();
+
+
   Future<List<CarInfoVM>> carInfoss;
   Future<List<ApiPairedCar>> carsPaired;
 
@@ -119,6 +142,7 @@ class MapPageState extends State<MapPage> {
   var location = new Location();
 
   List<Marker> markers = [];
+  List<LatLng> points=[];
   StreamController<LatLng> markerlocationStream = StreamController();
   UserLocationOptions userLocationOptions;
 
@@ -129,16 +153,48 @@ class MapPageState extends State<MapPage> {
   MapController mapController;
   LiveMapController liveMapController;
 
+  Marker _marker;
+  Timer _timer;
+  int _markerIndex = 0;
+  Polyline _polyLine;
+  Polyline _polyLineAnim;
+
+  LatLng _fpoint;
+  LatLng _spoint;
+
+  int _pointIndex=0;
+  Timer _timerLine;
+  int _polyLineIndex = 0;
+
   String pelakForSearch='';
   String carIdForSearch='';
   String mobileForSearch='';
   String minStopTime;
+  String minStopDate;
+
+  String minStopTime2;
+  String minStopDate2;
+
   LatLng firstPoint;
   LatLng currentCarLatLng;
 
+  Widget getMarkerOnSpeed(int speed) {
+    var item=Image.asset( markerRed  , key: ObjectKey(Colors.red ));
+    if(maxSpeed==null || maxSpeed==0)
+       maxSpeed=100;
+    if(minSpeed==null || minSpeed==0)
+      minSpeed=30;
+
+    if (speed > maxSpeed)
+    return item;
+    else if((speed > minSpeed))
+   return Image.asset( markerGreen  , key: ObjectKey(Colors.green ),) ;
+       else return
+   Image.asset( markerGreen  , color: Colors.amber,key: ObjectKey(Colors.amber ),) ;
+  }
   getMinMaxSpeed() async {
-    maxSpeed=await prefRepository.getMinMaxSpeed(SettingsScreenState.MAX_SPEED_TAG);
-    minSpeed=await prefRepository.getMinMaxSpeed(SettingsScreenState.MIN_SPEED_TAG);
+    /*maxSpeed=await prefRepository.getMinMaxSpeed(SettingsScreenState.MAX_SPEED_TAG);
+    minSpeed=await prefRepository.getMinMaxSpeed(SettingsScreenState.MIN_SPEED_TAG);*/
 
   }
 
@@ -151,6 +207,46 @@ class MapPageState extends State<MapPage> {
         isDark=false;
     });
 
+  }
+
+  animateRoutecar() async {
+    _timer = Timer.periodic(Duration(seconds: 1), (_) {
+
+        _marker = markers[_markerIndex];
+        _markerIndex = (_markerIndex + 1) % markers.length;
+       // animateNoty.updateValue(new Message(type: 'MARKER_ANIM'));
+    });
+  }
+
+  animateRoutecarPolyLines() async {
+
+
+    int next=0;
+    int index=0;
+    _timerLine = Timer.periodic(Duration(milliseconds: 500), (_) {
+
+        _polyLine = lines[_polyLineIndex];
+        _polyLineIndex = (_polyLineIndex + 1) % lines.length;
+        //index=_polyLine.points.length;
+        if (index < _polyLine.points.length - 1) {
+          index++;
+          next = index + 1;
+        }
+       // _fpoint=_polyLine.points[_pointIndex];
+        _pointIndex=(_pointIndex + 1) % _polyLine.points.length;
+        if (index < _polyLine.points.length - 1) {
+          _fpoint = _polyLine.points[index];
+          _spoint = _polyLine.points[next];
+          points..add(_fpoint)..add(_spoint);
+        }
+        if((_pointIndex+1)>=_polyLine.points.length){
+          _timerLine.cancel();
+        }
+        _polyLineAnim=new Polyline(strokeWidth: 12.0,
+            color: Colors.pinkAccent,
+            points: points);
+        animateNoty.updateValue(new Message(type: 'LINE_ANIM'));
+    });
   }
 
   getUserId() async {
@@ -180,6 +276,7 @@ class MapPageState extends State<MapPage> {
          centerRepository.showFancyToast(result.Message);
         // setState(() {
            carsSlavePairedList.removeWhere((c)=>c.CarId==secondCar);
+         pairedChangedNoty.updateValue(new Message(type: 'CAR_PAIRED'));
          //});
        }else{
          centerRepository.showFancyToast(result.Message);
@@ -199,7 +296,10 @@ class MapPageState extends State<MapPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         GestureDetector(
-          child : Button(color: Colors.pinkAccent.value,wid:150.0,title: Translations.current.delete(),),
+          child : Padding(
+        padding: EdgeInsets.only(bottom: 20.0, right: 10.0,left: 10.0),
+            child:
+          Button(clr: Colors.pinkAccent,wid:150.0,title: Translations.current.delete(),),),
           onTap: (){
 
             _deleteCarFromPaired(car.masterId,car.CarId);
@@ -210,7 +310,7 @@ class MapPageState extends State<MapPage> {
 
 
         GestureDetector(
-          child :Button(color: Colors.pinkAccent.value,wid:120.0,title: Translations.current.navigateToCurrent(),),
+          child :Button(clr: Colors.pinkAccent,wid:150.0,title: Translations.current.navigateToCurrent(),),
           onTap: (){
             Navigator.pop(context);
             navigateToCarSelected(0,true, car.CarId);
@@ -306,6 +406,7 @@ class MapPageState extends State<MapPage> {
                                             CarIds: null, master: null, slaves: null);
 
                                         addCarToPaired(pairedCar);
+                                        Navigator.pop(context);
                                       },
                                      child: Text( Translations.current.addToPaired(),style: TextStyle(color:Colors.white),)),),),
 
@@ -334,7 +435,10 @@ class MapPageState extends State<MapPage> {
     try {
      List<Car> result = await restDatasource.searchCars(int.tryParse( carIdForSearch),pelakForSearch,mobileForSearch);
      if(result!=null && result.length>0){
-        _showBottomSheetForSearchedCar(context, result.first);
+       var cr=result.where((c)=>c.carId==int.tryParse( carIdForSearch)).toList();
+       if(cr!=null && cr.length>0) {
+         _showBottomSheetForSearchedCar(context, cr.first);
+       }
      }
     }
     catch(error)
@@ -420,6 +524,9 @@ class MapPageState extends State<MapPage> {
     }
   }
 
+  showSpeedDialog(int speed) async {
+    FlashHelper.informationBar2(context, message: ' سرعت خودرو در این نقطه :'+speed.toString());
+  }
   Future<void> processData() async {
     final geojson = GeoJson();
     geojson.processedMultipolygons.listen((GeoJsonMultiPolygon multiPolygon) {
@@ -451,13 +558,13 @@ class MapPageState extends State<MapPage> {
   Future<List<Polyline>> processLineData(bool fromCurrent,
       String clat,String clng,
       String fromDate,String toDate,
-      bool forReport) async {
+      bool forReport,bool anim) async {
 
     String sdate=DateTimeUtils.convertIntoDateTime(DateTimeUtils.getDateJalali());
     String tdate=DateTimeUtils.convertIntoDateTime(DateTimeUtils.getDateJalaliWithAddDays(-3));
 
     ApiRoute route=new ApiRoute(
-        carId: widget.mapVM.carId,
+        carId: lastCarIdSelected,
         startDate: forReport ? DateTimeUtils.convertIntoDateTime(fromDate) : sdate,
         endDate: forReport ? DateTimeUtils.convertIntoDateTime(toDate) : tdate,
         dateTime: null,
@@ -479,30 +586,82 @@ class MapPageState extends State<MapPage> {
     if(!fromCurrent) {
       final pointDatas = await restDatasource.getRouteList(route);
       if (pointDatas != null && pointDatas.length > 0) {
+        if(markers!=null && markers.length>0){
+          markers.clear();
+        }
         var points = '';
         int index = pointDatas.length - 1;
-        firstPoint = LatLng(double.tryParse(pointDatas[0].lat),
-            double.tryParse(pointDatas[0].lat));
+
+        String latStr1=pointDatas[0].lat;
+        String lngStr1=pointDatas[0].long;
+        var firstLat=latStr1.split('*');
+        var firstLng=lngStr1.split('*');
+        var secondLat=firstLat[1].split("'");
+        var secondLng=firstLng[1].split("'");
+
+        double fresultLatLng=ConvertDegreeAngleToDouble(
+            double.tryParse( firstLat[0]), double.tryParse( secondLat[0]), double.tryParse( secondLat[1]));
+
+        double sresultLatLng=ConvertDegreeAngleToDouble(
+            double.tryParse( firstLng[0]), double.tryParse( secondLng[0]), double.tryParse( secondLng[1]));
+
+        firstPoint = LatLng(fresultLatLng, sresultLatLng);
         for (var i = 0; i < pointDatas.length; i++) {
-          double lat = double.tryParse(pointDatas[i].lat);
-          double lng = double.tryParse(pointDatas[i].long);
+          String latStr2=pointDatas[i].lat;
+          String lngStr2=pointDatas[i].long;
+          var firstLat1=latStr2.split('*');
+          var firstLng1=lngStr2.split('*');
+          var secondLat1=firstLat1[1].split("'");
+          var secondLng1=firstLng1[1].split("'");
+
+          double fresultLatLng1=ConvertDegreeAngleToDouble(
+              double.tryParse( firstLat1[0]), double.tryParse( secondLat1[0]), double.tryParse( secondLat1[1]));
+
+          double sresultLatLng1=ConvertDegreeAngleToDouble(
+              double.tryParse( firstLng1[0]), double.tryParse( secondLng1[0]), double.tryParse( secondLng1[1]));
+
+
+          double lat = fresultLatLng1;
+          double lng = sresultLatLng1;
           int speed=pointDatas[i].speed;
-          if (i < index)
-            points += '[$lng,$lat],';
-          else
-            points += '[$lng,$lat]';
+          if(speed==null)
+            speed=0;
+
+            if(index>100) {
+              if (i < index && speed > 0 && (i % 20)==0)
+                points += '[$lng,$lat],';
+              else if (i>=index && speed > 0)
+                points += '[$lng,$lat]';
+            }else if(index>300) {
+              if (i < index && speed > 0 && (i % 40)==0)
+                points += '[$lng,$lat],';
+              else if (i>=index && speed > 0)
+                points += '[$lng,$lat]';
+            }
+            else if(index >400) {
+              if (i < index && speed > 0 && (i % 60)==0)
+                points += '[$lng,$lat],';
+              else if (i>=index && speed > 0)
+                points += '[$lng,$lat]';
+            }
+            else {
+              if (i < index )
+                points += '[$lng,$lat],';
+              else
+                points += '[$lng,$lat]';
+            }
           //points..add(item);
 
             var marker = Marker(
               width: 40.0,
               height: 40.0,
               point: LatLng(lat,lng),
-              builder: (ctx) =>
+              builder: (ctx) {
+                return
                   GestureDetector(
                     onTap: () {
-
                         _showInfoPopUp = true;
-
+                        showSpeedDialog(speed);
                     },
                     child: Container(
                         width: 38.0,
@@ -510,14 +669,15 @@ class MapPageState extends State<MapPage> {
                         child: CircleAvatar(
                             radius: 38.0,
                             backgroundColor: Colors.transparent,
-                            child: Image.asset(speed > maxSpeed ? markerRed :
-                               markerGreen , key: ObjectKey(
-                                speed > maxSpeed ? Colors.red : Colors.green),))
-                    ),),
+                            child: getMarkerOnSpeed(speed)
+                            ,)
+                    ),);}
             );
             markers.add(marker);
         }
-
+        if(points.endsWith(',')){
+          points=points.substring(0,points.length-1);
+        }
         queryBody = queryBody + points + ']}';
       } else {
         var points = '';
@@ -529,6 +689,7 @@ class MapPageState extends State<MapPage> {
 
         points += '[$lng,$lat],';
         points += '[$lng2,$lat2]';
+
         queryBody = queryBody + points + ']}';
 
       }
@@ -547,16 +708,18 @@ class MapPageState extends State<MapPage> {
         double lat2 = double.tryParse(currentLocation.latitude.toString());
         double lng2 = double.tryParse(currentLocation.longitude.toString());
         speed=currentLocation.speed;
+        if(speed==null)
+          speed=0;
         var marker = Marker(
           width: 40.0,
           height: 40.0,
           point: LatLng(lat1,lng1),
-          builder: (ctx) =>
+          builder: (ctx) {
+            return
               GestureDetector(
                 onTap: () {
-
                     _showInfoPopUp = true;
-
+                    showSpeedDialog(int.tryParse( speed.toString()));
                 },
                 child: Container(
                     width: 38.0,
@@ -564,10 +727,8 @@ class MapPageState extends State<MapPage> {
                     child: CircleAvatar(
                         radius: 38.0,
                         backgroundColor: Colors.transparent,
-                        child: Image.asset(speed > maxSpeed ? markerRed :
-                        markerGreen , key: ObjectKey(
-                            speed > maxSpeed ? Colors.red : Colors.green),))
-                ),),
+                        child: getMarkerOnSpeed(int.tryParse( speed.toString())),)
+                ),);}
         );
         markers.add(marker);
 
@@ -575,12 +736,12 @@ class MapPageState extends State<MapPage> {
           width: 40.0,
           height: 40.0,
           point: LatLng(lat2,lng2),
-          builder: (ctx) =>
+          builder: (ctx) {
+            return
               GestureDetector(
                 onTap: () {
-                  setState(() {
                     _showInfoPopUp = true;
-                  });
+                    showSpeedDialog(int.tryParse(speed.toString()));
                 },
                 child: Container(
                     width: 38.0,
@@ -588,10 +749,8 @@ class MapPageState extends State<MapPage> {
                     child: CircleAvatar(
                         radius: 38.0,
                         backgroundColor: Colors.transparent,
-                        child: Image.asset(speed > maxSpeed ? markerRed :
-                        markerGreen , key: ObjectKey(
-                            speed > maxSpeed ? Colors.red : Colors.green),))
-                ),),
+                        child:  getMarkerOnSpeed(int.tryParse( speed.toString())) ,)
+                ),);}
         );
         markers.add(marker);
          queryBody = '{"coordinates":[[$lng2,$lat2],[$lng1,$lat1]]}';
@@ -601,6 +760,9 @@ class MapPageState extends State<MapPage> {
         {
           centerRepository.showFancyToast(Translations.current.yourLocationNotFound());
         }
+    }
+    if(lines!=null && lines.length>0){
+      lines.clear();
     }
       final openRoutegeoJSON = await restDatasource
           .fetchOpenRouteServiceURlJSON(body: queryBody);
@@ -623,26 +785,32 @@ class MapPageState extends State<MapPage> {
         await geojson.parse(openRoutegeoJSON, verbose: true);
       }
 
-    if(lines!=null && lines.length>0)
+    if(lines!=null && lines.length>0) {
+     // moreButtonNoty.updateValue(new Message(type:'CLOSE_MORE_BUTTON'));
+     RxBus.post(new ChangeEvent(type: 'CLOSE_MORE_BUTTON'));
+
+      liveMapController.mapController.move(firstPoint, 15);
       return lines;
-    else
+    }
+
     return null;
   }
 
 
 
   Future<List<Marker>> processLineDataForReportMinTime(
-      String fromDate,
-      String toDate,
+      String fromDat,
+      String toDat,
       String minTime) async {
 
     String sdate=DateTimeUtils.convertIntoDateTime(DateTimeUtils.getDateJalali());
     String tdate=DateTimeUtils.convertIntoDateTime(DateTimeUtils.getDateJalaliWithAddDays(0));
 
+
     ApiRoute route=new ApiRoute(
-        carId: widget.mapVM.carId,
-        startDate: DateTimeUtils.convertIntoDateTime(sdate),
-        endDate: DateTimeUtils.convertIntoDateTime(tdate) ,
+        carId: lastCarIdSelected,
+        startDate: (fromDat!=null && fromDat.isNotEmpty) ? DateTimeUtils.convertIntoDateTime(fromDat) : sdate,
+        endDate: (toDat!=null && toDat.isNotEmpty) ? DateTimeUtils.convertIntoDateTime(toDat) : tdate ,
         dateTime: null,
         speed: null,
         lat: null,
@@ -657,6 +825,9 @@ class MapPageState extends State<MapPage> {
         CreatedDateTime: null);
 
 
+    if(minDelay==null){
+      minDelay=10;
+    }
     centerRepository.showProgressDialog(context, Translations.current.loadingdata());
     var queryBody = '{"coordinates":[';//$lng2,$lat2],[$lng1,$lat1]]}';
 
@@ -664,18 +835,70 @@ class MapPageState extends State<MapPage> {
       if (pointDatas != null && pointDatas.length > 0) {
         if(markers!=null && markers.length>0)
           markers.clear();
+        minStopTime='';
+        minStopTime2='';
+        minStopDate='';
+        minStopDate2='';
+
         var points = '';
         int index = pointDatas.length - 1;
-        firstPoint = LatLng(double.tryParse(pointDatas[0].lat),
-            double.tryParse(pointDatas[0].lat));
-        for (var i = 0; i < pointDatas.length; i++) {
-          double lat = double.tryParse(pointDatas[i].lat);
-          double lng = double.tryParse(pointDatas[i].long);
-          if(i<pointDatas.length-1) {
-            double lat2 = double.tryParse(pointDatas[i + 1].lat);
-            double lng2 = double.tryParse(pointDatas[i + 1].long);
 
+        String latStr1=pointDatas[0].lat;
+        String lngStr1=pointDatas[0].long;
+        var firstLat=latStr1.split('*');
+        var firstLng=lngStr1.split('*');
+        var secondLat=firstLat[1].split("'");
+        var secondLng=firstLng[1].split("'");
+
+        double fresultLatLng=ConvertDegreeAngleToDouble(
+            double.tryParse( firstLat[0]), double.tryParse( secondLat[0]), double.tryParse( secondLat[1]));
+
+        double sresultLatLng=ConvertDegreeAngleToDouble(
+            double.tryParse( firstLng[0]), double.tryParse( secondLng[0]), double.tryParse( secondLng[1]));
+
+        firstPoint = LatLng(fresultLatLng,
+            sresultLatLng);
+        for (var i = 0; i < pointDatas.length; i++) {
+
+          String latStr2=pointDatas[i].lat;
+          String lngStr2=pointDatas[i].long;
+          var firstLat1=latStr2.split('*');
+          var firstLng1=lngStr2.split('*');
+          var secondLat1=firstLat1[1].split("'");
+          var secondLng1=firstLng1[1].split("'");
+
+          double fresultLatLng1=ConvertDegreeAngleToDouble(
+              double.tryParse( firstLat1[0]), double.tryParse( secondLat1[0]), double.tryParse( secondLat1[1]));
+
+          double sresultLatLng1=ConvertDegreeAngleToDouble(
+              double.tryParse( firstLng1[0]), double.tryParse( secondLng1[0]), double.tryParse( secondLng1[1]));
+
+          double lat = fresultLatLng1;
+          double lng = sresultLatLng1;
+          if(i<pointDatas.length-1) {
+             latStr2=pointDatas[i+1].lat;
+             lngStr2=pointDatas[i+1].long;
+
+             firstLat1=latStr2.split('*');
+             firstLng1=lngStr2.split('*');
+             secondLat1=firstLat1[1].split("'");
+             secondLng1=firstLng1[1].split("'");
+
+             fresultLatLng1=ConvertDegreeAngleToDouble(
+                double.tryParse( firstLat1[0]), double.tryParse( secondLat1[0]), double.tryParse( secondLat1[1]));
+
+             sresultLatLng1=ConvertDegreeAngleToDouble(
+                double.tryParse( firstLng1[0]), double.tryParse( secondLng1[0]), double.tryParse( secondLng1[1]));
+
+            double lat2 = fresultLatLng1;
+            double lng2 = sresultLatLng1;
+
+          /*  double lat2 = double.tryParse(pointDatas[i + 1].lat);
+            double lng2 = double.tryParse(pointDatas[i + 1].lat);
+*/
             int speed = pointDatas[i].speed;
+            if(speed==null)
+              speed=0;
             if (i < index)
               points += '[$lng,$lat],';
             else
@@ -683,36 +906,79 @@ class MapPageState extends State<MapPage> {
             //points..add(item);
             final Distance distance = new Distance();
 
-            // km = 423
-            final int km = distance.as(LengthUnit.Kilometer,
-                new LatLng(lat, lng), new LatLng(lat2, lng2));
+            if(speed<1 && (minStopTime==null || minStopTime.isEmpty)) {
+              minStopDate=pointDatas[i].dateTime;
+              minStopTime=pointDatas[i].enterTime;
+            } else if(speed>1 && (minStopTime!=null && minStopTime.isNotEmpty)){
+              minStopDate2=pointDatas[i].dateTime;
+              minStopTime2=pointDatas[i].enterTime;
 
-            // meter = 422591.551
-            final int meter = distance(
-                new LatLng(lat, lng), new LatLng(lat2, lng2)
-            );
-            var marker = Marker(
-              width: 40.0,
-              height: 40.0,
-              point: LatLng(lat, lng),
-              builder: (ctx) =>
-                  GestureDetector(
-                    onTap: () {
 
-                    },
-                    child: Container(
-                        width: 38.0,
-                        height: 38.0,
-                        child: CircleAvatar(
-                            radius: 38.0,
-                            backgroundColor: Colors.transparent,
-                            child: Image.asset(speed > maxSpeed ? markerRed :
-                            markerGreen, key: ObjectKey(
-                                speed > maxSpeed ? Colors.red : Colors.green),))
-                    ),),
-            );
-            if(meter<=5)
-                markers.add(marker);
+
+              var time1=minStopTime.split(':');
+              var time2=minStopTime2.split(':');
+             /* int h1=int.tryParse(time1[0]);
+              int m1=int.tryParse(time1[1]);
+              int s1=int.tryParse(time1[2]);
+
+              int h2=int.tryParse(time2[0]);
+              int m2=int.tryParse(time2[1]);
+              int s2=int.tryParse(time2[2]);*/
+
+              minStopDate=minStopDate.replaceAll('/', '');
+              minStopDate2=minStopDate2.replaceAll('/', '');
+              if(minStopDate.trim()==minStopDate2.trim()) {
+                int diff = DateTimeUtils.diffMinsFromDateToDate4(
+                    DateTimeUtils.convertIntoTimeOnly(minStopTime2),
+                    DateTimeUtils.convertIntoTimeOnly(minStopTime));
+                if (diff > minDelay) {
+
+                  var marker = Marker(
+                    width: 40.0,
+                    height: 40.0,
+                    point: LatLng(lat, lng),
+                    builder: (ctx) {
+                      return
+                        GestureDetector(
+                          onTap: () {
+                              showSpeedDialog(speed);
+                          },
+                          child: Container(
+                              width: 38.0,
+                              height: 38.0,
+                              child: CircleAvatar(
+                                  radius: 38.0,
+                                  backgroundColor: Colors.transparent,
+                                  child: getMarkerOnSpeed(speed),
+                          ),),);} );
+
+                  markers.add(marker);
+                   marker = Marker(
+                    width: 40.0,
+                    height: 40.0,
+                    point: LatLng(lat2, lng2),
+                    builder: (ctx){
+                      return
+                        GestureDetector(
+                          onTap: () {
+                            showSpeedDialog(speed);
+                          },
+                          child: Container(
+                              width: 38.0,
+                              height: 38.0,
+                              child: CircleAvatar(
+                                  radius: 38.0,
+                                  backgroundColor: Colors.transparent,
+                                  child: Image.asset( markerRed
+                                      , key: ObjectKey(Colors.red ),))
+                          ),);}
+                  );
+
+                  markers.add(marker);
+                  minStopTime='';
+                }
+              }
+            }
           }
         }
 
@@ -732,9 +998,18 @@ class MapPageState extends State<MapPage> {
       }
 
 
-    if(markers!=null && markers.length>0)
-       reportNoty.updateValue(new Message(type: 'HAS_MARKERS'));
+    if(markers!=null && markers.length>0) {
+      if(firstPoint.longitude!= markers[0].point.latitude && firstPoint.longitude!= markers[0].point.longitude){
+        firstPoint=markers[0].point;
+      }
+     // moreButtonNoty.updateValue(new Message(type: 'CLOSE_MORE_BUTTON'));
+      RxBus.post(new ChangeEvent(type: 'CLOSE_MORE_BUTTON'));
 
+      liveMapController.mapController.move(firstPoint, 15);
+      reportNoty.updateValue(new Message(type: 'HAS_MARKERS'));
+
+      return markers;
+    }
       return null;
   }
 
@@ -745,10 +1020,13 @@ class MapPageState extends State<MapPage> {
 
 
     getUserId();
-    getMinMaxSpeed();
+    //getMinMaxSpeed();
     location = new Location();
     mapController=new MapController();
     reportNoty=new NotyBloc<Message>();
+    pairedChangedNoty=new NotyBloc<Message>();
+    moreButtonNoty=new NotyBloc<Message>();
+    animateNoty=new NotyBloc<Message>();
    carInfoss= getCarInfo();
     getCurrentLoaction();
 
@@ -763,16 +1041,173 @@ class MapPageState extends State<MapPage> {
     location.onLocationChanged().listen((LocationData currentLocation) {
       print(currentLocation.latitude);
       print(currentLocation.longitude);
+
       //mapController.move(LatLng(currentLocation.latitude,currentLocation.longitude), 17.0);
     });
 
     if(widget.mapVM!=null && widget.mapVM.forReport!=null &&
     widget.mapVM.forReport){
-      lines2=processLineData(false, '', '',widget.mapVM.fromDate,widget.mapVM.toDate,widget.mapVM.forReport);
+      lines2=processLineData(false, '', '',widget.mapVM.fromDate,widget.mapVM.toDate,widget.mapVM.forReport,false);
     }
     super.initState();
   }
+  _onConfirmDefaultSettings(String type,BuildContext context) async{
+    _formKey.currentState.save();
 
+      prefRepository.setMinMaxSpeed(MIN_SPEED_TAG,  minSpeed);
+      prefRepository.setMinMaxSpeed(MAX_SPEED_TAG,  maxSpeed);
+      centerRepository.showFancyToast('اطلاعات با موفقیت ذخیره شد.');
+
+    Navigator.pop(context);
+  }
+  _showDefaultSettingsSheet(BuildContext context,String type)
+  {
+  showModalBottomSheetCustom(context: context ,
+  mHeight: 0.90,
+  builder: (BuildContext context) {
+  return Builder( builder:
+  (context) {
+  return  Form(
+  key: _formKey,
+  child:
+  Container(
+  width: MediaQuery.of(context).size.width-10,
+  height: 450.0,
+  child:
+   Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: <Widget>[
+  Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: <Widget>[
+  Container(
+  width: 150.0,
+  height: 50.0,
+  child: _buildMaxTextField(
+  Translations.current.maxSpeed(), 80.0, maxSpeed.toString()),
+  ),
+  ],
+  ),
+  Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: <Widget>[
+  Container(
+  width: 150.0,
+  height: 50.0,
+  child: _buildMinTextField(
+  Translations.current.minSpeed(), 80.0, minSpeed.toString()),
+  )
+  ],
+  ),
+    Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(
+            child: FlatButton(
+              onPressed: () {
+                _onConfirmDefaultSettings(type,context);
+              },
+              child: Button(title: Translations.current.confirm(),wid: 120.0,clr: Colors.green,),
+            )
+        )
+      ],
+    ),
+      ],
+  ),
+  ),
+    );
+  },
+  );
+  });
+  }
+
+  Widget _buildMinDelayTextField(String hint,double width, String result) {
+    return
+      new TextFormField(
+        decoration: new InputDecoration(
+          labelText: hint,
+          fillColor: Colors.white,
+          border: new OutlineInputBorder(
+            borderRadius: new BorderRadius.circular(2.0),
+            borderSide: new BorderSide(
+            ),
+          ),
+          //fillColor: Colors.green
+        ),
+        validator: (val) {
+            return null;
+        },
+        onSaved: (value){
+          minDelay=int.tryParse( value==null ? '0' : value);
+        },
+        keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false) ,
+        style: new TextStyle(
+          fontFamily: "IranSans",
+        ),
+        onFieldSubmitted: (value) {
+
+        },
+      );
+  }
+  Widget _buildMaxTextField(String hint,double width, String result) {
+    return
+      new TextFormField(
+        decoration: new InputDecoration(
+          labelText: "حداکثر سرعت",
+          fillColor: Colors.white,
+          border: new OutlineInputBorder(
+            borderRadius: new BorderRadius.circular(2.0),
+            borderSide: new BorderSide(
+            ),
+          ),
+          //fillColor: Colors.green
+        ),
+        validator: (val) {
+            return null;
+        },
+        onSaved: (value){
+          maxSpeed=int.tryParse( value==null ? '0' : value);
+        },
+        keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false) ,
+        style: new TextStyle(
+          fontFamily: "IranSans",
+        ),
+        onFieldSubmitted: (value) {
+
+        },
+      );
+  }
+  Widget _buildMinTextField(String hint,double width, String result) {
+    return
+      new TextFormField(
+        decoration: new InputDecoration(
+          labelText: "حداقل سرعت",
+          fillColor: Colors.white,
+          border: new OutlineInputBorder(
+            borderRadius: new BorderRadius.circular(2.0),
+            borderSide: new BorderSide(
+            ),
+          ),
+          //fillColor: Colors.green
+        ),
+        validator: (val) {
+            return null;
+        },
+        onSaved: (value){
+          minSpeed=int.tryParse( value==null ? '0' : value);
+          // result=value;
+        },
+        keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false) ,
+        style: new TextStyle(
+          fontFamily: "IranSans",
+        ),
+        onFieldSubmitted: (value) {
+
+        },
+
+      );
+  }
   Widget createInfoPopup(String lastDateOnline,String lastTimeOnline,String pelak){
     return Container(
       width: 200,
@@ -826,7 +1261,15 @@ class MapPageState extends State<MapPage> {
       currentLocation = null;
     }
   }
+   double ConvertDegreeAngleToDouble( double degrees, double minutes, double seconds )
+  {
+    //Decimal degrees =
+    //   whole number of degrees,
+    //   plus minutes divided by 60,
+    //   plus seconds divided by 3600
 
+    return degrees + (minutes/60) + (seconds/3600);
+  }
   _showInfoDialog(int carId) async{
     List<int> carIds=new List();
     carIds..add(carId);
@@ -848,15 +1291,32 @@ class MapPageState extends State<MapPage> {
         CreatedDateTime: null);
     var result=await restDatasource.getLastPositionRoute(apiRoute);
     if(result!=null && result.length>0) {
-      double lat = double.tryParse(result[0].Latitude);
-      double lng = double.tryParse(result[0].Longitude);
+
+      String latStr=result[0].Latitude;
+      String lngStr=result[0].Longitude;
+      var firstLat=latStr.split('*');
+      var firstLng=lngStr.split('*');
+      var secondLat=firstLat[1].split("'");
+      var secondLng=firstLng[1].split("'");
+
+      double fresultLatLng=ConvertDegreeAngleToDouble(
+          double.tryParse( firstLat[0]), double.tryParse( secondLat[0]), double.tryParse( secondLat[1]));
+
+      double sresultLatLng=ConvertDegreeAngleToDouble(
+          double.tryParse( firstLng[0]), double.tryParse( secondLng[0]), double.tryParse( secondLng[1]));
+
+      double lat = fresultLatLng;
+      double lng = sresultLatLng;
       LatLng latLng = LatLng(lat, lng);
       currentCarLatLng = LatLng(lat, lng);
       String date=result[0].Date;
       String time=result[0].Time;
       int speed=result[0].speed;
+
       String msgTemp=time+' '+ 'با سرعت : '+speed.toString();
-      FlashHelper.informationBar2(context,title: date, message:msgTemp,);
+      DateTime newObjDate=DateTimeUtils.convertIntoDateObject(date);
+      String newDate=DateTimeUtils.getDateJalaliFromDateTimeObj(newObjDate);
+      FlashHelper.informationBar2(context,title: newDate, message:msgTemp,);
     }
     else{
       FlashHelper.informationBar2(context,title: null, message:'اطلاعاتی برای نمایش یافت نشد',);
@@ -879,10 +1339,13 @@ class MapPageState extends State<MapPage> {
     imgUrl=carImgList[0];
     }
       else {
-        carIds..add(carInfo.carId);
-        imgUrl=carInfo.imageUrl;
+        carIds..add(carId);
+        imgUrl=carInfo!=null ?  carInfo.imageUrl : carImgList[0];
     }
-
+      if(imgUrl==null || imgUrl.isEmpty){
+        imgUrl=carImgList[0];
+      }
+    lastCarIdSelected=carId>0 ? carId : (carInfo!=null) ? carInfo.carId : 0;
     ApiRoute apiRoute=new ApiRoute(carId: null,
         startDate: null,
         endDate: null,
@@ -903,8 +1366,23 @@ class MapPageState extends State<MapPage> {
       {
 
         int speed=result[0].speed;
-        double lat=double.tryParse( result[0].Latitude);
-        double lng=double.tryParse(result[0].Longitude);
+        if(speed==null )
+          speed=100;
+        String latStr=result[0].Latitude;
+        String lngStr=result[0].Longitude;
+        var firstLat=latStr.split('*');
+        var firstLng=lngStr.split('*');
+        var secondLat=firstLat[1].split("'");
+        var secondLng=firstLng[1].split("'");
+
+        double fresultLatLng=ConvertDegreeAngleToDouble(
+            double.tryParse( firstLat[0]), double.tryParse( secondLat[0]), double.tryParse( secondLat[1]));
+
+        double sresultLatLng=ConvertDegreeAngleToDouble(
+            double.tryParse( firstLng[0]), double.tryParse( secondLng[0]), double.tryParse( secondLng[1]));
+
+        double lat=fresultLatLng;
+        double lng=sresultLatLng;
         LatLng latLng=LatLng(lat,lng);
         currentCarLatLng=LatLng(lat,lng);
         liveMapController.mapController.move(latLng, 14);
@@ -915,7 +1393,7 @@ class MapPageState extends State<MapPage> {
           builder: (ctx) => Container (
             child : GestureDetector(
             onTap: (){
-              _showInfoDialog(carId);
+              _showInfoDialog(lastCarIdSelected);
                 _showInfoPopUp=true;
 
             },
@@ -925,7 +1403,7 @@ class MapPageState extends State<MapPage> {
             child: CircleAvatar(
               radius: 38.0,
                 backgroundColor: Colors.transparent,
-                child: Image.asset(imgUrl,key: ObjectKey(speed > maxSpeed ? Colors.red : Colors.green),))
+                child:  Image.asset(imgUrl,key: ObjectKey( Colors.green),))
           ),),),
         );
 
@@ -948,7 +1426,7 @@ class MapPageState extends State<MapPage> {
           onTap: ()async {
 
               _showInfoPopUp=true;
-              _showInfoDialog(carId);
+              _showInfoDialog(lastCarIdSelected);
 
           },
           child:
@@ -974,7 +1452,7 @@ class MapPageState extends State<MapPage> {
       centerRepository.showFancyToast(result.Message);
       if( result.IsSuccessful){
             centerRepository.showFancyToast(result.Message);
-            Navigator.pop(context);
+            pairedChangedNoty.updateValue(new Message(type:'CAR_PAIRED'));
    }
    else {
         centerRepository.showFancyToast(result.Message);
@@ -1152,6 +1630,21 @@ class MapPageState extends State<MapPage> {
           );
         });
   }
+  initDatePicker(TextEditingController controller,String type){
+    persianDatePicker = PersianDatePicker(
+      controller: controller,
+      datetime: Jalali.now().toString(),
+      fontFamily: 'IranSans',
+      onChange: (String oldText, String newText){
+        if(type=='From')
+          fromDate=newText;
+        else
+          toDate=newText;
+      },
+
+    ).init();
+    return persianDatePicker;
+  }
   _onValueChanged(String value) {
     minStopTime=value;
   }
@@ -1161,12 +1654,76 @@ class MapPageState extends State<MapPage> {
     if(cars!=null && cars.length>0)
         _showBottomSheetLastCars(cntext, cars);
   }
+  _showBottomSheetDates(BuildContext cntext) {
+    showModalBottomSheetCustom(context: cntext ,
+        mHeight: 0.95,
+        builder: (BuildContext context) {
+          return
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Text(Translations.current.fromDate(),
+                  style: TextStyle(color: Colors.pinkAccent,fontSize: 15.0),
+                  textAlign: TextAlign.center,),
+                Container(
+                  height: MediaQuery.of(context).size.height*0.35,
+                  child: initDatePicker(textEditingController, 'From'),
+                ),
+                Text(Translations.current.toDate(),
+                  style: TextStyle(color: Colors.pinkAccent,fontSize: 15.0),
+                  textAlign: TextAlign.center,),
+                Container(
+                  height:MediaQuery.of(context).size.height*0.35,
+                  child: initDatePicker(textEditingController, 'To'),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(right: 10.0,left: 10.0),
+                      child:
+                    FlatButton(
+                      child: Button(wid: 120.0,clr: Colors.pinkAccent,title: Translations.current.doFilter(),),
+                      onPressed: () {
+                        if(lastCarIdSelected==null || lastCarIdSelected==0){
+                         centerRepository.showFancyToast('لطفا ابتدا خودرو را انتخاب نمایید');
+                        }else {
+                          forAnim=false;
+                          Navigator.pop(context);
+                          lines2 = processLineData(
+                              false, currentCarLatLng.latitude.toString(),
+                              currentCarLatLng.longitude.toString(), fromDate,
+                              toDate, true,false);
+                          Navigator.pop(context);
 
+                        }
+                      },
+                    ),),
+                    Padding(
+                      padding: EdgeInsets.only(right: 10.0,left: 10.0),
+                      child:
+                    FlatButton(
+                      child: Button(wid: 120.0,clr: Colors.pinkAccent,title: Translations.current.close(),),
+                      onPressed: () {
+                          Navigator.pop(context);
+                      },
+                    ),),
+                  ],
+                )
+              ],
+            );
+        });
+
+  }
+  showFilterDate(BuildContext context, bool from) {
+    return _showBottomSheetDates(context);
+  }
   _showBottomSheetReport(BuildContext cntext)
   {
     double wid=MediaQuery.of(cntext).size.width*0.75;
     showModalBottomSheetCustom(context: cntext ,
-        mHeight: 0.75,
+        mHeight: 0.85,
         builder: (BuildContext context) {
           return Stack(
             overflow: Overflow.visible,
@@ -1191,8 +1748,12 @@ class MapPageState extends State<MapPage> {
                             borderRadius: BorderRadius.all(Radius.circular(15.0)),
                           ),
                           child: FlatButton(
-                            onPressed: (){ },
-                            child: Button(title: Translations.current.fromDateToDate(),wid: wid,color: Colors.blueAccent.value,),
+                            onPressed: (){
+                             // Navigator.pop(context);
+                              showFilterDate(context, true);
+
+                            },
+                            child: Button(title: Translations.current.fromDateToDate(),wid: wid,clr: Colors.blueAccent,),
                           )
                       ),
 
@@ -1203,8 +1764,8 @@ class MapPageState extends State<MapPage> {
                     children: <Widget>[
                       Container(
                         alignment: Alignment.topCenter,
-                        width: MediaQuery.of(context).size.width*0.80,
-                        height: 250,
+                        width: MediaQuery.of(context).size.width*0.85,
+                        height: 400,
                         child:
 
                         new ListView (
@@ -1214,10 +1775,10 @@ class MapPageState extends State<MapPage> {
                               alignment: Alignment.topCenter,
                               margin: EdgeInsets.all(0.0),
                               width: MediaQuery.of(context).size.width*0.80,
-                              height: 200,
+                              height: 400,
                               child:
                               Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 //margin: EdgeInsets.symmetric(horizontal: 20.0),
                                 children: <Widget>[
@@ -1239,36 +1800,35 @@ class MapPageState extends State<MapPage> {
                                         physics: BouncingScrollPhysics(),
                                         child: new Column(
                                           children: <Widget>[
-
                                             Container(
                                               //height: 45,
                                               padding: EdgeInsets.symmetric(
                                                   vertical: 2.0, horizontal: 2.0),
                                               child:
-                                              FormBuilderTextField(
-                                                initialValue: '3',
-                                                attribute: "MinStopTime",
-                                                decoration: InputDecoration(
-                                                  labelText: Translations.current.minStopTime(),
-                                                ),
-                                                onChanged: (value) => _onValueChanged(value),
-                                                valueTransformer: (text) => text,
-                                                validators: [
-                                                  FormBuilderValidators.required(),
-                                                ],
-                                                keyboardType: TextInputType.numberWithOptions(signed: false,decimal: false),
-                                              ),
+                                              _buildMinDelayTextField('حداقل زمان توقف دقیقه', 150.0, null),
+                                            ),
+                                            Container(
+                                              //height: 45,
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 2.0, horizontal: 2.0),
+                                              child:
+                                                   _buildMinTextField('حداقل سرعت', 150.0, null),
+
 
                                             ),
-
-
+                                            Container(
+                                              //height: 45,
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 2.0, horizontal: 2.0),
+                                              child:
+                                              _buildMaxTextField('حداکثر سرعت', 150.0, null),
+                                            ),
                                             new GestureDetector(
                                               onTap: () {
-                                                processLineDataForReportMinTime('','',minStopTime);
                                               },
 
                                               child: new Container(
-                                                  margin: EdgeInsets.only(top: 5.0,right: 5.0,left: 5.0),
+                                                  margin: EdgeInsets.only(top: 5.0,right: 5.0,left: 5.0,bottom: 5.0),
                                                   constraints: new BoxConstraints.expand(
                                                     height: 48.0,
                                                     width: wid,
@@ -1280,13 +1840,50 @@ class MapPageState extends State<MapPage> {
                                                   ),
                                                   child: FlatButton(
                                                     onPressed: (){
-
+          if(lastCarIdSelected==null || lastCarIdSelected==0){
+          centerRepository.showFancyToast('لطفا ابتدا خودرو را انتخاب نمایید');
+          }else {
+                                                        forAnim=false;
+                                                      _formKey.currentState.save();
+                                                      processLineDataForReportMinTime(fromDate,toDate,minDelay.toString());
+                                                      Navigator.pop(context);}
                                                     },
-                                                    child: Button(title: Translations.current.showReport(),wid: wid,color: Colors.blueAccent.value,),
+                                                    child: Button(title: Translations.current.showReport(),wid: wid,clr: Colors.blueAccent,),
                                                   )
                                               ),
 
                                             ),
+                                            Padding(padding: EdgeInsets.only(bottom: 10.0),
+                                            child:
+                                            new GestureDetector(
+                                              onTap: () {
+                                                if(lastCarIdSelected==null || lastCarIdSelected==0){
+                                                  centerRepository.showFancyToast('لطفا ابتدا خودرو را انتخاب نمایید');
+                                                }else {
+                                                  _formKey.currentState.save();
+                                                  forAnim=true;
+                                                 lines2= processLineData(
+                                                      false, currentCarLatLng.latitude.toString(),
+                                                      currentCarLatLng.longitude.toString(), fromDate,
+                                                      toDate, true,true);
+                                                 lines2.then((result){
+                                                   if(result!=null && result.length>0) {
+                                                       reportNoty.updateValue(new Message(type:'ANIM_ROUTE'));
+                                                   }
+                                                 });
+                                                  Navigator.pop(context);
+                                                }
+                                              },
+                                              child:
+                                              Container(
+                                                width: wid,
+                                                height: 40.0,
+                                                child:
+                                                new Button(title: 'گزارش با حرکت خودرو در مسیر',
+                                                  color: Colors.white.value,
+                                                  clr: Colors.pinkAccent,),
+                                              ),
+                                            ),),
                                             new GestureDetector(
                                               onTap: () {
                                                 Navigator.pop(context);
@@ -1331,17 +1928,31 @@ class MapPageState extends State<MapPage> {
     _showBottomSheetReport(context);
   }
 
-  showRouteCurrentToCar(){
-
+  showRouteCurrentToCar() async{
+    if(lastCarIdSelected==null || lastCarIdSelected==0){
+      centerRepository.showFancyToast('لطفا ابتدا خودرو را انتخاب نمایید');
+    }else {
+      lines2 = processLineData(true, currentCarLatLng.latitude.toString(),
+          currentCarLatLng.longitude.toString(), '', '', false,false);
+    }
   }
 
   showCarRoute() {
-    lines2=processLineData(false, '', '','','',false);
+    if(lastCarIdSelected==null || lastCarIdSelected==0){
+      centerRepository.showFancyToast('لطفا ابتدا خودرو را انتخاب نمایید');
+    }else {
+      lines2 = processLineData(false, '', '', '', '', false,false);
+    }
   }
 
   @override
   void dispose() {
+    pairedChangedNoty.dispose();
     markerlocationStream.close();
+    animateNoty.dispose();
+    _timer.cancel();
+    _timerLine.cancel();
+
     super.dispose();
   }
 
@@ -1366,661 +1977,793 @@ class MapPageState extends State<MapPage> {
         fabBottom: 160,
         fabRight: 20,
         verbose: false);
-    return FutureBuilder<List<CarInfoVM>>(
-        future: carInfoss ,
-        builder: (context,snapshot) {
-      if (snapshot.hasData &&
-          snapshot.data != null) {
-        final parallaxCardItemsList = <ParallaxCardItem>[
-          for(var car in carInfos)
-            ParallaxCardItem(
-                title: DartHelper.isNullOrEmptyString(car.car.pelaueNumber),
-                body: DartHelper.isNullOrEmptyString(car.carId.toString()),
-                background: Container(
-                  width: 50.0,
-                  color: Colors.white,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.transparent,
-                    radius: 30.0,
-                    child: Image.asset(car.imageUrl),
-                  ),
-                )),
+    return StreamBuilder<Message>(
+      //initialData: new Message(t),
+      stream: pairedChangedNoty.noty,
+      builder: (context,snapshot)
+    {
+      if(snapshot.hasData && snapshot.data!=null){
+        if(snapshot.data.type=='CAR_PAIRED')
+          getCarInfo();
+      }
+      return
+        FutureBuilder<List<CarInfoVM>>(
+          future: carInfoss,
+          builder: (context, snapshot) {
+            if (snapshot.hasData &&
+                snapshot.data != null) {
+              final parallaxCardItemsList = <ParallaxCardItem>[
+                for(var car in carInfos)
+                  ParallaxCardItem(
+                      title: DartHelper.isNullOrEmptyString(
+                          car.car.pelaueNumber),
+                      body: DartHelper.isNullOrEmptyString(
+                          car.carId.toString()),
+                      background: Container(
+                        width: 50.0,
+                        color: Colors.white,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.transparent,
+                          radius: 30.0,
+                          child: Image.asset(car.imageUrl),
+                        ),
+                      )),
 
 
-        ];
+              ];
 
-        final carPairedItemsList = <ParallaxCardItem>[
-          for(var car in carsSlavePairedList)
-            ParallaxCardItem(
-                title: DartHelper.isNullOrEmptyString(car.BrandTitle),
-                body: DartHelper.isNullOrEmptyString(car.CarId.toString()),
-                background: Container(
-                  width: 160.0,
-                  color: Theme.of(context).cardColor,
-                  child: Container(
-                      child:
+              final carPairedItemsList = <ParallaxCardItem>[
+                for(var car in carsSlavePairedList)
+                  ParallaxCardItem(
+                    title: DartHelper.isNullOrEmptyString(car.BrandTitle),
+                    body: DartHelper.isNullOrEmptyString(car.CarId.toString()),
+                    background: Container(
+                      width: 160.0,
+                      color: Theme
+                          .of(context)
+                          .cardColor,
+                      child: Container(
+                        child:
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
 
                             Row(
                               children: <Widget>[
-                                Text(Translations.current.thisCarPaired(),style: TextStyle(fontSize: 10.0),),
+                                Text(Translations.current.thisCarPaired(),
+                                  style: TextStyle(fontSize: 10.0),),
                               ],
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text(Translations.current.masterCarId(),style: TextStyle(fontSize: 10.0)),
-                                Text(DartHelper.isNullOrEmptyString(car.masterId.toString()),style: TextStyle(fontSize: 10.0)),
+                                Text(Translations.current.masterCarId(),
+                                    style: TextStyle(fontSize: 10.0)),
+                                Text(DartHelper.isNullOrEmptyString(
+                                    car.masterId.toString()),
+                                    style: TextStyle(fontSize: 10.0)),
                               ],
                             ),
                             Row(
                               children: <Widget>[
-                                Text(DartHelper.isNullOrEmptyString(car.CarModelTitle),style: TextStyle(fontSize: 10.0)),
+                                Text(DartHelper.isNullOrEmptyString(
+                                    car.CarModelTitle),
+                                    style: TextStyle(fontSize: 10.0)),
                               ],
                             ),
                             Row(
                               children: <Widget>[
-                                Text(DartHelper.isNullOrEmptyString(car.CarModelDetailTitle),style: TextStyle(fontSize: 10.0)),
+                                Text(DartHelper.isNullOrEmptyString(
+                                    car.CarModelDetailTitle),
+                                    style: TextStyle(fontSize: 10.0)),
                               ],
-                            ),],
-                    ),
-    ),
-                ),
-            ),
-        ];
-
-      return
-        ExtendedNavigationBarScaffold(
-          key: _scaffoldKey,
-          drawer: AppDrawer(userName: userName,currentRoute: route,imageUrl: imageUrl,carPageTap: onCarPageTap,carId: widget.mapVM.carId,),
-          body:
-          Stack(
-              overflow: Overflow.visible,
-              children: <Widget>[
-
-          FutureBuilder<List<Polyline>>(
-              future: lines2,
-              builder: (context, snapshot) {
-                if (snapshot.hasData &&
-                    snapshot.data != null) {
-                  centerRepository.dismissDialog(context);
-                  return
-                   StreamBuilder<Message>(
-                     stream: reportNoty.noty,
-                     builder: (context,snapshot)
-                  {
-                    if(snapshot.hasData && snapshot.data!=null) {
-                      Message msg=snapshot.data;
-                      if(msg.type=='CLEAR_MAP'){
-                        if(lines!=null && lines.length>0) {
-                          lines.clear();
-                        }
-                        if(lines2!=null ){
-                          lines2=null;
-                        }
-                      }
-                    }
-                    return
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                              child: Text(
-                                  ''),
-                            ),
-                            Flexible(
-                              child: Stack(
-                                children: <Widget>[
-                                  FlutterMap(
-                                    mapController: liveMapController
-                                        .mapController,
-                                    options: MapOptions(
-                                      center: firstPoint != null
-                                          ? firstPoint
-                                          : currentLocation != null ?
-                                      LatLng(currentLocation.latitude,
-                                          currentLocation.longitude) : LatLng(
-                                          35.6917856, 51.4204603),
-                                      zoom: 15.0,
-                                      plugins: [
-                                        UserLocationPlugin(),
-                                      ],
-                                    ),
-
-                                    layers: [
-                                      TileLayerOptions(
-                                        urlTemplate:
-                                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                        subdomains: ['a', 'b', 'c'],
-                                        // NetworkTileProvider or CachedNetworkTileProvider
-                                        tileProvider: NetworkTileProvider(),
-                                      ),
-
-                                      PolylineLayerOptions(polylines: lines),
-                                      MarkerLayerOptions(markers: markers),
-                                      userLocationOptions
-                                      /* PolygonLayerOptions(
-                    polygons: polygons,
-                  ),*/
-                                    ],
-                                  ),
-
-                                  Positioned(
-                                    right: 20.0,
-                                    bottom: 260.0,
-                                    child:
-                                    Container(
-                                      width: 38.0,
-                                      height: 38.0,
-                                      child:
-                                      FloatingActionButton(
-                                        onPressed: () {
-                                         reportNoty.updateValue(new Message(type:'CLEAR_MAP'));
-                                        },
-                                        child: Container(
-                                          width: 38.0,
-                                          height: 38.0,
-                                          child: Image.asset(
-                                            'assets/images/clear_map.png',
-                                            color: Colors.white,),),
-                                        elevation: 3.0,
-                                        backgroundColor: Colors.blueAccent,
-                                        heroTag: 'ClearMap1',
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 20.0,
-                                    bottom: 210.0,
-                                    child:
-                                    Container(
-                                      width: 38.0,
-                                      height: 38.0,
-                                      child:
-                                      FloatingActionButton(
-                                        onPressed: () {
-                                          showRouteCurrentToCar();
-                                        },
-                                        child: Container(
-                                          width: 38.0,
-                                          height: 38.0,
-                                          child: Image.asset(
-                                            'assets/images/go.png',
-                                            color: Colors.white,),),
-                                        elevation: 3.0,
-                                        backgroundColor: Colors.blueAccent,
-                                        heroTag: 'GO1',
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ],
-
                         ),
-                      );
-                  },
-                   );
-                }
-                else {
-                  double lat = currentLocation != null ? currentLocation
-                      .latitude : 35.6917856;
-                  double long = currentLocation != null ? currentLocation
-                      .longitude : 51.4204603;
-                  return StreamBuilder<Message>(
-                    stream: reportNoty.noty,
-                    builder: (context,snapshot)
-                  {
-                    if(snapshot.hasData && snapshot.data!=null){
-                      Message msg=snapshot.data;
-                      if(msg.type=='CLEAR_MAP'){
-                        if(lines!=null && lines.length>0) {
-                          lines.clear();
-                        }
-                        if(lines2!=null ){
-                          lines2=null;
-                        }
-                      }
-                    }
-                  return  Column(
-                      children: [
-                        Flexible(
-                          child: Stack(
-                            children: <Widget>[
-                              FlutterMap(
-                                options: MapOptions(
-                                  center: LatLng(lat, long),
-                                  zoom: 16.0,
-                                  plugins: [
-                                    UserLocationPlugin(),
-                                  ],
-                                ),
-<<<<<<< HEAD
-                                layers: [
-                                  TileLayerOptions(
-                                    urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                    subdomains: ['a', 'b', 'c'],
-                                    tileProvider: CachedNetworkTileProvider(),
-                                  ),
+                      ),
+                    ),
+                  ),
+              ];
 
-                                  PolylineLayerOptions(polylines: lines),
-                                  MarkerLayerOptions(markers: markers),
-                                  userLocationOptions
-                                ],
-                                mapController: liveMapController.mapController,
-                              ),
+              return
+                ExtendedNavigationBarScaffold(
+                  notyBloc: moreButtonNoty,
+                  key: _scaffoldKey,
+                  drawer: AppDrawer(userName: userName,
+                    currentRoute: route,
+                    imageUrl: imageUrl,
+                    carPageTap: onCarPageTap,
+                    carId: widget.mapVM.carId,),
+                  body:
+                  Stack(
+                    overflow: Overflow.visible,
+                    children: <Widget>[
 
-                              Positioned(
-                                right: 20.0,
-                                bottom: 260.0,
-                                child:
-                                Container(
-=======
-                                Positioned(
-                                  right: 20.0,
-                                  bottom: 290.0,
-                                  child:
-                                  Container(
-                                    width: 38.0,
-                                    height: 38.0,
-                                    child:
-                                    FloatingActionButton(
-                                      onPressed: (){
-                                          if(lines!=null){
-                                            lines.clear();
+                      FutureBuilder<List<Polyline>>(
+                          future: lines2,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData &&
+                                snapshot.data != null) {
+                              centerRepository.dismissDialog(context);
+
+                              return
+                                StreamBuilder<Message>(
+                                  stream: reportNoty.noty,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData &&
+                                        snapshot.data != null) {
+                                      Message msg = snapshot.data;
+                                      if (msg.type == 'ANIM_ROUTE') {
+                                       // if (forAnim) {
+                                          animateRoutecarPolyLines();
+                                       // }
+                                      }
+                                      if (msg.type == 'CLEAR_MAP') {
+                                        if(_timerLine!=null && _timerLine.isActive)
+                                        {
+                                          //_timerLine=null;
+                                          _timerLine.cancel();
+                                        }
+                                        if(_polyLineAnim!=null)
+                                          {
+                                            forAnim=false;
+                                            _polyLineAnim=null;
                                           }
-                                          if(lines2!=null){
-                                            lines2=null;
-                                          }
-                                          setState(() {
 
-                                          });
-                                      },
-                                      child:Container(
-                                        width: 38.0,
-                                        height: 38.0,
-                                        child: Image.asset('assets/images/clear_map.png',color: Colors.white,),),
-                                      elevation: 3.0,
-                                      backgroundColor: Colors.blueAccent,
-                                    ),
-                                  ),
-                                ),
-                            Positioned(
-                              right: 20.0,
-                              bottom: 210.0,
-                              child:
-                              Container(
->>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
-                                  width: 38.0,
-                                  height: 38.0,
-                                  child:
-                                  FloatingActionButton(
-                                    onPressed: () {
-                                     // liveMapController.removeMarkers();
-                                      reportNoty.updateValue(new Message(type: 'CLEAR_MAP'));
-                                    },
-                                    child: Container(
-                                      width: 38.0,
-                                      height: 38.0,
-                                      child: Image.asset(
-                                        'assets/images/clear_map.png',
-                                        color: Colors.white,),),
-                                    elevation: 3.0,
-                                    backgroundColor: Colors.blueAccent,
-                                    heroTag: 'ClearMap2',
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                right: 20.0,
-                                bottom: 210.0,
-                                child:
-                                Container(
-                                    width: 38.0,
-                                    height: 38.0,
-                                    child:
-                                    FloatingActionButton(
-                                      onPressed: () {
-                                        showRouteCurrentToCar();
-                                      },
-                                      child: Container(
-                                        width: 38.0,
-                                        height: 38.0,
-                                        child: Image.asset(
-                                          'assets/images/go.png',
-                                          color: Colors.white,),),
-                                      elevation: 3.0,
-                                      backgroundColor: Colors.blueAccent,
-                                      heroTag: 'GO2',
-                                    )
-                                ),
+                                        if (lines != null && lines.length > 0) {
+                                          lines.clear();
+                                        }
+                                        if (markers != null &&
+                                            markers.length > 0) {
+                                          markers.clear();
+                                        }
+                                        if (lines2 != null) {
+                                          lines2 = null;
+                                        }
+                                      }
+                                    }
+                                    return StreamBuilder<Message>(
+                                      stream: animateNoty.noty,
+                                      builder: (context,snapshot)
+                                      {
+                                        if(snapshot.hasData && snapshot.data!=null){
+                                          if(_fpoint!=null)
+                                            liveMapController.mapController.move(_fpoint, 15);
+                                        }
+                                        return
+                                      Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 8.0, bottom: 8.0),
+                                              child: Text(
+                                                  ''),
+                                            ),
+                                            Flexible(
+                                              child: Stack(
+                                                children: <Widget>[
+                                                  FlutterMap(
+                                                    mapController: liveMapController
+                                                        .mapController,
+                                                    options: MapOptions(
+                                                      center: firstPoint != null
+                                                          ? firstPoint
+                                                          : currentLocation !=
+                                                          null
+                                                          ?
+                                                      LatLng(currentLocation
+                                                          .latitude,
+                                                          currentLocation
+                                                              .longitude)
+                                                          : LatLng(
+                                                          35.6917856,
+                                                          51.4204603),
+                                                      zoom: 15.0,
+                                                      plugins: [
+                                                        UserLocationPlugin(),
+                                                      ],
+                                                    ),
+
+                                                    layers: [
+                                                      TileLayerOptions(
+                                                        urlTemplate:
+                                                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                                        subdomains: [
+                                                          'a',
+                                                          'b',
+                                                          'c'
+                                                        ],
+                                                        // NetworkTileProvider or CachedNetworkTileProvider
+                                                        tileProvider: CachedNetworkTileProvider(),
+                                                      ),
+
+                                                      ( forAnim && _polyLineAnim!=null)
+                                                          ? PolylineLayerOptions(
+                                                          polylines: <Polyline>[
+                                                            _polyLineAnim
+                                                          ])
+                                                          :
+                                                      PolylineLayerOptions(
+                                                          polylines: lines),
+                                                     /* forAnim
+                                                          ? MarkerLayerOptions(
+                                                          markers: <Marker>[
+                                                            _marker
+                                                          ])
+                                                          :*/
+                                                      MarkerLayerOptions(
+                                                          markers: markers),
+                                                      userLocationOptions
+                                                      /* PolygonLayerOptions(
+                    polygons: polygons,
+                  ),*/
+                                                    ],
+                                                  ),
+
+                                                  Positioned(
+                                                    right: 20.0,
+                                                    bottom: 260.0,
+                                                    child:
+                                                    Container(
+                                                      width: 38.0,
+                                                      height: 38.0,
+                                                      child:
+                                                      FloatingActionButton(
+                                                        onPressed: () {
+                                                          reportNoty
+                                                              .updateValue(
+                                                              new Message(
+                                                                  type: 'CLEAR_MAP'));
+                                                        },
+                                                        child: Container(
+                                                          width: 38.0,
+                                                          height: 38.0,
+                                                          child: Image.asset(
+                                                            'assets/images/clear_map.png',
+                                                            color: Colors
+                                                                .white,),),
+                                                        elevation: 3.0,
+                                                        backgroundColor: Colors
+                                                            .blueAccent,
+                                                        heroTag: 'ClearMap1',
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    right: 20.0,
+                                                    bottom: 210.0,
+                                                    child:
+                                                    Container(
+                                                      width: 38.0,
+                                                      height: 38.0,
+                                                      child:
+                                                      FloatingActionButton(
+                                                        onPressed: () {
+                                                          showRouteCurrentToCar();
+                                                        },
+                                                        child: Container(
+                                                          width: 38.0,
+                                                          height: 38.0,
+                                                          child: Image.asset(
+                                                            'assets/images/go.png',
+                                                            color: Colors
+                                                                .white,),),
+                                                        elevation: 3.0,
+                                                        backgroundColor: Colors
+                                                            .blueAccent,
+                                                        heroTag: 'GO1',
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+
+                                        ),
+                                      );
+                                  },
+                                );
+                                  },
+                                );
+                            }
+                            else {
+                              double lat = currentLocation != null
+                                  ? currentLocation
+                                  .latitude
+                                  : 35.6917856;
+                              double long = currentLocation != null
+                                  ? currentLocation
+                                  .longitude
+                                  : 51.4204603;
+                              return StreamBuilder<Message>(
+                                stream: reportNoty.noty,
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData &&
+                                      snapshot.data != null) {
+                                    Message msg = snapshot.data;
+                                    if (msg.type == 'ANIM_ROUTE') {
+                                      if (forAnim) {
+                                        animateRoutecarPolyLines();
+                                      }
+                                    }
+                                    if (msg.type == 'CLEAR_MAP') {
+                                        if(_timerLine!=null && _timerLine.isActive)
+                                          {
+                                            _timerLine.cancel();
+                                          }
+                                      if(_polyLineAnim!=null)
+                                      {
+                                        forAnim=false;
+                                        _polyLineAnim=null;
+                                      }
+
+                                      if (lines != null && lines.length > 0) {
+                                        lines.clear();
+                                      }
+                                      if (markers != null &&
+                                          markers.length > 0) {
+                                        markers.clear();
+                                      }
+                                      if (lines2 != null) {
+                                        lines2 = null;
+                                      }
+                                    }
+                                  }
+                                  return StreamBuilder<Message>(
+                                    stream: animateNoty.noty,
+                                    builder: (context,snapshot) {
+                                    if(snapshot.hasData && snapshot.data!=null){
+                                      if(_fpoint!=null)
+                                        liveMapController.mapController.move(_fpoint, 15);
+                                    }
+                                    return
+                                    Column(
+                                    children: [
+                                      Flexible(
+                                        child: Stack(
+                                          children: <Widget>[
+                                            FlutterMap(
+                                              options: MapOptions(
+                                                center: LatLng(lat, long),
+                                                zoom: 16.0,
+                                                plugins: [
+                                                  UserLocationPlugin(),
+                                                ],
+                                              ),
+                                              layers: [
+                                                TileLayerOptions(
+                                                  urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                                  subdomains: ['a', 'b', 'c'],
+                                                  tileProvider: CachedNetworkTileProvider(),
+                                                ),
+
+                                                ( forAnim  && _polyLineAnim!=null ) ?  PolylineLayerOptions(
+                                                    polylines: <Polyline>[ _polyLineAnim]) :
+                                                PolylineLayerOptions(
+                                                    polylines: lines),
+                                                /*forAnim ?  MarkerLayerOptions(
+                                                    markers: <Marker>[_marker]) :*/
+                                               /* MarkerLayerOptions(
+                                                    markers: markers),*/
+                                                MarkerLayerOptions(
+                                                    markers: markers),
+                                                userLocationOptions
+                                              ],
+                                              mapController: liveMapController
+                                                  .mapController,
+                                            ),
+
+                                            Positioned(
+                                              right: 20.0,
+                                              bottom: 260.0,
+                                              child:
+                                              Container(
+                                                width: 38.0,
+                                                height: 38.0,
+                                                child:
+                                                FloatingActionButton(
+                                                  onPressed: () {
+                                                    // liveMapController.removeMarkers();
+                                                    reportNoty.updateValue(
+                                                        new Message(
+                                                            type: 'CLEAR_MAP'));
+                                                  },
+                                                  child: Container(
+                                                    width: 38.0,
+                                                    height: 38.0,
+                                                    child: Image.asset(
+                                                      'assets/images/clear_map.png',
+                                                      color: Colors.white,),),
+                                                  elevation: 3.0,
+                                                  backgroundColor: Colors
+                                                      .blueAccent,
+                                                  heroTag: 'ClearMap2',
+                                                ),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              right: 20.0,
+                                              bottom: 210.0,
+                                              child:
+                                              Container(
+                                                  width: 38.0,
+                                                  height: 38.0,
+                                                  child:
+                                                  FloatingActionButton(
+                                                    onPressed: () {
+                                                      showRouteCurrentToCar();
+                                                    },
+                                                    child: Container(
+                                                      width: 38.0,
+                                                      height: 38.0,
+                                                      child: Image.asset(
+                                                        'assets/images/go.png',
+                                                        color: Colors.white,),),
+                                                    elevation: 3.0,
+                                                    backgroundColor: Colors
+                                                        .blueAccent,
+                                                    heroTag: 'GO2',
+                                                  )
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+
+                                  );
+                                },
+                              );
+                                },
+                              );
+                            }
+                          }
+                        // ),
+                      ),
+
+                    ],
+                  ),
+                  elevation: 0,
+                  floatingAppBar: true,
+                  floatAppbar:
+                  Stack(
+                    children: <Widget>[
+                      Align(
+                        alignment: Alignment(1, -1),
+                        child:
+                        Container(
+                          height: 70.0,
+                          child:
+                          AppBar(
+                            automaticallyImplyLeading: true,
+                            backgroundColor: Colors.transparent,
+                            elevation: 0.0,
+                            actions: <Widget>[
+                              IconButton(
+                                icon: Icon(Icons.arrow_forward,
+                                  color: Colors.indigoAccent,),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/home');
+                                },
                               ),
                             ],
+                            leading:null, /*IconButton(
+                              icon: Icon(Icons.menu,
+                                color: Colors.indigoAccent,),
+                              onPressed: () {
+                                _scaffoldKey.currentState.openDrawer();
+                              },
+                            ),*/
                           ),
                         ),
-                      ],
-
-                    );
-                  },
-                  );
-                }
-              }
-         // ),
-          ),
-
-          ],
-          ),
-          elevation: 0,
-          floatingAppBar: true,
-          floatAppbar:
-                      Stack(
-                        children: <Widget>[
-                          Align(
-                            alignment: Alignment(1,-1),
-                            child:
-                            Container(
-                              height:70.0,
-                              child:
-                              AppBar(
-                                automaticallyImplyLeading: true,
-                                backgroundColor: Colors.transparent,
-                                elevation: 0.0,
-                                actions: <Widget>[
-                                  IconButton(
-                                    icon: Icon(Icons.arrow_forward,color: Colors.indigoAccent,),
-                                    onPressed: (){
-                                      Navigator.pushNamed(context, '/home');
-                                    },
-                                  ),
-                                ],
-                                leading: IconButton(
-                                  icon: Icon(Icons.menu,color: Colors.indigoAccent,),
-                                  onPressed: (){
-                                    _scaffoldKey.currentState.openDrawer();
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-          Padding(
-            padding: EdgeInsets.only(top: 60.0),
-            child:
-          Container(
-            color: Colors.transparent,
-            width: MediaQuery.of(context).size.width-10,
-            height: 110.0,
-            child:
-            PageTransformer(
-              pageViewBuilder: (context, visibilityResolver) {
-                return
-                  PageView.builder(
-                    physics: BouncingScrollPhysics(),
-                    controller: PageController(viewportFraction: 0.5,),
-                    itemCount: parallaxCardItemsList.length,
-                    itemBuilder: (context, index) {
-                      final item = parallaxCardItemsList[index];
-                      final pageVisibility =
-                      visibilityResolver.resolvePageVisibility(index);
-                      return GestureDetector(
-                        onTap: (){
-                          navigateToCarSelected(index,false,0);
-                        },
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 60.0),
                         child:
-                       Container(
-                        color: Colors.white.withOpacity(0.0),
-                          width: 200.0,
-                          height: 100.0,
-                          child: ParallaxCardsWidget(
-                        item: item,
-                        pageVisibility: pageVisibility,
+                        Container(
+                          color: Colors.transparent,
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .width - 10,
+                          height: 110.0,
+                          child:
+                          PageTransformer(
+                            pageViewBuilder: (context, visibilityResolver) {
+                              return
+                                PageView.builder(
+                                  physics: BouncingScrollPhysics(),
+                                  controller: PageController(
+                                    viewportFraction: 0.5,),
+                                  itemCount: parallaxCardItemsList.length,
+                                  itemBuilder: (context, index) {
+                                    final item = parallaxCardItemsList[index];
+                                    final pageVisibility =
+                                    visibilityResolver.resolvePageVisibility(
+                                        index);
+                                    return GestureDetector(
+                                      onTap: () {
+                                        navigateToCarSelected(index, false, 0);
+                                      },
+                                      child:
+                                      Container(
+                                        color: Colors.white.withOpacity(0.0),
+                                        width: 200.0,
+                                        height: 100.0,
+                                        child: ParallaxCardsWidget(
+                                          item: item,
+                                          pageVisibility: pageVisibility,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                            },
                           ),
-                       ),
-                      );
-                    },
-                  );
-              },
-            ),
-          ),
-          ),
-          ],),
-          appBar: AppBar(
-            shape: kAppbarShape,
-            actions: <Widget>[
-
-            ],
-            leading: IconButton(
-              icon: Icon(
-                EvaIcons.person,
-                color: Colors.pinkAccent,
-              ),
-              onPressed: () {},
-            ),
-            title: Text(
-              'خودروهای تعریف شده',
-              style: TextStyle(color: Colors.black),
-            ),
-            centerTitle: true,
-            backgroundColor: Colors.white,
-          ),
-          navBarColor: Colors.white,
-          navBarIconColor: Colors.blueAccent,
-          moreButtons: [
-            MoreButtonModel(
-              icon: MaterialCommunityIcons.account_question,
-              label: 'درخواست ها',
-              onTap: () {
-                showLastCarJoint(context);
-              },
-            ),
-            MoreButtonModel(
-              icon: MaterialCommunityIcons.parking,
-              label: 'مسیر طی شده',
-              onTap: () { showCarRoute();},
-            ),
-            MoreButtonModel(
-              icon: FontAwesome.book,
-              label: 'گزارش مسیر',
-              onTap: () { _showReportSheet(context);},
-            ),
-           null,
-           /* MoreButtonModel(
+                        ),
+                      ),
+                    ],),
+                  appBar: AppBar(
+                    shape: kAppbarShape,
+                    actions: <Widget>[
+                    ],
+                    leading: IconButton(
+                      icon: Icon(
+                        EvaIcons.person,
+                        color: Colors.pinkAccent,
+                      ),
+                      onPressed: () {},
+                    ),
+                    title: Text(
+                      'خودروهای تعریف شده',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    centerTitle: true,
+                    backgroundColor: Colors.white,
+                  ),
+                  navBarColor: Colors.white,
+                  navBarIconColor: Colors.blueAccent,
+                  moreButtons: [
+                    MoreButtonModel(
+                      icon: MaterialCommunityIcons.account_question,
+                      label: 'درخواست ها',
+                      onTap: () {
+                        showLastCarJoint(context);
+                      },
+                    ),
+                    MoreButtonModel(
+                      icon: MaterialCommunityIcons.parking,
+                      label: 'مسیر طی شده',
+                      onTap: () {
+                        showCarRoute();
+                      },
+                    ),
+                    MoreButtonModel(
+                      icon: FontAwesome.book,
+                      label: 'گزارش مسیر',
+                      onTap: () {
+                        _showReportSheet(context);
+                      },
+                    ),
+                    null,
+                    /* MoreButtonModel(
               icon: MaterialCommunityIcons.car_multiple,
               label: 'خودرهای من',
               onTap: () {},
             ),*/
 
-            null,
-            /*MoreButtonModel(
+                    null,
+                    /*MoreButtonModel(
               icon: MaterialCommunityIcons.home_map_marker,
               label: 'ارسال پیام',
               onTap: () {},
             ),*/
-            null,
-            /*MoreButtonModel(
+                    null,
+                    /*MoreButtonModel(
               icon: FontAwesome5Regular.user_circle,
               label: 'گروه خودروها',
               onTap: () {},
             ),*/
-            null,
-            null,
-            /*MoreButtonModel(
+                    null,
+                    null,
+                    /*MoreButtonModel(
               icon: EvaIcons.settings,
               label: 'تنظیمات',
               onTap: () {},
             ),*/
-            null,
-          ],
-          searchWidget: Container(
-            width: 350.0,
-            height: 300,
-         child:
-          Stack(
-            children: <Widget>[
-                new ListView (
-                  physics: BouncingScrollPhysics(),
-                  children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      //margin: EdgeInsets.symmetric(horizontal: 20.0),
+                    null,
+                  ],
+                  searchWidget: Container(
+                    width: 350.0,
+                    height: 300,
+                    child:
+                    Stack(
                       children: <Widget>[
-                        SizedBox(
-                          height: 0,
-                        ),
-                       /* FlatButton(
+                        new ListView (
+                          physics: BouncingScrollPhysics(),
+                          children: <Widget>[
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              //margin: EdgeInsets.symmetric(horizontal: 20.0),
+                              children: <Widget>[
+                                SizedBox(
+                                  height: 0,
+                                ),
+                                /* FlatButton(
                           onPressed: (){ showLastCarJoint(context);},
                           child: Button(color: Colors.blueAccent.value,wid: 220,title: Translations.current.carJoindBefore(),),
                         ),*/
-                        Container(
-                          margin: EdgeInsets.symmetric(horizontal: 12.0),
-                          width:MediaQuery.of(context).size.width*0.70,
-                          child:
-                          Form(
-                            key: _formKey,
-                            autovalidate: _autoValidate,
-                            child:
-                            SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              physics: BouncingScrollPhysics(),
-                              child: new Column(
-                                children: <Widget>[
-
-                                  Container(
-                                    //height: 45,
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 2.0, horizontal: 2.0),
+                                Container(
+                                  margin: EdgeInsets.symmetric(
+                                      horizontal: 12.0),
+                                  width: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .width * 0.70,
+                                  child:
+                                  Form(
+                                    key: _formKey2,
+                                    autovalidate: _autoValidate,
                                     child:
-                                    FormBuilderTextField(
-                                      initialValue: '',
-                                      attribute: "CarId",
-                                      decoration: InputDecoration(
-                                        labelText: Translations.current.carId(),
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.vertical,
+                                      physics: BouncingScrollPhysics(),
+                                      child: new Column(
+                                        children: <Widget>[
+
+                                          Container(
+                                            //height: 45,
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 2.0, horizontal: 2.0),
+                                            child:
+                                            FormBuilderTextField(
+                                              initialValue: '',
+                                              attribute: "CarId",
+                                              decoration: InputDecoration(
+                                                labelText: Translations.current
+                                                    .carId(),
+                                              ),
+                                              onChanged: (value) =>
+                                                  _onCarIdChanged(value),
+                                              valueTransformer: (text) =>
+                                                  num.tryParse(text),
+                                              validators: [
+                                                FormBuilderValidators
+                                                    .required(),
+                                                FormBuilderValidators.numeric(),
+                                                FormBuilderValidators.max(20),
+                                              ],
+                                              keyboardType: TextInputType
+                                                  .number,
+                                            ),
+
+                                          ),
+                                          Container(
+                                            // height: 45,
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 2.0, horizontal: 2.0),
+                                            child:
+                                            FormBuilderTextField(
+                                              initialValue: '',
+                                              attribute: "SerialNumber",
+                                              decoration: InputDecoration(
+                                                labelText: Translations.current
+                                                    .serialNumber(),
+                                              ),
+                                              onChanged: (value) =>
+                                                  _onMobileChanged(value),
+                                              valueTransformer: (text) => text,
+                                              validators: [
+                                                // FormBuilderValidators.required(),
+                                                FormBuilderValidators.numeric(),
+                                                FormBuilderValidators.max(70),
+                                              ],
+                                              keyboardType: TextInputType
+                                                  .number,
+                                            ),
+                                          ),
+                                          Container(
+                                            // height: 45,
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 2.0, horizontal: 2.0),
+                                            child:
+                                            FormBuilderTextField(
+                                              initialValue: '',
+                                              attribute: "Pelak",
+                                              inputFormatters: [
+                                                BlacklistingTextInputFormatter(
+                                                    RegExp(
+                                                        "[,@#%^&*()+=!.`~\"';:?؟و/\\\\]"))
+                                              ],
+                                              decoration: InputDecoration(
+                                                labelText: Translations.current
+                                                    .carpelak(),
+                                              ),
+                                              onChanged: (value) =>
+                                                  _onPelakChanged(value),
+                                              valueTransformer: (text) => text,
+                                              validators: [
+                                                FormBuilderValidators
+                                                    .required(),
+                                              ],
+                                              // keyboardType: TextInputType.text,
+                                            ),
+                                          ),
+
+
+                                          new GestureDetector(
+                                            onTap: () {
+
+                                              searchCar();
+                                            },
+                                            child:
+                                            Container(
+
+                                              child:
+                                              new SendData(),
+                                            ),
+                                          ),
+
+                                        ],
                                       ),
-                                      onChanged: (value) => _onCarIdChanged(value),
-                                      valueTransformer: (text) => num.tryParse(text),
-                                      validators: [
-                                        FormBuilderValidators.required(),
-                                        FormBuilderValidators.numeric(),
-                                        FormBuilderValidators.max(20),
-                                      ],
-                                      keyboardType: TextInputType.number,
-                                    ),
-
-                                  ),
-                                  Container(
-                                    // height: 45,
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 2.0, horizontal: 2.0),
-                                    child:
-                                    FormBuilderTextField(
-                                      initialValue: '',
-                                      attribute: "SerialNumber",
-                                      decoration: InputDecoration(
-                                        labelText: Translations.current.serialNumber(),
-                                      ),
-                                      onChanged: (value) => _onMobileChanged(value),
-                                      valueTransformer: (text) => text,
-                                      validators: [
-                                       // FormBuilderValidators.required(),
-                                        FormBuilderValidators.numeric(),
-                                        FormBuilderValidators.max(70),
-                                      ],
-                                      keyboardType: TextInputType.number,
                                     ),
                                   ),
-                                  Container(
-                                    // height: 45,
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 2.0, horizontal: 2.0),
-                                    child:
-                                    FormBuilderTextField(
-                                      initialValue: '',
-                                      attribute: "Pelak",
-                                      inputFormatters: [BlacklistingTextInputFormatter(RegExp("[,@#%^&*()+=!.`~\"';:?؟و/\\\\]"))],
-                                      decoration: InputDecoration(
-                                        labelText: Translations.current.carpelak(),
-                                      ),
-                                      onChanged: (value) => _onPelakChanged(value),
-                                      valueTransformer: (text) => text,
-                                      validators: [
-                                        FormBuilderValidators.required(),
-                                      ],
-                                     // keyboardType: TextInputType.text,
-                                    ),
-                                  ),
-
-
-                                  new GestureDetector(
-                                    onTap: () {
-                                      searchCar();
-                                    },
-                                    child:
-                                    Container(
-
-                                      child:
-                                      new SendData(),
-                                    ),
-                                  ),
-
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ),
+                          ],
                         ),
+
+
                       ],
                     ),
-                  ],
-                ),
-
-
-            ],
-          ),
-          ),
-          // onTap: (button) {},
-          // currentBottomBarCenterPercent: (currentBottomBarParallexPercent) {},
-          // currentBottomBarMorePercent: (currentBottomBarMorePercent) {},
-          // currentBottomBarSearchPercent: (currentBottomBarSearchPercent) {},
-          parallexCardPageTransformer: PageTransformer(
-            pageViewBuilder: (context, visibilityResolver) {
-              return
-                PageView.builder(
-                  controller: PageController(viewportFraction: 0.50),
-                  itemCount: carPairedItemsList.length,
-                  itemBuilder: (context, index) {
-                    final item = carPairedItemsList[index];
-                    final pageVisibility =
-                    visibilityResolver.resolvePageVisibility(index);
-                    return GestureDetector(
-                    child:
-                      Container(
-                        color: Colors.white.withOpacity(0.0),
-                        width: 200.0,
-                        height: 130.0,
-                        child: ParallaxCardsWidget(
-                          item: item,
-                          pageVisibility: pageVisibility,
-                        ),
-                      ),
-                      onTap: (){
-                        _showCarPairedActions(carsSlavePairedList[index],context);
-                      },
-                    );
-                  },
+                  ),
+                  // onTap: (button) {},
+                  // currentBottomBarCenterPercent: (currentBottomBarParallexPercent) {},
+                  // currentBottomBarMorePercent: (currentBottomBarMorePercent) {},
+                  // currentBottomBarSearchPercent: (currentBottomBarSearchPercent) {},
+                  parallexCardPageTransformer: PageTransformer(
+                    pageViewBuilder: (context, visibilityResolver) {
+                      return
+                        PageView.builder(
+                          controller: PageController(viewportFraction: 0.50),
+                          itemCount: carPairedItemsList.length,
+                          itemBuilder: (context, index) {
+                            final item = carPairedItemsList[index];
+                            final pageVisibility =
+                            visibilityResolver.resolvePageVisibility(index);
+                            return GestureDetector(
+                              child:
+                              Container(
+                                color: Colors.white.withOpacity(0.0),
+                                width: 200.0,
+                                height: 130.0,
+                                child: ParallaxCardsWidget(
+                                  item: item,
+                                  pageVisibility: pageVisibility,
+                                ),
+                              ),
+                              onTap: () {
+                                _showCarPairedActions(
+                                    carsSlavePairedList[index], context);
+                              },
+                            );
+                          },
+                        );
+                    },
+                  ),
                 );
-            },
-          ),
+            }
+            else {
+              return NoDataWidget();
+            }
+          },
         );
-    }
-      else
-        {
-          return NoDataWidget();
-        }
-  },
+    },
     );
  // },
  // );

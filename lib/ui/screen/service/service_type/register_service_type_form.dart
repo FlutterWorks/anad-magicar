@@ -5,6 +5,7 @@ import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/service_type.dart';
 import 'package:anad_magicar/model/user/user.dart';
 import 'package:anad_magicar/model/viewmodel/noty_loading_vm.dart';
+import 'package:anad_magicar/model/viewmodel/reg_service_type_vm.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/pref_repository.dart';
@@ -22,8 +23,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterServiceTypeForm extends StatefulWidget {
 
-  int carId;
-  RegisterServiceTypeForm({Key key,this.carId}) : super(key: key);
+  RegServiceTypeVM serviceTypeVM;
+  RegisterServiceTypeForm({Key key,this.serviceTypeVM}) : super(key: key);
 
   @override
   RegisterServiceTypeFormState createState() {
@@ -78,7 +79,8 @@ class RegisterServiceTypeFormState extends State<RegisterServiceTypeForm> {
                     haseError: false,
                     hasInternet: true));
 
-                Navigator.pushReplacementNamed(context, MainPageServiceState.route,arguments: new ServiceVM(carId: widget.carId,refresh: false));
+                Navigator.pushReplacementNamed(context, widget.serviceTypeVM.route,
+                    arguments: new ServiceVM(carId: widget.serviceTypeVM.carId,refresh: false));
               }
               else{
                 loadingNoty.updateValue(new NotyLoadingVM(isLoading: false,

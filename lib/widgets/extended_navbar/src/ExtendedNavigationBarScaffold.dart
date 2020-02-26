@@ -36,6 +36,7 @@ class ExtendedNavigationBarScaffold extends StatefulWidget {
     this.navBarColor,
     this.navBarIconColor,
     this.floatingAppBar = false,
+    this.notyBloc
   })  : assert(moreButtons != null ? moreButtons.length <= 9 : true),
         assert(body != null),
         super(key: key);
@@ -59,7 +60,7 @@ class ExtendedNavigationBarScaffold extends StatefulWidget {
   final Color navBarIconColor;
 
   final bool floatingAppBar;
-
+  final NotyBloc<Message> notyBloc;
   ///If you want Empty Space then put null.
   ///Maximum 9 buttons can be added.
   ///Buttons will be placed according to the list order.
@@ -110,6 +111,14 @@ class _ExtendedNavigationBarScaffoldState
       );
   bool isBottomBarParallexOpen = false;
   Animation<double> animationParallex;
+
+  void registerBus() {
+    RxBus.register<ChangeEvent>().listen((ChangeEvent event) {
+      if (event.type == 'CLOSE_MORE_BUTTON') {
+        animateBottomBarMore(false);
+      }});
+    }
+
 
   getAppTheme() async{
     int dark=await changeThemeBloc.getOption();
@@ -188,6 +197,7 @@ class _ExtendedNavigationBarScaffoldState
       );
   bool isBottomBarMoreOpen = false;
   Animation<double> animationMore;
+
 
   void onMoreVerticalDragUpdate(details) {
     offsetBottomBarMore -= details.delta.dy;
@@ -312,6 +322,7 @@ class _ExtendedNavigationBarScaffoldState
       widget.currentBottomBarSearchPercent(currentBottomBarSearchPercentage);
   }
 
+
   @override
   Widget build(BuildContext context) {
     if (widget.currentExternalAnimationPercentage > 0.30) {
@@ -360,6 +371,7 @@ class _ExtendedNavigationBarScaffoldState
                 )
               : Container(),
           _CustomBottomNavigationBar(
+            notyMessageBloc: widget.notyBloc,
             moreButtons: widget.moreButtons,
             searchWidget: widget.searchWidget,
             parallexCardPageTransformer: widget.parallexCardPageTransformer,
@@ -380,7 +392,7 @@ class _ExtendedNavigationBarScaffoldState
             currentBottomBarMorePercentage: currentBottomBarMorePercentage,
             isBottomBarMoreOpen: isBottomBarMoreOpen,
             onMoreVerticalDragUpdate: onMoreVerticalDragUpdate,
-            onMorePanDown: () => animationControllerBottomBarMore?.stop(),
+            onMorePanDown: () { animationControllerBottomBarMore?.stop();},
             //* Search
             animateBottomBarSearch: animateBottomBarSearch,
             currentBottomBarSearchPercentage: currentBottomBarSearchPercentage,
@@ -394,6 +406,12 @@ class _ExtendedNavigationBarScaffoldState
   }
 
   @override
+  void initState(){
+    registerBus();
+    super.initState();
+
+  }
+  @override
   void dispose() {
     super.dispose();
     animationControllerBottomBarParallex?.dispose();
@@ -406,6 +424,7 @@ class _CustomBottomNavigationBar extends StatelessWidget {
   _CustomBottomNavigationBar({
     Key key,
     this.onTap,
+    this.onCloseMoreTap,
     this.searchWidget,
     this.parallexCardPageTransformer,
     this.elevation,
@@ -430,9 +449,11 @@ class _CustomBottomNavigationBar extends StatelessWidget {
     this.isBottomBarSearchOpen,
     this.onSearchPanDown,
     this.onSearchVerticalDragUpdate,
+    this.notyMessageBloc
   }) : super(key: key);
 
   final Function(int) onTap;
+  final Function(bool) onCloseMoreTap;
 
   final Widget searchWidget;
 
@@ -462,6 +483,7 @@ class _CustomBottomNavigationBar extends StatelessWidget {
 
   final Color navBarIconColor;
 
+  final NotyBloc<Message> notyMessageBloc;
   @override
   Widget build(BuildContext context) {
     return Positioned(
@@ -685,73 +707,76 @@ class _CustomBottomNavigationBar extends StatelessWidget {
   }
 
   Widget _buildMoreButton() {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Container(
-            height: bottomBarVisibleHeight,
-            child: GestureDetector(
-              onPanDown: (_) => onMorePanDown,
-              onVerticalDragUpdate: onMoreVerticalDragUpdate,
-              onVerticalDragEnd: (_) {
-                _dispatchBottomBarMoreOffset();
-              },
-              onVerticalDragCancel: () {
-                _dispatchBottomBarMoreOffset();
-              },
-              child: FloatingActionButton(
-                backgroundColor: navBarColor,
-                heroTag: 'dsc',
-                // padding: EdgeInsets.only(right: 35),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(20),
+    return
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Container(
+                height: bottomBarVisibleHeight,
+                child: GestureDetector(
+                  onPanDown: (_) => onMorePanDown,
+                  onVerticalDragUpdate: onMoreVerticalDragUpdate,
+                  onVerticalDragEnd: (_) {
+                    _dispatchBottomBarMoreOffset();
+                  },
+                  onVerticalDragCancel: () {
+                    _dispatchBottomBarMoreOffset();
+                  },
+                  child: FloatingActionButton(
+                    backgroundColor: navBarColor,
+                    heroTag: 'dsc',
+                    // padding: EdgeInsets.only(right: 35),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(20),
+                      ),
+                    ),
+                    onPressed: () {
+                      if (onTap != null) onTap(0);
+                      animateBottomBarMore(!isBottomBarMoreOpen);
+
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Transform(
+                          alignment: FractionalOffset.center,
+                          transform: new Matrix4.identity()
+                            ..rotateZ(180 *
+                                currentBottomBarMorePercentage *
+                                3.1415927 /
+                                180),
+                          child: Icon(
+                            EvaIcons.arrowCircleUpOutline,
+                            size: 30,
+                            color: navBarIconColor,
+                          ),
+                        ),
+                        Text(
+                          'بیشتر',
+                          style: ktitleStyle.copyWith(
+                            fontSize: 13,
+                            color: navBarIconColor,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                onPressed: () {
-                  if (onTap != null) onTap(0);
-                  animateBottomBarMore(!isBottomBarMoreOpen);
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Transform(
-                      alignment: FractionalOffset.center,
-                      transform: new Matrix4.identity()
-                        ..rotateZ(180 *
-                            currentBottomBarMorePercentage *
-                            3.1415927 /
-                            180),
-                      child: Icon(
-                        EvaIcons.arrowCircleUpOutline,
-                        size: 30,
-                        color: navBarIconColor,
-                      ),
-                    ),
-                    Text(
-                      'بیشتر',
-                      style: ktitleStyle.copyWith(
-                        fontSize: 13,
-                        color: navBarIconColor,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            ),
+              SizedBox(
+                height: (bottomBarExpandedHeight - bottomBarVisibleHeight) *
+                    currentBottomBarMorePercentage,
+                // child: Container(
+                //   color: Colors.red,
+                // ),
+              )
+            ],
           ),
-          SizedBox(
-            height: (bottomBarExpandedHeight - bottomBarVisibleHeight) *
-                currentBottomBarMorePercentage,
-            // child: Container(
-            //   color: Colors.red,
-            // ),
-          )
-        ],
-      ),
-    );
+        );
+
   }
 
   Widget _buildBackgroundForParallexCard(BuildContext context) {

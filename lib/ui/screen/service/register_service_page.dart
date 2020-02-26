@@ -1,6 +1,11 @@
+import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/api_service.dart';
+import 'package:anad_magicar/model/apis/service_type.dart';
+import 'package:anad_magicar/model/viewmodel/reg_service_type_vm.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
+import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/ui/screen/base/main_page.dart';
+import 'package:anad_magicar/ui/screen/service/main_service_page.dart';
 import 'package:anad_magicar/ui/screen/service/register_service_form.dart';
 import 'package:anad_magicar/ui/screen/service/service_type/register_service_type_page.dart';
 
@@ -21,9 +26,16 @@ class RegisterServicePageState extends MainPage<RegisterServicePage> {
 
   static final String route='/registerservicepage';
 
+  loadServiceTypes() async{
+    List<ServiceType> sTypes=new List();
+    sTypes=await restDatasource.getCarServiceTypes();
+    if(sTypes!=null && sTypes.length>0)
+      centerRepository.setServiceTypes(sTypes);
+  }
 
   addServiceType() async {
-    Navigator.pushNamed(context,RegisterServicePageTypeState.route );
+    Navigator.pushNamed(context,RegisterServicePageTypeState.route ,arguments: new RegServiceTypeVM(carId: widget.serviceVM.carId,
+        route: route));
   }
 
   @override
@@ -35,7 +47,15 @@ class RegisterServicePageState extends MainPage<RegisterServicePage> {
   @override
   List<Widget> actionIcons() {
     // TODO: implement actionIcons
-    return null;
+    List<Widget> actions=<Widget>[
+      IconButton(
+        icon: Icon(Icons.arrow_forward,color: Colors.indigoAccent,),
+        onPressed: (){
+          Navigator.pushNamed(context, MainPageServiceState.route);
+        },
+      ),
+    ];
+    return actions;
   }
 
   @override
@@ -60,6 +80,7 @@ class RegisterServicePageState extends MainPage<RegisterServicePage> {
   @override
   initialize() {
     // TODO: implement initialize
+    loadServiceTypes();
     return null;
   }
 

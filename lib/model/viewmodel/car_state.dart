@@ -132,6 +132,9 @@ class CarStateVM {
   bool isGPSOn=true;
   bool isGPRSON=true;
 
+  int battery_value=0;
+  int tempreture=0;
+
   String carImage;
   String carDoorImage;
   String carTrunkImage;
@@ -354,6 +357,8 @@ class CarStateVM {
         isCaputOpen=status.hood;
          isTraunkOpen=status.trunk;
          isPowerOn=status.engine;
+         battery_value=status.batteryValue;
+         tempreture=status.temp;
          //AUX1_On=status;
          //AUX2_On=false;
          siren=status.siren;

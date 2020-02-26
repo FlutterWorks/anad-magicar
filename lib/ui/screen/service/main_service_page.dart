@@ -1,5 +1,7 @@
 import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/api_service.dart';
+import 'package:anad_magicar/model/apis/service_type.dart';
+import 'package:anad_magicar/model/viewmodel/reg_service_type_vm.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
@@ -36,13 +38,22 @@ class MainPageServiceState extends MainPage<MainPageService> {
     return null;
   }
 
+  loadServiceTypes() async{
+    List<ServiceType> sTypes=new List();
+    sTypes=await restDatasource.getCarServiceTypes();
+    if(sTypes!=null && sTypes.length>0)
+      centerRepository.setServiceTypes(sTypes);
+  }
+
   addService()  {
+    loadServiceTypes();
     if(centerRepository.getServiceTypes()==null || centerRepository.getServiceTypes().length==0){
       FlashHelper.informationBar(context, message: Translations.current.noServiceTypes());
     }
     else {
       Navigator.pushNamed(context, RegisterServicePageState.route,
           arguments: new ServiceVM(carId: widget.serviceVM.carId,
+              car: widget.serviceVM.car,
               editMode: false,
               service: null));
     }
@@ -62,7 +73,8 @@ class MainPageServiceState extends MainPage<MainPageService> {
       IconButton(
         icon: Icon(Icons.directions_car,color: Colors.indigoAccent,),
         onPressed: (){
-         Navigator.of(context).pushNamed(ServiceTypePageState.route,arguments: widget.serviceVM.carId);
+         Navigator.of(context).pushNamed(ServiceTypePageState.route,arguments: new RegServiceTypeVM(carId: widget.serviceVM.carId,
+             route: route) );
         },
       ),
       IconButton(
@@ -96,6 +108,7 @@ class MainPageServiceState extends MainPage<MainPageService> {
   @override
   initialize() {
     // TODO: implement initialize
+    loadServiceTypes();
     return null;
   }
 
@@ -103,10 +116,10 @@ class MainPageServiceState extends MainPage<MainPageService> {
   Widget pageContent() {
     // TODO: implement pageContent
     return new MainPersistentTabBar(
-      actions: <Widget>[
+      actions: <Widget> [
         IconButton(
           icon: Icon(Icons.directions_car,color: Colors.white,),
-          onPressed: (){
+          onPressed: () {
             Navigator.of(context).pushNamed(ServiceTypePageState.route,arguments: widget.serviceVM.carId);
           },
         ),

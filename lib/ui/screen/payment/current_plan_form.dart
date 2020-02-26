@@ -167,7 +167,6 @@ class CurrentPlanFormState extends MainPage<CurrentPlanForm>
 
   List<Widget> getInvoiceDetailsTiles(BuildContext context, InvoiceModel invoiceModel) {
     List<Widget> list = [];
-
     if (invoices != null &&
     invoiceModel.invoiceDetailModel!=null &&
     invoiceModel.invoiceDetailModel.length>0) {
@@ -233,15 +232,44 @@ class CurrentPlanFormState extends MainPage<CurrentPlanForm>
   }
 
 
+  _showBottomSheetPlanDetails(BuildContext cntext, InvoiceModel inv)
+  {
+    showModalBottomSheetCustom(context: cntext ,
+        mHeight: 0.80,
+        builder: (BuildContext context) {
+          return Container(
+            height: 350.0,
+            child:
+            Column(
+            children: getInvoiceDetailsTiles(context, inv),
+            ),
+          );
 
+        });
+  }
   Widget _mainListBuilder(BuildContext context, int index,List<InvoiceModel> planModel) {
-     return ExpansionTile(
+     return Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: <Widget>[
+         Card1(invoices:invoices,invoiceModel: invoices[index],),
+         Padding(
+           padding: EdgeInsets.only(top: 10.0),
+         child:
+             FlatButton(
+    onPressed: (){
+      _showBottomSheetPlanDetails(context,invoices[index]);
+    },
+    child:
+            Button(clr: Colors.blueAccent,title: 'جزییات',wid: 100.0,),),
+         ),
+       ],
+     ) ;
+       /*ExpansionTile(
 
        leading: null,
-       trailing: null,
+       trailing: Button(color: Colors.blueAccent.value,title: 'جزییات',wid: 100.0,),
          title: Card1(invoices:invoices,invoiceModel: invoices[index],),
-         children: getInvoiceDetailsTiles(context, invoices[index]),
-    );
+         children: getInvoiceDetailsTiles(context, invoices[index]),*/
   }
 
   Widget _buildListItem() {
@@ -769,7 +797,7 @@ class Card1 extends StatelessWidget {
                                               border: Border.all(color: Colors.indigoAccent.withOpacity(0.0),width: .5)
                                             ),
                                             constraints: new BoxConstraints.expand(
-                                              height: 340.0,
+                                              height: 400.0,
                                               width: MediaQuery.of(context).size.width*0.95,
                                             ),
                                             child: new Padding(
@@ -864,11 +892,7 @@ class Card1 extends StatelessWidget {
                                                   Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: <Widget>[
-<<<<<<< HEAD
                                                       (isDurational || isBoth) ?  remainDayProgress (
-=======
-                                                         remainDayProgress (
->>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
                                                         DateTimeUtils.diffDaysFromDateToDate(invoiceModel.StartDate,invoiceModel.EndDate),
                                                           DateTimeUtils.diffDaysFromDateToDate2(invoiceModel.StartDate,invoiceModel.EndDate)) :
                                                           Container(),
@@ -885,13 +909,13 @@ class Card1 extends StatelessWidget {
                                                     /*!isActive ?  Text(Translations.current.activatePlan(),style: TextStyle(color: Colors.pinkAccent),) :
                                                     Text(Translations.current.planIsActive() ,style: TextStyle(color: Colors.green),),
 */
-                                                      Button(
+                                                      /*Button(
                                                         title: Translations.current.showDetails(),
                                                         color: Colors.indigoAccent.value,
-                                                        wid: 100,),
+                                                        wid: 100,),*/
                                               !isActive ?   FlatButton(
                                                         padding: EdgeInsets.only(left: 0, right: 0),
-                                                        child:  Button(wid: 100.0, title: Translations.current.activatePlan(),color: Colors.indigoAccent.value) ,
+                                                        child:  Button(wid: 100.0, title: Translations.current.activatePlan(),clr: Colors.indigoAccent) ,
 
                                                         onPressed: () {
                                                           activateInvoice(context, invoiceModel);
@@ -913,7 +937,7 @@ class Card1 extends StatelessWidget {
                                                 child:
                                                   Button(
                                                     title: Translations.current.payPlan(),
-                                                    color: Colors.lightGreen.value,
+                                                    clr: Colors.lightGreen,
                                                     wid: 100,),) ],) :
                                                  Container(),
                                                 ],

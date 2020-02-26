@@ -576,7 +576,6 @@ class Translations {
       name: 'payPlan', desc: 'payPlan');
   String actionUsername() => Intl.message('actionUsername',
       name: 'actionUsername', desc: 'actionUsername');
-<<<<<<< HEAD
   String chargeAmount() => Intl.message('chargeAmount',
       name: 'chargeAmount', desc: 'chargeAmount');
   String chargeSimCard() => Intl.message('chargeSimCard',
@@ -629,10 +628,10 @@ class Translations {
       name: 'minStopTime', desc: 'minStopTime');
   String showReport() => Intl.message('showReport',
       name: 'showReport', desc: 'showReport');
-=======
-  String noData() => Intl.message('noData',
-      name: 'noData', desc: 'noData');
->>>>>>> f6d3e90b09cfbd5bd5bfd51d52090624e19f3a71
+  String remaindToNextService() => Intl.message('remaindToNextService',
+      name: 'remaindToNextService', desc: 'remaindToNextService');
+  String forGetChargeAmount() => Intl.message('forGetChargeAmount',
+      name: 'forGetChargeAmount', desc: 'forGetChargeAmount');
   String title() => Intl.message('MagiCar',
       name: 'title', desc: 'MagiCar Co.');
 }

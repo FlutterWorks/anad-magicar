@@ -445,7 +445,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   String actDate;
   String alarmDate;
   bool isDurational=false;
-
+  bool isDateEdited=false;
   initDatePicker(TextEditingController controller){
     persianDatePicker = PersianDatePicker(
       controller: controller,
@@ -514,13 +514,15 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     //mobileEditingController=new TextEditingController();
 
   if(widget.editMode!=null && widget.editMode) {
-    //isDurational=widget.service.ServiceTypeId==Constants.SERVICE_TYPE_DURATIONALITY;
+    isDurational=widget.service.serviceType.ServiceTypeConstId==Constants.SERVICE_TYPE_DURATIONALITY;
 
     _authData['serviceId']=widget.service.ServiceId.toString();
     var sType=serviceTypes.where((s)=>s.ServiceTypeId==widget.service.ServiceTypeId).toList();
+
     if(sType!=null && sType.length>0){
       _valueCarServiceType=sType.first;
     }
+
     String seDate = widget.service.ServiceDate;
     if(seDate!=null && seDate.isNotEmpty) {
       textEditingController.value = textEditingController.value.copyWith(
@@ -706,19 +708,38 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       } else if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_DAY){
         Jalali sj=Jalali.now().addDays(dv);
         serviceDate=DateTimeUtils.getDateJalaliThis(sj);
-      }
+      } }
+    if(editMode){
+      serviceDate=widget.service!=null ? widget.service.ServiceDate : '';
+      if(serviceDate==null)
+        {
+          serviceDate='';
+        }
       textEditingController.value = textEditingController.value.copyWith(
         text: serviceDate,
         selection:
-        TextSelection(baseOffset: serviceDate.length, extentOffset: serviceDate.length),
+        TextSelection(
+            baseOffset: serviceDate.length, extentOffset: serviceDate.length),
         composing: TextRange.empty,
       );
     }
+      if(!isDateEdited) {
+        textEditingController.value = textEditingController.value.copyWith(
+          text: serviceDate,
+          selection:
+          TextSelection(
+              baseOffset: serviceDate.length, extentOffset: serviceDate.length),
+          composing: TextRange.empty,
+        );
+      }
+
+
     return AnimatedTextFormField(
       enableInteractiveSelection: false,
       width: width,
      controller: textEditingController,
      onTap: (){
+        isDateEdited=true;
         showDatePicker('Service',textEditingController);
      },
      // inputFormatters: [ maskPelakFormatter],
@@ -730,17 +751,13 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       textInputAction: TextInputAction.next,
 
       onFieldSubmitted: (value) {
-        if(auth.isConfirm)
-          {
+        if(auth.isConfirm) {
             _submit();
           }
         else
           FocusScope.of(context).requestFocus(_serviceDateFocusNode);
       },
       validator: (value) {
-      /* if( auth.isConfirm )
-          widget.pelakValidator;*/
-
              return null;
            },
       onSaved: (value) => _authData['serviceDate'] = value,
@@ -860,16 +877,21 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         Jalali sj=Jalali.now().addDays(dv);
         serviceDate=DateTimeUtils.getDateJalaliThis(sj);
       }
-      textEditingController3.value = textEditingController3.value.copyWith(
-        text: serviceDate,
-        selection:
-        TextSelection(baseOffset: serviceDate.length, extentOffset: serviceDate.length),
-        composing: TextRange.empty,
-      );
+      if(!isDateEdited) {
+        textEditingController3.value = textEditingController3.value.copyWith(
+          text: serviceDate,
+          selection:
+          TextSelection(
+              baseOffset: serviceDate.length, extentOffset: serviceDate.length),
+          composing: TextRange.empty,
+        );
+      }
     }
     return AnimatedTextFormField(
       enableInteractiveSelection: false,
-      onTap: (){showDatePicker('Alarm',textEditingController3);},
+      onTap: (){
+        isDateEdited=true;
+        showDatePicker('Alarm',textEditingController3);},
       width: width,
       loadingController: _loadingController,
       interval: _passTextFieldLoadingAnimationInterval,
@@ -894,7 +916,9 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
 
     return AnimatedTextFormField(
       enableInteractiveSelection: false,
-      onTap: (){showDatePicker('Action',textEditingController2);},
+      onTap: () {
+        isDateEdited=true;
+        showDatePicker('Action',textEditingController2);},
       width: width,
       loadingController: _loadingController,
       interval: _passTextFieldLoadingAnimationInterval,
@@ -916,7 +940,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   }
   Widget _buildAlarmCountField(double width, CarServiceMessages messages) {
     final auth = Provider.of<Auth>(context);
-    String serviceDate='';
+
     if(!isDurational){
       int dv=_valueCarServiceType.AlarmCount;
 
@@ -1034,7 +1058,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
               children: <Widget>[
                 _buildServiceTypesField(textFieldWidth, messages,serviceTypeId),
                 SizedBox(height: 5),
-                (isDurational) ?  _buildServiceDateField(textFieldWidth, messages) : Container(),
+                isDurational ?  _buildServiceDateField(textFieldWidth, messages) : Container(),
                 SizedBox(height: 5),
                 (widget.editMode!=null && widget.editMode) ?  _buildActionDateField(textFieldWidth, messages) :
                 Container(width: 0.0,height: 0.0,),

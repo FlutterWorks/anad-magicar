@@ -114,7 +114,8 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
          widget.sendCommandNoty.updateValue(
              new SendingCommandVM(sending: false,
                  sent: true, hasError: false));
-         play('', lastActionCode);
+         if(lastActionCode!=null)
+           play('', lastActionCode);
          updateCarStatusAfterCommands();
        }
      });
@@ -212,11 +213,16 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
     int actionId=ActionsCommand.actionCommandsMap[actionCode];
     //ActionModel actionModel=centerRepository.getActionByActionCode(actionId);
     //if(actionModel!=null) {
+    String command='';
+    if(actionCode==ActionsCommand.AUX1_Output_ON_CODE || actionCode==ActionsCommand.AUX2_Output_ON_CODE)
+      command='1';
+    else if(actionCode==ActionsCommand.AUX2_Output_ON_CODE || actionCode==ActionsCommand.AUX2_Output_OFF_CODE)
+      command='0';
       SendCommandModel sendCommand = new SendCommandModel(
           UserId: userId,
           ActionId: actionId,
           CarId: widget.carStateVM.carId,
-          Command: '');
+          Command: command);
       // centerRepository.showProgressDialog(context, Translations.current.sendingCommand());
       widget.sendCommandNoty.updateValue(new SendingCommandVM(sending: true,
           sent: false, hasError: false));

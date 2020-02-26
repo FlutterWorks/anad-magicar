@@ -729,13 +729,25 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       width: 50.0,
       child:
         new TextFormField(
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr,
+          inputFormatters: [LengthLimitingTextInputFormatter(2)],
           decoration: new InputDecoration(
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+              borderSide: BorderSide(width: 1,color: Colors.red),
+            ),
+            enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+      borderSide: BorderSide(width: 1,color: Colors.green),
+    ),
             labelText: "",
             fillColor: Colors.white,
             border: new OutlineInputBorder(
+
               borderRadius: new BorderRadius.circular(2.0),
               borderSide: new BorderSide(
-                  width: 0.5,
+                  width: 1.0,
                   color: Colors.black
               ),
             ),
@@ -775,13 +787,24 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     width: 50.0,
     child:
         new TextFormField(
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr,
+          inputFormatters: [LengthLimitingTextInputFormatter(3)],
           decoration: new InputDecoration(
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+              borderSide: BorderSide(width: 1,color: Colors.red),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+              borderSide: BorderSide(width: 1,color: Colors.green),
+            ),
             labelText: "",
             fillColor: Colors.white,
             border: new OutlineInputBorder(
               borderRadius: new BorderRadius.circular(2.0),
               borderSide: new BorderSide(
-                  width: 0.5,
+                  width: 1.0,
                   color: Colors.black
               ),
             ),
@@ -815,8 +838,19 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         width: 50.0,
     child:
         new TextFormField(
-          inputFormatters: [BlacklistingTextInputFormatter('.!@#\\\$%^&*(),;:"\\\'و،')],
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr,
+          inputFormatters: [BlacklistingTextInputFormatter('.!@#\\\$%^&*(),;:"\\\'و،'),
+            LengthLimitingTextInputFormatter(1)],
           decoration: new InputDecoration(
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+              borderSide: BorderSide(width: 1,color: Colors.red),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+              borderSide: BorderSide(width: 1,color: Colors.green),
+            ),
             labelText: "",
             fillColor: Colors.white,
             border: new OutlineInputBorder(
@@ -856,7 +890,18 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     width: 50.0,
     child:
         new TextFormField(
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr,
+          inputFormatters: [LengthLimitingTextInputFormatter(2)],
           decoration: new InputDecoration(
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+              borderSide: BorderSide(width: 1,color: Colors.red),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+              borderSide: BorderSide(width: 1,color: Colors.green),
+            ),
             labelText: "",
             fillColor: Colors.white,
             border: new OutlineInputBorder(

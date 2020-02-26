@@ -20,14 +20,14 @@ class Button extends StatelessWidget {
       decoration: new BoxDecoration(
         color: clr!=null ? clr : Color(this.color),
         border: new Border.all(width: 0.5,color: clr!=null ? clr : Color(this.color)),
-        borderRadius: new BorderRadius.all(const Radius.circular(30.0)),
+        borderRadius: new BorderRadius.all(const Radius.circular(10.0)),
       ),
       child: new Text(
         this.title,
         textAlign: TextAlign.center,
         style: new TextStyle(
-          color: Colors.white,
-          fontSize: 16.0,
+          color: color!=null ? Color(color) : Colors.white,
+          fontSize: 14.0,
           fontWeight: FontWeight.w300,
           letterSpacing: 0.3,
         ),
