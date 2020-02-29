@@ -720,6 +720,16 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   Widget _buildPelakField(double width, LoginMessages messages) {
     final auth = Provider.of<Auth>(context);
 
+    if(widget.addCarVM!=null && widget.addCarVM.editMode!=null && widget.addCarVM.editMode){
+      String pelak=widget.addCarVM.editCarModel.pelak;
+      var parts=pelak.split('-');
+      if(parts!=null && parts.length>0 && parts.length==5){
+        pelak_part1=parts[0];
+        pelak_part2=parts[1];
+        pelak_part3=parts[2];
+        pelak_part4=parts[4];
+      }
+    }
     return Row(
 
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -729,6 +739,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
       width: 50.0,
       child:
         new TextFormField(
+          initialValue: pelak_part4!=null ? pelak_part4 : '',
           textAlign: TextAlign.center,
           textDirection: TextDirection.ltr,
           inputFormatters: [LengthLimitingTextInputFormatter(2)],
@@ -787,6 +798,8 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     width: 50.0,
     child:
         new TextFormField(
+          initialValue: pelak_part3!=null ? pelak_part3 : '',
+
           textAlign: TextAlign.center,
           textDirection: TextDirection.ltr,
           inputFormatters: [LengthLimitingTextInputFormatter(3)],
@@ -838,6 +851,8 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         width: 50.0,
     child:
         new TextFormField(
+          initialValue: pelak_part2!=null ? pelak_part2 : '',
+
           textAlign: TextAlign.center,
           textDirection: TextDirection.ltr,
           inputFormatters: [BlacklistingTextInputFormatter('.!@#\\\$%^&*(),;:"\\\'و،'),
@@ -890,6 +905,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     width: 50.0,
     child:
         new TextFormField(
+          initialValue: pelak_part1!=null ? pelak_part1 : '',
           textAlign: TextAlign.center,
           textDirection: TextDirection.ltr,
           inputFormatters: [LengthLimitingTextInputFormatter(2)],

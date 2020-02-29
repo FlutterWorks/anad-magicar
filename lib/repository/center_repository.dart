@@ -111,6 +111,7 @@ class CenterRepository{
   int carId=0;
   static int userId;
   static int currentCarId=0;
+  static int messageCounts=0;
   static ProgressDialog progressDialog;
   User userCached;
   SaveUserModel userModelInCach;
@@ -204,6 +205,7 @@ class CenterRepository{
     prefRepository.setMinMaxSpeed(SettingsScreenState.MAX_SPEED_TAG, 100);
 
   }
+
  checkGPSStatus(int carId) async{
 
    ApiRoute apiRoute=new ApiRoute(carId: null,

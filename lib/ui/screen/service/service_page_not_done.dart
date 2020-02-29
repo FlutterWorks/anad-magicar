@@ -9,14 +9,9 @@ import 'package:anad_magicar/model/apis/service_type.dart';
 import 'package:anad_magicar/model/change_event.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
-import 'package:anad_magicar/ui/screen/base/main_page.dart';
 import 'package:anad_magicar/ui/screen/service/register_service_page.dart';
 import 'package:anad_magicar/ui/screen/service/service_form.dart';
-import 'package:anad_magicar/ui/screen/service/service_item.dart';
-import 'package:anad_magicar/ui/screen/service/service_type/register_service_type_page.dart';
-import 'package:anad_magicar/ui/screen/service/service_type/service_type_page.dart';
-import 'package:anad_magicar/utils/date_utils.dart';
-import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
+
 import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
 import 'package:flutter/material.dart';
 
@@ -80,8 +75,9 @@ class ServicePageNotDoneState extends State<ServicePageNotDone> {
 
   @override
   void initState() {
-    fServices=loadCarServices(widget.serviceVM.carId);
     super.initState();
+    fServices=loadCarServices(widget.serviceVM.carId);
+
   }
 
   @override

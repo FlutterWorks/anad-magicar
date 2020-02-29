@@ -632,6 +632,8 @@ class Translations {
       name: 'remaindToNextService', desc: 'remaindToNextService');
   String forGetChargeAmount() => Intl.message('forGetChargeAmount',
       name: 'forGetChargeAmount', desc: 'forGetChargeAmount');
+  String messageCount() => Intl.message('messageCount',
+      name: 'messageCount', desc: 'messageCount');
   String title() => Intl.message('MagiCar',
       name: 'title', desc: 'MagiCar Co.');
 }

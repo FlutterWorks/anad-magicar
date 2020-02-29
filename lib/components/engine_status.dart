@@ -111,9 +111,9 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
    registerRxBus() {
      RxBus.register<ChangeEvent>().listen((ChangeEvent event) {
        if(event!=null && event.type=='COMMAND_SUCCESS'){
-         widget.sendCommandNoty.updateValue(
+         /*widget.sendCommandNoty.updateValue(
              new SendingCommandVM(sending: false,
-                 sent: true, hasError: false));
+                 sent: true, hasError: false));*/
          if(lastActionCode!=null)
            play('', lastActionCode);
          updateCarStatusAfterCommands();
@@ -232,6 +232,9 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
           if (result != null) {
             if (result.IsSuccessful) {
               lastActionCode=actionCode;
+              widget.sendCommandNoty.updateValue(
+                  new SendingCommandVM(sending: false,
+                      sent: true, hasError: false));
             }
             else {
               widget.sendCommandNoty.updateValue(
@@ -259,7 +262,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                 sent: false, hasError: true));
 
       }
-      Future.delayed(new Duration(milliseconds: 10000)).then((value){
+      Future.delayed(new Duration(milliseconds: 3000)).then((value){
         widget.sendCommandNoty.updateValue(
             new SendingCommandVM(sending: false,
                 sent: false, hasError: false));

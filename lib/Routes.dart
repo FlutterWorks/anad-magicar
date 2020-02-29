@@ -37,6 +37,7 @@ import 'package:anad_magicar/ui/screen/login/login_page.dart';
 import 'package:anad_magicar/ui/screen/login/reset/reset_screen.dart';
 import 'package:anad_magicar/ui/screen/message/message_history_screen.dart';
 import 'package:anad_magicar/ui/screen/message_app/message_app_page.dart';
+import 'package:anad_magicar/ui/screen/message_app/new_message_item.dart';
 import 'package:anad_magicar/ui/screen/payment/invoice_form.dart';
 import 'package:anad_magicar/ui/screen/payment/plan_screen.dart';
 import 'package:anad_magicar/ui/screen/profile/profile2.dart';
@@ -75,7 +76,7 @@ import 'package:anad_magicar/translation_strings.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:anad_magicar/bloc/basic/bloc_provider.dart' as gbloc;
-import 'package:anad_magicar/firebase/message/message_handler.dart' as msgHdlr;
+
 import 'package:anad_magicar/ui/screen/service/main_service_page.dart';
 
 
@@ -158,7 +159,7 @@ class _MyAppState extends State<MyApp>
 {
   final MethodChannel platform =
   MethodChannel('crossingthestreams.io/resourceResolver');
-  FireBaseMessageHandler messageHandler;
+
   //MyApp get _widget => widget as MyApp;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   AuthenticationBloc _authenticationBloc;
@@ -238,7 +239,7 @@ class _MyAppState extends State<MyApp>
     }
   }*/
 
- showMessage(Map<String,dynamic> message)
+ /*showMessage(Map<String,dynamic> message)
  {
    String title=message['notification']['title'];
    String messageBody=message['notification']['body'];
@@ -253,11 +254,11 @@ class _MyAppState extends State<MyApp>
    }else {
      RxBus.post(new ChangeEvent(type: 'FCM', message: messageBody));
    }
- }
+ }*/
    @override
   void initState() {
 
-     messageHandler=new msgHdlr.MessageHandler(sendMessage:(message){ showMessage(message);}, context: context);
+
     // messageHandler.initMessageHandler();
 
     _authenticationBloc = AuthenticationBloc(userRepository: _userRepository);
@@ -423,13 +424,13 @@ class _MyAppState extends State<MyApp>
                                             if (state is AuthenticationAuthenticated) {
                                               //Navigator.pushReplacementNamed(context, '/home');
                                               // return HomeScreen();
-                                              return new LoadingScreen(messageHandler: messageHandler,);
+                                              return new LoadingScreen(messageHandler: null,);
                                             }
                                             if (state is AuthenticationLoading) {
                                               return LoadingIndicator();
                                             }
                                             if (state is AuthenticationUnauthenticated) {
-                                              return new LoginPage(messageHandler: messageHandler,
+                                              return new LoginPage(messageHandler: null,loginType: state.loginType,
                                                 userRepository: UserRepository(),);
                                             }
                                             return new AnimatedSplashScreen(
@@ -443,7 +444,7 @@ class _MyAppState extends State<MyApp>
                                               return new MyCustomRoute(
                                                 builder: (_) =>
                                                 new LoginPage(
-                                                  messageHandler: messageHandler,
+                                                  messageHandler: null,
                                                   userRepository: UserRepository(),loginType: settings.arguments,),
                                                 settings: settings,
                                               );
@@ -498,6 +499,11 @@ class _MyAppState extends State<MyApp>
                                                 builder: (_) => new MessageAppPage(carId: settings.arguments,),
                                                 settings: settings,
                                               );
+                                            case '/messageappdetail':
+                                              return new MyCustomRoute(
+                                                builder: (_) => new NewMessageItem(messages: settings.arguments,),
+                                                settings: settings,
+                                              );
                                             case '/servicepage':
                                               return new MyCustomRoute(
                                                 builder: (_) => new MainPageService(serviceVM: settings.arguments,),
@@ -549,7 +555,7 @@ class _MyAppState extends State<MyApp>
                                               );
                                             case '/loadingscreen':
                                               return new MyCustomRoute(
-                                                builder: (_) => new LoadingScreen(messageHandler: messageHandler,),
+                                                builder: (_) => new LoadingScreen(messageHandler: null,),
                                                 settings: settings,
                                               );
                                             case '/showusers':
@@ -586,7 +592,7 @@ class _MyAppState extends State<MyApp>
                                           return new MyCustomRoute(
                                             builder: (_) =>
                                             new LoginPage(
-                                              messageHandler: messageHandler,
+                                              messageHandler: null,
                                               loginType: settings.arguments,
                                               userRepository: UserRepository(),),
                                             settings: settings,

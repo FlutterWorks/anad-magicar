@@ -46,7 +46,7 @@ class _BottomMenuBarState
     );
 
     sizeAnim = Tween<double>(begin: defaultHeight, end: 180)
-    .animate(
+        .animate(
         CurvedAnimation(parent: controller, curve: Curves.linear)
     );
   }
@@ -152,15 +152,15 @@ class _SlidingContainerState
     );
 
     return AnimatedBuilder(
-        animation: widget.controller,
-        builder: (context, child){
-          return ClipPath(
-            clipper: MyClipper(radiusAnimation.value, widget.centerMargin),
-            child: Container(
-              color: widget.color,
-            ),
-          );
-        },
+      animation: widget.controller,
+      builder: (context, child){
+        return ClipPath(
+          clipper: MyClipper(radiusAnimation.value, widget.centerMargin),
+          child: Container(
+            color: widget.color,
+          ),
+        );
+      },
     );
   }
 

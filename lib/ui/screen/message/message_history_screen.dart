@@ -74,7 +74,7 @@ class MessageHistoryScreenState extends MainPage<MessageHistoryScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
           FlatButton(
-          child: Button(wid: 140.0,color: Colors.pinkAccent.value,title: Translations.current.doFilter(),),
+          child: Button(wid: 140.0,clr: Colors.pinkAccent, color: Colors.white.value,title: Translations.current.doFilter(),),
           onPressed: () {
           notyDateFilterBloc.updateValue(new ChangeEvent(fromDate: fromDate,toDate: toDate));
           Navigator.pop(context);

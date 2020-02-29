@@ -65,51 +65,10 @@ class AppBarCollaps extends StatelessWidget {
 
   int carCount;
 
-  /*final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-  GlobalKey<RefreshIndicatorState>();*/
-
-
 
   @override
   Widget build(BuildContext context) {
-    return /*StreamBuilder(
-    initialData: null,
-      stream: BlocProvider.of<GlobalBloc>(context).messageBloc.messageStream,
-
-      builder: (context, snapshot) {
-      if(snapshot!=null &&
-      snapshot.hasData)
-        {
-
-        }
-       return*/ /*Scaffold(
-          body: */ /*LiquidSwipe(
-            pages: carPages,
-              initialPage: 0,
-            enableLoop: true,
-            //fullTransitionValue: 0.8,
-            waveType: WaveType.liquidReveal,
-            onPageChangeCallback: pageChangeCallback,
-            currentUpdateTypeCallback: updateTypeCallback,
-          )*/
-
-          /*new TransformerPageView(
-            index: 0,
-              loop: true,
-              scrollDirection: Axis.horizontal,
-              physics: BouncingScrollPhysics(),
-              duration: new Duration(microseconds: 2000),
-              viewportFraction: 0.8,
-              curve: Curves.bounceInOut,
-              pageSnapping: true,
-              transformer: new ThreeDTransformer(),
-              pageController: TransformerPageController(),
-              itemBuilder: (BuildContext context, int index) {
-                return carPages[index];
-              },
-              itemCount: 3)*/
-
-     // return
+    return
         Stack(
           overflow: Overflow.visible,
           children: <Widget>[
@@ -139,10 +98,7 @@ class AppBarCollaps extends StatelessWidget {
                     alignment: Alignment.topCenter,
                     margin: EdgeInsets.all(5.0),
                     builder: SwiperPagination.dots),
-                /*control: new SwiperControl(iconNext: Icons.arrow_forward,
-                   size: 20.0,
-                   color: Colors.blueAccent,
-                   iconPrevious: Icons.arrow_back,),*/
+
 
                 onIndexChanged: (index) {
                   carPageNoty.updateValue(

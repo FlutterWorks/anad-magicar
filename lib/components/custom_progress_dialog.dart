@@ -84,7 +84,7 @@ class CustomProgressDialog extends StatelessWidget {
   }
 }
 
-//the code below is writeen by Vikas-Jilla and the above code is from existing material dialog library
+
 class ProgressDialog {
  bool isDismissed = true;
   var lock = Lock();
@@ -92,7 +92,7 @@ class ProgressDialog {
   Future<void> dismissProgressDialog(BuildContext context) async {
     _timer?.cancel();
     await lock.synchronized(() async {
-      if (isDismissed) {
+      if (isDismissed!=null && isDismissed) {
         return;
       }
       isDismissed = true;

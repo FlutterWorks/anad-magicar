@@ -1,3 +1,4 @@
+import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/pref_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
@@ -85,6 +86,7 @@ class _TouchIDState extends State<TouchID> {
     setState(() {
       if (_isAuthorized) {
         _authorizeText = Translations.current.authorizedSuccessfull();
+        Navigator.pushReplacementNamed(context, '/loadingscreen');
       } else {
         _authorizeText = Translations.current.authorizedFaild();
       }
@@ -111,14 +113,13 @@ class _TouchIDState extends State<TouchID> {
                 child: Text(_hasFingerPrintSupport ? Translations.of(context).hasFinger() :
                 Translations.of(context).noFinger()),
               ),
-              RaisedButton(
+              FlatButton(
                 child: Icon(Icons.fingerprint,size: 45.0,),
                 color: Colors.red,
-                onPressed: () { authenticateMe();
-                },
+                onPressed: () { _authorize(); },
               ),
-              RaisedButton(
-                child: Text(Translations.current.loginWithPassword()),
+              FlatButton(
+                child: Button(title: Translations.current.loginWithPassword()),
                 color: Colors.red,
                 onPressed: () { Navigator.of(context).pushReplacementNamed('/login',arguments: LoginType.PASWWORD);
                 },

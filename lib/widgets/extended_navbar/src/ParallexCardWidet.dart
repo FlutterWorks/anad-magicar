@@ -6,11 +6,13 @@ class ParallaxCardItem {
     this.body,
     this.background,
     this.data,
+    this.backColor,
   });
 
   final String title;
   final String body;
   final Widget background;
+  final Color backColor;
   final dynamic data;
 }
 
@@ -135,9 +137,9 @@ class ParallaxCardsWidget extends StatelessWidget {
 
         borderRadius: BorderRadius.circular(20.0),
         child: Material(
-          shadowColor: Colors.white,
+          shadowColor:  item.backColor!=null ? item.backColor : Colors.white,
           elevation: 10,
-          color: Colors.white.withOpacity(1.0),
+          color: item.backColor!=null ? item.backColor : Colors.white.withOpacity(1.0),
           type: MaterialType.card,
           child:Stack(
             alignment: Alignment.center,

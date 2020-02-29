@@ -4,6 +4,7 @@ import 'package:anad_magicar/components/no_data_widget.dart';
 import 'package:anad_magicar/components/pull_refresh/pull_to_refresh.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/api_message.dart';
+import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/message_app/message_app_item.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,7 @@ class MessageAppForm extends StatefulWidget {
 class _MessageAppFormState extends State<MessageAppForm> {
 
   RefreshController _refreshController = RefreshController(initialRefresh: false);
-
+  List<int> senderIds=new List();
   Future<List<ApiMessage>> fMessages;
   List<ApiMessage> messages=new List();
   List<Map<String,dynamic>> mapList=new List();
@@ -37,13 +38,16 @@ class _MessageAppFormState extends State<MessageAppForm> {
   }
 
 
-  Future<List<ApiMessage>> refreshMessageApp() async
-  {
+  Future<List<ApiMessage>> refreshMessageApp() async{
    getMessages();
   }
 
 
-
+  loadGroupedMessages(Map<int,List<Map<String,dynamic>>> gMsgs) {
+    gMsgs.forEach((k,v) {
+      senderIds..add(k);
+    });
+  }
 
   @override
   void initState() {
@@ -61,7 +65,6 @@ class _MessageAppFormState extends State<MessageAppForm> {
     // TODO: implement build
     return
       SmartRefresher(
-
           controller: _refreshController,
           enablePullUp: true,
           enablePullDown: true,
@@ -84,7 +87,6 @@ class _MessageAppFormState extends State<MessageAppForm> {
               _refreshController.refreshFailed();
             else
               _refreshController.refreshCompleted();
-
           },
           onLoading:() async {
             //monitor fetch data from network
@@ -96,16 +98,12 @@ class _MessageAppFormState extends State<MessageAppForm> {
             else
               _refreshController.loadComplete();
           },
-          child:
-
-          ListView.builder(
+          child: ListView.builder(
           padding: EdgeInsets.only(top:1.0), //kMaterialListPadding,
-    itemCount: 1,
-    itemBuilder: (BuildContext context, int index)
-    {
-
-    return
-      FutureBuilder<List<ApiMessage>>(
+          itemCount: 1,
+          itemBuilder: (BuildContext context, int index)
+      {
+        return FutureBuilder<List<ApiMessage>>(
       future: fMessages,
       builder: (context, snapshot) {
         if (snapshot.hasData &&
@@ -113,30 +111,33 @@ class _MessageAppFormState extends State<MessageAppForm> {
           messages = snapshot.data;
           mapList=messages.map((m)=>m.toMap()).toList();
          Map<int,List<Map<String,dynamic>>> recIds=groupBy(mapList,(o)=>o['SenderUserId']);
+          loadGroupedMessages(recIds);
+    return new Padding(
+              padding: EdgeInsets.only(top: 75.0,right: 10.0,left: 10.0),
+        child:
+    Container(
+      height: MediaQuery.of(context).size.height*0.95,
+      child:
+      ListView.builder(
+    physics: BouncingScrollPhysics(),
+    scrollDirection: Axis.vertical,
+    itemCount: recIds.length,
+    itemBuilder: (context, index) {
 
-          return new Container(
-            height: 450.0,
-            child:
-            new Card(
-              margin: new EdgeInsets.only(
-                  left: 5.0, right: 5.0, top: 78.0, bottom: 5.0),
-              shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Colors.white,width: 0.5),
-                  borderRadius: BorderRadius.circular(8.0)),
-              elevation: 0.0,
-              child:
-              new Container(
-                alignment: Alignment.center,
-                decoration: new BoxDecoration(
-                  color: Color(0xfffefefe),
-                  borderRadius: new BorderRadius.all(
-                      new Radius.circular(5.0)),
-                ),
-                child:
-                        MessageAppItem(messages : recIds,carId: widget.carId,),
-              ),
-            ),
-          );
+        int senderId=senderIds[index];
+        int unReadItems=0;
+        //پیامهای فرستنده
+        List<Map<String,dynamic>> newList=recIds[senderId];
+        ApiMessage apiMessage=ApiMessage.fromMap( newList[0]);
+        List<ApiMessage> apiMsgs=newList.map<ApiMessage>((m)=>ApiMessage.fromMap(m)).toList();
+        var uri=apiMsgs.where((m)=>m.MessageStatusConstId!=ApiMessage.MESSAGE_STATUS_AS_READ_TAG).toList();
+        unReadItems=uri==null ? 0 : uri.length;
+
+        return MessageAppItem(carId: widget.carId,message: apiMessage,messagesCount: unReadItems,messageList: apiMsgs,senderId: senderId,);
+        },
+    ),
+    ),
+        );
         } else {
           return NoDataWidget(noCarCount: false,);
         }
@@ -147,3 +148,36 @@ class _MessageAppFormState extends State<MessageAppForm> {
       );
   }
 }
+
+
+/*
+new Container(
+height: 450.0,
+child:
+new Card(
+margin: new EdgeInsets.only(
+left: 5.0, right: 5.0, top: 78.0, bottom: 5.0),
+shape: RoundedRectangleBorder(
+side: BorderSide(color: Colors.white,width: 0.5),
+borderRadius: BorderRadius.circular(8.0)),
+elevation: 0.0,
+child:
+new Container(
+alignment: Alignment.center,
+decoration: new BoxDecoration(
+color: Color(0xfffefefe),
+borderRadius: new BorderRadius.all(
+new Radius.circular(5.0)),
+),
+child: ListView.builder(
+physics: BouncingScrollPhysics(),
+scrollDirection: Axis.vertical,
+itemCount: messages.length,
+itemBuilder: (context, index) {
+return
+MessageAppItem(messages : recIds,carId: widget.carId,message: messages[index],);
+}
+),
+),
+),
+);*/

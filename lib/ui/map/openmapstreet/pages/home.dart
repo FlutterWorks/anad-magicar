@@ -5,6 +5,7 @@ import 'package:anad_magicar/bloc/values/notify_value.dart';
 import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/components/button.dart';
 import 'package:anad_magicar/components/flutter_form_builder/flutter_form_builder.dart';
+import 'package:anad_magicar/components/image_neon_glow.dart';
 import 'package:anad_magicar/components/no_data_widget.dart';
 import 'package:anad_magicar/components/send_data.dart';
 import 'package:anad_magicar/data/database_helper.dart';
@@ -104,6 +105,9 @@ class MapPageState extends State<MapPage> {
   static bool forAnim=false;
   static int lastCarIdSelected=0;
   bool _showInfoPopUp=false;
+  bool isGPSOn=false;
+  bool isGPRSOn=false;
+
   final TextEditingController textEditingController = TextEditingController();
   String fromDate='';
   String toDate='';
@@ -124,6 +128,8 @@ class MapPageState extends State<MapPage> {
   bool isDark=false;
   List<CarInfoVM> carInfos=new List();
   NotyBloc<Message> reportNoty=new NotyBloc<Message>();
+  NotyBloc<Message> statusNoty=new NotyBloc<Message>();
+
   NotyBloc<Message> moreButtonNoty=new NotyBloc<Message>();
   NotyBloc<Message> pairedChangedNoty=new NotyBloc<Message>();
   NotyBloc<Message> animateNoty=new NotyBloc<Message>();
@@ -468,7 +474,24 @@ class MapPageState extends State<MapPage> {
       }
       carsSlavePairedList..addAll(c.slaves);
     }
+
+        fillCarsInGroup();
       return carInfos;
+  }
+
+  fillCarsInGroup() async{
+    for(var car in carInfos){
+       if(carsSlavePairedList!=null && carsSlavePairedList.length>0) {
+         var carfound = carsSlavePairedList.where((c) => c.CarId == car.carId)
+             .toList();
+         if (carfound != null && carfound.length > 0) {
+           car.hasJoind = true;
+         }
+         else {
+           car.hasJoind = false;
+         }
+       }
+    }
   }
 
   fillCarInfo(List<AdminCarModel> carsToUser)
@@ -1027,7 +1050,9 @@ class MapPageState extends State<MapPage> {
     pairedChangedNoty=new NotyBloc<Message>();
     moreButtonNoty=new NotyBloc<Message>();
     animateNoty=new NotyBloc<Message>();
-   carInfoss= getCarInfo();
+    statusNoty=new NotyBloc<Message>();
+
+    carInfoss= getCarInfo();
     getCurrentLoaction();
 
     liveMapController = LiveMapController(
@@ -1339,7 +1364,7 @@ class MapPageState extends State<MapPage> {
     imgUrl=carImgList[0];
     }
       else {
-        carIds..add(carId);
+        carIds..add(carInfo.carId);
         imgUrl=carInfo!=null ?  carInfo.imageUrl : carImgList[0];
     }
       if(imgUrl==null || imgUrl.isEmpty){
@@ -1366,6 +1391,28 @@ class MapPageState extends State<MapPage> {
       {
 
         int speed=result[0].speed;
+        String GPSDateTime=result[0].GPSDateTimeGregorian;
+
+        String date=result[0].Date;
+        String time=result[0].Time;
+
+        if(date!=null && time !=null){
+          isGPRSOn=true;
+        }
+        else{
+          isGPRSOn=false;
+        }
+
+        DateTime gpsDt=DateTimeUtils.convertIntoDateTimeObject(GPSDateTime);
+        DateTime now= DateTime.now();
+        Duration diff=now.difference(gpsDt);
+        if(diff.inMinutes<=2){
+          isGPSOn=true;
+        }
+        else{
+          isGPSOn=false;
+        }
+
         if(speed==null )
           speed=100;
         String latStr=result[0].Latitude;
@@ -1408,7 +1455,7 @@ class MapPageState extends State<MapPage> {
         );
 
         markers.add(marker);
-
+        statusNoty.updateValue(new Message(type: 'GPS_GPRS_UPDATE'));
       }else {
       double lat = 35.796249;
       double lng = 51.427583 ;
@@ -1442,6 +1489,7 @@ class MapPageState extends State<MapPage> {
       );
 
       markers.add(marker);
+      statusNoty.updateValue(new Message(type: 'GPS_GPRS_UPDATE'));
     }
   }
 
@@ -1995,13 +2043,14 @@ class MapPageState extends State<MapPage> {
               final parallaxCardItemsList = <ParallaxCardItem>[
                 for(var car in carInfos)
                   ParallaxCardItem(
+                    backColor: (car.hasJoind!=null && car.hasJoind) ? Colors.lightBlue : Colors.white,
                       title: DartHelper.isNullOrEmptyString(
                           car.car.pelaueNumber),
                       body: DartHelper.isNullOrEmptyString(
                           car.carId.toString()),
                       background: Container(
                         width: 50.0,
-                        color: Colors.white,
+                       // color: (car.hasJoind!=null && car.hasJoind) ? Colors.lightBlue : Colors.white,
                         child: CircleAvatar(
                           backgroundColor: Colors.transparent,
                           radius: 30.0,
@@ -2015,6 +2064,7 @@ class MapPageState extends State<MapPage> {
               final carPairedItemsList = <ParallaxCardItem>[
                 for(var car in carsSlavePairedList)
                   ParallaxCardItem(
+                    backColor: Colors.blueAccent,
                     title: DartHelper.isNullOrEmptyString(car.BrandTitle),
                     body: DartHelper.isNullOrEmptyString(car.CarId.toString()),
                     background: Container(
@@ -2045,10 +2095,20 @@ class MapPageState extends State<MapPage> {
                               ],
                             ),
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: <Widget>[
                                 Text(DartHelper.isNullOrEmptyString(
                                     car.CarModelTitle),
                                     style: TextStyle(fontSize: 10.0)),
+                                Container(
+                                  width: 50.0,
+                                 // color:  Colors.lightBlue ,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.transparent,
+                                    radius: 30.0,
+                                    child: Image.asset(carImgList[1]),
+                                  ),
+                                )
                               ],
                             ),
                             Row(
@@ -2131,139 +2191,213 @@ class MapPageState extends State<MapPage> {
                                             liveMapController.mapController.move(_fpoint, 15);
                                         }
                                         return
-                                      Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Column(
-                                          children: [
+
+                                        StreamBuilder<Message>(
+                                        stream: statusNoty.noty,
+                                      builder: (context,snapshot)
+                                        {
+                                          if (snapshot.hasData &&
+                                              snapshot.data != null) {
+
+                                          }
+                                          return
                                             Padding(
-                                              padding: EdgeInsets.only(
-                                                  top: 8.0, bottom: 8.0),
-                                              child: Text(
-                                                  ''),
-                                            ),
-                                            Flexible(
-                                              child: Stack(
-                                                children: <Widget>[
-                                                  FlutterMap(
-                                                    mapController: liveMapController
-                                                        .mapController,
-                                                    options: MapOptions(
-                                                      center: firstPoint != null
-                                                          ? firstPoint
-                                                          : currentLocation !=
-                                                          null
-                                                          ?
-                                                      LatLng(currentLocation
-                                                          .latitude,
-                                                          currentLocation
-                                                              .longitude)
-                                                          : LatLng(
-                                                          35.6917856,
-                                                          51.4204603),
-                                                      zoom: 15.0,
-                                                      plugins: [
-                                                        UserLocationPlugin(),
-                                                      ],
-                                                    ),
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Column(
+                                                children: [
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        top: 8.0, bottom: 8.0),
+                                                    child: Text(
+                                                        ''),
+                                                  ),
+                                                  Flexible(
+                                                    child: Stack(
+                                                      children: <Widget>[
+                                                        FlutterMap(
+                                                          mapController: liveMapController
+                                                              .mapController,
+                                                          options: MapOptions(
+                                                            center: firstPoint !=
+                                                                null
+                                                                ? firstPoint
+                                                                : currentLocation !=
+                                                                null
+                                                                ?
+                                                            LatLng(
+                                                                currentLocation
+                                                                    .latitude,
+                                                                currentLocation
+                                                                    .longitude)
+                                                                : LatLng(
+                                                                35.6917856,
+                                                                51.4204603),
+                                                            zoom: 15.0,
+                                                            plugins: [
+                                                              UserLocationPlugin(),
+                                                            ],
+                                                          ),
 
-                                                    layers: [
-                                                      TileLayerOptions(
-                                                        urlTemplate:
-                                                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                                        subdomains: [
-                                                          'a',
-                                                          'b',
-                                                          'c'
-                                                        ],
-                                                        // NetworkTileProvider or CachedNetworkTileProvider
-                                                        tileProvider: CachedNetworkTileProvider(),
-                                                      ),
+                                                          layers: [
+                                                            TileLayerOptions(
+                                                              urlTemplate:
+                                                              'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                                              subdomains: [
+                                                                'a',
+                                                                'b',
+                                                                'c'
+                                                              ],
+                                                              // NetworkTileProvider or CachedNetworkTileProvider
+                                                              tileProvider: CachedNetworkTileProvider(),
+                                                            ),
 
-                                                      ( forAnim && _polyLineAnim!=null)
-                                                          ? PolylineLayerOptions(
-                                                          polylines: <Polyline>[
-                                                            _polyLineAnim
-                                                          ])
-                                                          :
-                                                      PolylineLayerOptions(
-                                                          polylines: lines),
-                                                     /* forAnim
+                                                            (forAnim &&
+                                                                _polyLineAnim !=
+                                                                    null)
+                                                                ? PolylineLayerOptions(
+                                                                polylines: <
+                                                                    Polyline>[
+                                                                  _polyLineAnim
+                                                                ])
+                                                                :
+                                                            PolylineLayerOptions(
+                                                                polylines: lines),
+                                                            /* forAnim
                                                           ? MarkerLayerOptions(
                                                           markers: <Marker>[
                                                             _marker
                                                           ])
                                                           :*/
-                                                      MarkerLayerOptions(
-                                                          markers: markers),
-                                                      userLocationOptions
-                                                      /* PolygonLayerOptions(
+                                                            MarkerLayerOptions(
+                                                                markers: markers),
+                                                            userLocationOptions
+                                                            /* PolygonLayerOptions(
                     polygons: polygons,
                   ),*/
-                                                    ],
-                                                  ),
+                                                          ],
+                                                        ),
 
-                                                  Positioned(
-                                                    right: 20.0,
-                                                    bottom: 260.0,
-                                                    child:
-                                                    Container(
-                                                      width: 38.0,
-                                                      height: 38.0,
-                                                      child:
-                                                      FloatingActionButton(
-                                                        onPressed: () {
-                                                          reportNoty
-                                                              .updateValue(
-                                                              new Message(
-                                                                  type: 'CLEAR_MAP'));
-                                                        },
-                                                        child: Container(
-                                                          width: 38.0,
-                                                          height: 38.0,
-                                                          child: Image.asset(
-                                                            'assets/images/clear_map.png',
-                                                            color: Colors
-                                                                .white,),),
-                                                        elevation: 3.0,
-                                                        backgroundColor: Colors
-                                                            .blueAccent,
-                                                        heroTag: 'ClearMap1',
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Positioned(
-                                                    right: 20.0,
-                                                    bottom: 210.0,
-                                                    child:
-                                                    Container(
-                                                      width: 38.0,
-                                                      height: 38.0,
-                                                      child:
-                                                      FloatingActionButton(
-                                                        onPressed: () {
-                                                          showRouteCurrentToCar();
-                                                        },
-                                                        child: Container(
-                                                          width: 38.0,
-                                                          height: 38.0,
-                                                          child: Image.asset(
-                                                            'assets/images/go.png',
-                                                            color: Colors
-                                                                .white,),),
-                                                        elevation: 3.0,
-                                                        backgroundColor: Colors
-                                                            .blueAccent,
-                                                        heroTag: 'GO1',
-                                                      ),
+                                                        Positioned(
+                                                          right: 20.0,
+                                                          bottom: 260.0,
+                                                          child:
+                                                          Container(
+                                                            width: 38.0,
+                                                            height: 38.0,
+                                                            child:
+                                                            FloatingActionButton(
+                                                              onPressed: () {
+                                                                reportNoty
+                                                                    .updateValue(
+                                                                    new Message(
+                                                                        type: 'CLEAR_MAP'));
+                                                              },
+                                                              child: Container(
+                                                                width: 38.0,
+                                                                height: 38.0,
+                                                                child: Image
+                                                                    .asset(
+                                                                  'assets/images/clear_map.png',
+                                                                  color: Colors
+                                                                      .white,),),
+                                                              elevation: 3.0,
+                                                              backgroundColor: Colors
+                                                                  .blueAccent,
+                                                              heroTag: 'ClearMap1',
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          right: 20.0,
+                                                          bottom: 210.0,
+                                                          child:
+                                                          Container(
+                                                            width: 38.0,
+                                                            height: 38.0,
+                                                            child:
+                                                            FloatingActionButton(
+                                                              onPressed: () {
+                                                                showRouteCurrentToCar();
+                                                              },
+                                                              child: Container(
+                                                                width: 38.0,
+                                                                height: 38.0,
+                                                                child: Image
+                                                                    .asset(
+                                                                  'assets/images/go.png',
+                                                                  color: Colors
+                                                                      .white,),),
+                                                              elevation: 0.0,
+                                                              backgroundColor: Colors
+                                                                  .blueAccent,
+                                                              heroTag: 'GO1',
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          left: 20.0,
+                                                          top: 60.0,
+                                                          child:
+                                                          Container(
+                                                            width: 38.0,
+                                                            height: 38.0,
+                                                            child:
+                                                            FloatingActionButton(
+                                                              onPressed: () {
+
+                                                              },
+                                                              child: Container(
+                                                                width: 38.0,
+                                                                height: 38.0,
+                                                                child: isGPSOn ? ImageNeonGlow(imageUrl: 'assets/images/gps.png',counter: 0,color: Colors.indigoAccent,) :
+                                                                Image.asset(
+                                                                  'assets/images/gps.png',
+                                                                  color: Colors
+                                                                      .white,),),
+                                                              elevation: 1.0,
+                                                              backgroundColor: Colors
+                                                                  .transparent,
+                                                              heroTag: 'GPS',
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          left: 80.0,
+                                                          top: 60.0,
+                                                          child:
+                                                          Container(
+                                                            width: 38.0,
+                                                            height: 38.0,
+                                                            child:
+                                                            FloatingActionButton(
+                                                              onPressed: () {
+
+                                                              },
+                                                              child: Container(
+                                                                width: 38.0,
+                                                                height: 38.0,
+                                                                child: isGPRSOn ? ImageNeonGlow(imageUrl: 'assets/images/gprs.png',counter: 0,color: Colors.indigoAccent,) :
+                                                                Image
+                                                                    .asset(
+                                                                  'assets/images/gprs.png',
+                                                                  color: Colors
+                                                                      .white,),),
+                                                              elevation: 1.0,
+                                                              backgroundColor: Colors
+                                                                  .transparent,
+                                                              heroTag: 'GPRS',
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
                                                 ],
-                                              ),
-                                            ),
-                                          ],
 
-                                        ),
-                                      );
+                                              ),
+                                            );
+                                        },
+                                        );
                                   },
                                 );
                                   },
@@ -2320,101 +2454,179 @@ class MapPageState extends State<MapPage> {
                                         liveMapController.mapController.move(_fpoint, 15);
                                     }
                                     return
-                                    Column(
-                                    children: [
-                                      Flexible(
-                                        child: Stack(
-                                          children: <Widget>[
-                                            FlutterMap(
-                                              options: MapOptions(
-                                                center: LatLng(lat, long),
-                                                zoom: 16.0,
-                                                plugins: [
-                                                  UserLocationPlugin(),
-                                                ],
-                                              ),
-                                              layers: [
-                                                TileLayerOptions(
-                                                  urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                                  subdomains: ['a', 'b', 'c'],
-                                                  tileProvider: CachedNetworkTileProvider(),
-                                                ),
+                                    StreamBuilder<Message>(
+                                    stream: statusNoty.noty,
+                                        builder: (context,snapshot)
+                                    {
+                                      if (snapshot.hasData &&
+                                          snapshot.data != null) {
 
-                                                ( forAnim  && _polyLineAnim!=null ) ?  PolylineLayerOptions(
-                                                    polylines: <Polyline>[ _polyLineAnim]) :
-                                                PolylineLayerOptions(
-                                                    polylines: lines),
-                                                /*forAnim ?  MarkerLayerOptions(
+                                      }
+                                      return
+                                        Column(
+                                          children: [
+                                            Flexible(
+                                              child: Stack(
+                                                children: <Widget>[
+                                                  FlutterMap(
+                                                    options: MapOptions(
+                                                      center: LatLng(lat, long),
+                                                      zoom: 16.0,
+                                                      plugins: [
+                                                        UserLocationPlugin(),
+                                                      ],
+                                                    ),
+                                                    layers: [
+                                                      TileLayerOptions(
+                                                        urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                                        subdomains: [
+                                                          'a',
+                                                          'b',
+                                                          'c'
+                                                        ],
+                                                        tileProvider: CachedNetworkTileProvider(),
+                                                      ),
+
+                                                      (forAnim &&
+                                                          _polyLineAnim != null)
+                                                          ? PolylineLayerOptions(
+                                                          polylines: <Polyline>[
+                                                            _polyLineAnim
+                                                          ])
+                                                          :
+                                                      PolylineLayerOptions(
+                                                          polylines: lines),
+                                                      /*forAnim ?  MarkerLayerOptions(
                                                     markers: <Marker>[_marker]) :*/
-                                               /* MarkerLayerOptions(
+                                                      /* MarkerLayerOptions(
                                                     markers: markers),*/
-                                                MarkerLayerOptions(
-                                                    markers: markers),
-                                                userLocationOptions
-                                              ],
-                                              mapController: liveMapController
-                                                  .mapController,
-                                            ),
+                                                      MarkerLayerOptions(
+                                                          markers: markers),
+                                                      userLocationOptions
+                                                    ],
+                                                    mapController: liveMapController
+                                                        .mapController,
+                                                  ),
 
-                                            Positioned(
-                                              right: 20.0,
-                                              bottom: 260.0,
-                                              child:
-                                              Container(
-                                                width: 38.0,
-                                                height: 38.0,
-                                                child:
-                                                FloatingActionButton(
-                                                  onPressed: () {
-                                                    // liveMapController.removeMarkers();
-                                                    reportNoty.updateValue(
-                                                        new Message(
-                                                            type: 'CLEAR_MAP'));
-                                                  },
-                                                  child: Container(
-                                                    width: 38.0,
-                                                    height: 38.0,
-                                                    child: Image.asset(
-                                                      'assets/images/clear_map.png',
-                                                      color: Colors.white,),),
-                                                  elevation: 3.0,
-                                                  backgroundColor: Colors
-                                                      .blueAccent,
-                                                  heroTag: 'ClearMap2',
-                                                ),
-                                              ),
-                                            ),
-                                            Positioned(
-                                              right: 20.0,
-                                              bottom: 210.0,
-                                              child:
-                                              Container(
-                                                  width: 38.0,
-                                                  height: 38.0,
-                                                  child:
-                                                  FloatingActionButton(
-                                                    onPressed: () {
-                                                      showRouteCurrentToCar();
-                                                    },
-                                                    child: Container(
+                                                  Positioned(
+                                                    right: 20.0,
+                                                    bottom: 260.0,
+                                                    child:
+                                                    Container(
                                                       width: 38.0,
                                                       height: 38.0,
-                                                      child: Image.asset(
-                                                        'assets/images/go.png',
-                                                        color: Colors.white,),),
-                                                    elevation: 3.0,
-                                                    backgroundColor: Colors
-                                                        .blueAccent,
-                                                    heroTag: 'GO2',
-                                                  )
+                                                      child:
+                                                      FloatingActionButton(
+                                                        onPressed: () {
+                                                          // liveMapController.removeMarkers();
+                                                          reportNoty
+                                                              .updateValue(
+                                                              new Message(
+                                                                  type: 'CLEAR_MAP'));
+                                                        },
+                                                        child: Container(
+                                                          width: 38.0,
+                                                          height: 38.0,
+                                                          child: Image.asset(
+                                                            'assets/images/clear_map.png',
+                                                            color: Colors
+                                                                .white,),),
+                                                        elevation: 3.0,
+                                                        backgroundColor: Colors
+                                                            .blueAccent,
+                                                        heroTag: 'ClearMap2',
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    right: 20.0,
+                                                    bottom: 210.0,
+                                                    child:
+                                                    Container(
+                                                        width: 38.0,
+                                                        height: 38.0,
+                                                        child:
+                                                        FloatingActionButton(
+                                                          onPressed: () {
+                                                            showRouteCurrentToCar();
+                                                          },
+                                                          child: Container(
+                                                            width: 38.0,
+                                                            height: 38.0,
+                                                            child: Image.asset(
+                                                              'assets/images/go.png',
+                                                              color: Colors
+                                                                  .white,),),
+                                                          elevation:0.0,
+                                                          backgroundColor: Colors
+                                                              .blueAccent,
+                                                          heroTag: 'GO2',
+                                                        )
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    left: 20.0,
+                                                    top: 60.0,
+                                                    child:
+                                                    Container(
+                                                      width: 38.0,
+                                                      height: 38.0,
+                                                      child:
+                                                      FloatingActionButton(
+                                                        onPressed: () {
+
+                                                        },
+                                                        child: Container(
+                                                          width: 38.0,
+                                                          height: 38.0,
+                                                          child: isGPSOn ? ImageNeonGlow(imageUrl: 'assets/images/gps.png',counter: 0,color: Colors.indigoAccent,) :
+                                                          Image.asset(
+                                                            'assets/images/gps.png',
+                                                            color: Colors
+                                                                .white,),),
+                                                        elevation: 1.0,
+                                                        backgroundColor: Colors
+                                                            .transparent,
+                                                        heroTag: 'GPS',
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    left: 80.0,
+                                                    top: 60.0,
+                                                    child:
+                                                    Container(
+                                                      width: 38.0,
+                                                      height: 38.0,
+                                                      child:
+                                                      FloatingActionButton(
+                                                        onPressed: () {
+
+                                                        },
+                                                        child: Container(
+                                                          width: 38.0,
+                                                          height: 38.0,
+                                                          child: isGPRSOn ? ImageNeonGlow(imageUrl: 'assets/images/gprs.png',counter: 0,color: Colors.indigoAccent,) :
+                                                          Image
+                                                              .asset(
+                                                            'assets/images/gprs.png',
+                                                            color: Colors
+                                                                .white,),),
+                                                        elevation: 1.0,
+                                                        backgroundColor: Colors
+                                                            .transparent,
+                                                        heroTag: 'GPRS',
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ],
-                                        ),
-                                      ),
-                                    ],
 
-                                  );
+                                        );
+                                    },
+                                    );
                                 },
                               );
                                 },

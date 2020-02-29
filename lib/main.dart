@@ -1,5 +1,8 @@
 import 'package:anad_magicar/Routes.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
+import 'package:anad_magicar/data/rxbus.dart';
+import 'package:anad_magicar/firebase/message/firebase_message_handler.dart';
+import 'package:anad_magicar/model/change_event.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/repository/user/user_repo.dart';
 import 'package:anad_magicar/service/locator.dart';
@@ -8,19 +11,74 @@ import 'package:anad_magicar/ui/screen/login/login_page.dart';
 import 'package:anad_magicar/ui/screen/login/login_screen.dart';
 import 'package:anad_magicar/utils/check_status_connection.dart';
 import 'package:android_alarm_manager/android_alarm_manager.dart';
-
+import 'package:anad_magicar/firebase/message/message_handler.dart' as msgHdlr;
 import 'package:flutter/material.dart';
 import 'package:anad_magicar/Routes.dart' as myApp;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+ Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async{
+  if (message.containsKey('data')) {
+    final dynamic data = message['data'];
+
+    final title = data['title'];
+    final body = data['body'];
+    await _showNotificationWithDefaultSound(title, body);
+  }
+
+  if (message.containsKey('notification')) {
+    final dynamic notification = message['notification'];
+  }
+
+
+  return Future<void>.value();
+}
+showMessage(Map<String,dynamic> message) {
+  String title=message['notification']['title'];
+  String messageBody=message['notification']['body'];
+  messageBody+='\n'+title;
+  String data_title=message['data']['title'];
+  String data=message['data']['body'];
+  if(data!=null && data.isNotEmpty){
+    if(data_title=='command') {
+      String carid=message['data']['carId'];
+      RxBus.post(new ChangeEvent(type: 'FCM_STATUS', message: data,id: int.tryParse(carid)));
+    }
+  }else {
+    RxBus.post(new ChangeEvent(type: 'FCM', message: messageBody));
+    _showNotificationWithDefaultSound(title,messageBody);
+
+  }
+}
+Future _showNotificationWithDefaultSound(String title, String message) async {
+  var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'anad_60', 'anad_channel', 'channel_description',
+      importance: Importance.None, priority: Priority.Low);
+  var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+  var platformChannelSpecifics = NotificationDetails(
+      androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+  await flutterLocalNotificationsPlugin.show(
+    0,
+    '$title',
+    '$message',
+    platformChannelSpecifics,
+    payload: 'Default_Sound',
+  );
+}
+
 Future<void> main() async {
   final int checkStatusAlarmID = 0;
   final int checkParkGPSStatusAlarmID = 1;
-
+  FireBaseMessageHandler messageHandler;
   setupLocator();
   ConnectionStatusSingleton connectionStatus = ConnectionStatusSingleton.getInstance();
   connectionStatus.initialize();
   WidgetsFlutterBinding.ensureInitialized();
+
+  //await AndroidAlarmManager.initialize();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =  FlutterLocalNotificationsPlugin();
+
   var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+
   var initializationSettingsIOS = IOSInitializationSettings(
       onDidReceiveLocalNotification:
           (int id, String title, String body, String payload) async {
@@ -35,8 +93,11 @@ Future<void> main() async {
           debugPrint('notification payload: ' + payload);
         }
         selectNotificationSubject.add(payload);
-      });
-  await AndroidAlarmManager.initialize();
+      },);
+
+
+  messageHandler=new msgHdlr.MessageHandler(sendMessage:(message){ showMessage(message);}, );
+  messageHandler.initMessageHandler();
   new Routes();
  /* await AndroidAlarmManager.periodic(const Duration(minutes: 1), checkStatusAlarmID, centerRepository.checkCarStatusPeriodic());
   await AndroidAlarmManager.periodic(const Duration(minutes: 1), checkParkGPSStatusAlarmID, centerRepository.checkParkGPSStatusPeriodic());*/

@@ -22,6 +22,7 @@ import 'package:anad_magicar/model/actions.dart';
 import 'package:anad_magicar/model/apis/api_brand_model.dart';
 import 'package:anad_magicar/model/apis/api_car_color.dart';
 import 'package:anad_magicar/model/apis/api_device_model.dart';
+import 'package:anad_magicar/model/apis/api_message.dart';
 import 'package:anad_magicar/model/apis/api_user_model.dart';
 import 'package:anad_magicar/model/apis/current_user_accessable_action.dart';
 import 'package:anad_magicar/model/apis/service_result.dart';
@@ -161,7 +162,7 @@ void _loadItemsInCart() async {
   void initState() {
     super.initState();
     checkInternet();
-    widget.messageHandler.initMessageHandler();
+   // widget.messageHandler.initMessageHandler();
     ActionsCommand.createActionsTitleMap();
    ActionsCommand.createActionIconsURlMap();
     _loadingInProgress = true;
@@ -212,6 +213,16 @@ _controller = new AnimationController(
     initData=_loadData();
 
   }
+
+
+  Future<List<ApiMessage>> getMessages() {
+    var result=restDatasource.getUserMessage();
+    if(result!=null ) {
+      return result;
+    }
+    return null;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -493,6 +504,15 @@ Widget _buildAnimation() {
      sTypes=await restDatasource.getCarServiceTypes();
      if(sTypes!=null && sTypes.length>0)
        centerRepository.setServiceTypes(sTypes);
+
+
+     List<ApiMessage> messages=await getMessages();
+       if(messages!=null && messages.length>0) {
+         var result=messages.where((m)=>m.MessageStatusConstId!=ApiMessage.MESSAGE_STATUS_AS_READ_TAG).toList();
+         if(result!=null && result.length>0){
+           CenterRepository.messageCounts=result.length;
+         }
+     }
 
      if (brands != null && colors != null && models != null &&
          carModelDetails != null) {

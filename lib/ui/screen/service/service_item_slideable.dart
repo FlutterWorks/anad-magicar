@@ -364,10 +364,12 @@ class HorizontalListItem extends StatelessWidget {
               Text(DartHelper.isNullOrEmptyString(serviceTypeTitle),style: TextStyle(fontSize: 15.0)),
       CircleAvatar(
 
-        radius: 50.0,
+        radius: 60.0,
         backgroundColor: item.ServiceStatusConstId==Constants.SERVICE_DONE ? Colors.greenAccent :
-        item.ServiceStatusConstId==Constants.SERVICE_NOTDONE ? Colors.white :
-        item.ServiceStatusConstId==Constants.SERVICE_CANCEL ? Colors.pinkAccent : Colors.amberAccent,
+        item.ServiceStatusConstId==Constants.SERVICE_NOTDONE ? Colors.pinkAccent :
+        item.ServiceStatusConstId==Constants.SERVICE_CANCEL ? Colors.blueAccent :
+        item.ServiceStatusConstId==Constants.SERVICE_NEAR ? Colors.amberAccent :
+        Colors.white,
         child: Text(DartHelper.isNullOrEmptyString( item.serviceType.ServiceTypeTitle),style: TextStyle(fontSize: 10.0,color: item.ServiceStatusConstId==Constants.SERVICE_NOTDONE ? Colors.black : Colors.white)),
         foregroundColor: Colors.white,
       ),

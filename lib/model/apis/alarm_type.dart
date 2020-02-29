@@ -1,3 +1,4 @@
+import 'package:anad_magicar/model/apis/alarm_type_to_user.dart';
 import 'package:flutter/material.dart';
 
 class AlarmType {
@@ -9,6 +10,12 @@ class AlarmType {
   String Description;
   String CreatedDate;
   String LastUpdateDate;
+  bool SendSMS;
+  bool Call;
+  bool MissedCall;
+  bool SendToAdmin;
+  int RowStateType;
+  List<AlarmTypeToUser> alarmTypeToUser;
 
   AlarmType({
     @required this.AlarmTypeId,
@@ -19,6 +26,11 @@ class AlarmType {
     @required this.Description,
     @required this.CreatedDate,
     @required this.LastUpdateDate,
+    @required this.SendSMS,
+    @required this.Call,
+    @required this.MissedCall,
+    @required this.SendToAdmin,
+    @required this.alarmTypeToUser
   });
 
   Map<String, dynamic> toMap() {
@@ -36,28 +48,50 @@ class AlarmType {
 
   factory AlarmType.fromMap(Map<String, dynamic> map) {
     return new AlarmType(
-      AlarmTypeId: map['AlarmTypeId'] as int,
-      AlarmTypeCode: map['AlarmTypeCode'] as String,
-      AlarmTypeTitle: map['AlarmTypeTitle'] as String,
-      IsDefault: map['IsDefault'] as bool,
-      ActionId: map['ActionId'] as int,
-      Description: map['Description'] as String,
-      CreatedDate: map['CreatedDate'] as String,
-      LastUpdateDate: map['LastUpdateDate'] as String,
+      AlarmTypeId: map['AlarmTypeId'] ,
+      AlarmTypeCode: map['AlarmTypeCode'] ,
+      AlarmTypeTitle: map['AlarmTypeTitle'] ,
+      IsDefault: map['IsDefault'] ,
+      ActionId: map['ActionId'] ,
+      Description: map['Description'] ,
+      CreatedDate: map['CreatedDate'] ,
+      LastUpdateDate: map['LastUpdateDate'] ,
+      Call: map['Call'],
+      MissedCall: map['MissedCall'],
+      SendSMS: map['SendSMS'],
+      SendToAdmin: map['SendToAdmin']
     );
   }
 
   factory AlarmType.fromJson(Map<String, dynamic> json) {
-    return AlarmType(AlarmTypeId: int.parse(json["AlarmTypeId"]),
+    return AlarmType(AlarmTypeId: json["AlarmTypeId"],
       AlarmTypeCode: json["AlarmTypeCode"],
       AlarmTypeTitle: json["AlarmTypeTitle"],
-      IsDefault: json["IsDefault"].toLowerCase() == 'true',
-      ActionId: int.parse(json["ActionId"]),
+      IsDefault: json["IsDefault"],
+      ActionId: json["ActionId"],
       Description: json["Description"],
       CreatedDate: json["CreatedDate"],
-      LastUpdateDate: json["LastUpdateDate"],);
+      LastUpdateDate: json["LastUpdateDate"],
+        Call: json["Call"],
+        MissedCall: json["MissedCall"],
+        SendSMS: json["SendSMS"],
+        SendToAdmin: json["SendToAdmin"]);
   }
 
+  factory AlarmType.fromJsonForUser(Map<String, dynamic> json) {
+    var typeToUser=json["AlarmTypeToUser"];
+    List<AlarmTypeToUser> types=new List();
+    if(typeToUser!=null && typeToUser.length>0) {
+        types=typeToUser.map<AlarmTypeToUser>((t)=>AlarmTypeToUser.fromJson(t)).toList();
+    }
+    return AlarmType(AlarmTypeId: json["AlarmTypeId"],
+      AlarmTypeTitle: json["AlarmTypeTitle"],
+        Call: json["Call"],
+        MissedCall: json["MissedCall"],
+        SendSMS: json["SendSMS"],
+        SendToAdmin: json["SendToAdmin"],
+    alarmTypeToUser: types);
+  }
   Map<String, dynamic> toJson() {
     return {
       "AlarmTypeId": this.AlarmTypeId,
@@ -68,6 +102,10 @@ class AlarmType {
       "Description": this.Description,
       "CreatedDate": this.CreatedDate,
       "LastUpdateDate": this.LastUpdateDate,
+      "Call": this.Call,
+      "MissedCall": this.MissedCall,
+      "SendSMS": this.SendSMS,
+      "RowStateType": this.RowStateType
     };
   }
 

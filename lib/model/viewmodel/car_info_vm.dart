@@ -27,6 +27,7 @@ class CarInfoVM{
   bool isAdmin;
   bool isActive;
   int userId;
+  bool hasJoind;
   String fromDate;
   String Description;
   int CarToUserStatusConstId;
@@ -56,7 +57,8 @@ class CarInfoVM{
     @required this.imageUrl,
     @required this.pelak,
     @required this.distance,
-    @required this.isActive
+    @required this.isActive,
+    @required this.hasJoind
   });
 
 

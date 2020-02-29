@@ -11,6 +11,7 @@ import 'package:anad_magicar/common/actions_constants.dart';
 import 'package:anad_magicar/common/constants.dart';
 import 'package:anad_magicar/components/CircleImage.dart';
 import 'package:anad_magicar/components/bottomsheet/bottom_sheet_animated.dart';
+import 'package:anad_magicar/components/circle_badge.dart';
 import 'package:anad_magicar/components/engine_status.dart';
 import 'package:anad_magicar/components/flushbar/flushbar_helper.dart';
 import 'package:anad_magicar/components/intervalprogressbar.dart';
@@ -164,6 +165,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin ,
   bool isLoginned=true;
   bool isAdmin;
   int _counter=0;
+  int messageCounts=0;
   User user;
   bool engineStatus=false;
   bool lockStatus=true;
@@ -178,6 +180,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin ,
   var carPageChangedNoty=new NotyBloc<Message>();
   var carLockPanelNoty=new NotyBloc<Message>();
   var sendCommandNoty=new NotyBloc<SendingCommandVM>();
+  var messageCountNoty=new NotyBloc<Message>();
   //var valueNotyModelBloc=new NotyBloc<ChangeEvent>();
 
   var _currentColor=Colors.redAccent;
@@ -814,6 +817,9 @@ void registerBus() {
            int carId=event.id;
            String commandCode=msg.substring(0,2);
            if(commandCode!=ActionsCommand.Check_Status_Car) {
+             /*sendCommandNoty.updateValue(
+                 new SendingCommandVM(sending: false,
+                     sent: true, hasError: false));*/
              RxBus.post(new ChangeEvent(type: 'COMMAND_SUCCESS',id: int.tryParse(commandCode)));
            }
            String newFCM=msg.substring(2,msg.length);
@@ -891,6 +897,7 @@ void registerBus() {
     startEnginChangedNoty=new NotyBloc<Message>();
     carPageChangedNoty=new NotyBloc<Message>();
     carLockPanelNoty=new NotyBloc<Message>();
+    messageCountNoty=new NotyBloc<Message>();
     //statusChangedNoty=new NotyBloc<CarStateVM>();
     sendCommandNoty=new NotyBloc<SendingCommandVM>();
     valueNotyModelBloc=new NotyBloc<ChangeEvent>();
@@ -908,10 +915,10 @@ void registerBus() {
 
     animController = AnimationController(duration: const Duration(milliseconds: 3000), vsync: this);
    // animController.repeat(reverse: true);
-    animProgressController = AnimationController(duration: const Duration(milliseconds: 1000), vsync: this);
+    animProgressController = AnimationController(duration: const Duration(milliseconds: 3000), vsync: this);
     animProgressController.addListener((){
       setState(() {
-        if(commandProgressValue>5)
+        if(commandProgressValue>3)
           {
             animProgressController.reverse();
           }
@@ -919,7 +926,7 @@ void registerBus() {
           {
             animProgressController.forward();
           }
-        if(commandProgressValue<5) {
+        if(commandProgressValue<3) {
           commandProgressValue++;
         }
         else if(commandProgressValue>0) {
@@ -932,7 +939,7 @@ void registerBus() {
     centerRepository.checkParkGPSStatusPeriodic(6);
 
     super.initState();
-
+    messageCountNoty.updateValue(new Message(index:CenterRepository.messageCounts));
 
   }
 
@@ -1077,10 +1084,45 @@ void registerBus() {
                             onTap: () {
                               Navigator.pushNamed(context, MessageAppPageState.route,arguments: _currentCarId);
                             },
-                            child: new Container(width: 24.0,height: 24.0,
-                              child:
-                              Image.asset('assets/images/message.png',color: Colors.indigoAccent,),
-                            ),),), ),
+                            child: StreamBuilder(
+              stream: messageCountNoty.noty,
+              initialData: null,
+              builder: (BuildContext c, AsyncSnapshot<Message> snapshot)
+              {
+                if(snapshot.hasData && snapshot.data!=null) {
+                  messageCounts=snapshot.data.index;
+                }else
+                  {
+                    messageCounts=CenterRepository.messageCounts;
+                  }
+              return new Container(
+                width: 58.0,
+                height: 58.0,
+                child:
+                Stack(
+                  children: <Widget>[
+                    Positioned(
+                      top:0.0,
+                      left:16,
+                      child:
+                      Padding(
+                        padding: EdgeInsets.only(
+                            left: 18.0,
+                            bottom: 10.0,
+                            right: 0.0,
+                            top: 0.0
+                        ),
+                        child: CircleBadge(number: messageCounts.toString(),),
+                      ),),
+                    Positioned(
+                      top:5.0,
+                      left:12,
+                      child:
+                      Container(
+                        width: 28.0,
+                        height: 28.0,
+                        child:
+                        new Image.asset('assets/images/message.png',color: Colors.blueAccent,),), ) ,],) ,);},),), ),),
                       Padding(
                         padding: EdgeInsets.only(right: 60.0,top: 30.0),
                         child:

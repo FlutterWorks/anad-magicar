@@ -116,6 +116,7 @@ class MainPageServiceState extends MainPage<MainPageService> {
   Widget pageContent() {
     // TODO: implement pageContent
     return new MainPersistentTabBar(
+
       actions: <Widget> [
         IconButton(
           icon: Icon(Icons.directions_car,color: Colors.white,),

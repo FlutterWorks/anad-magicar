@@ -1,8 +1,13 @@
 
 import 'dart:async';
+import 'package:anad_magicar/Routes.dart';
+import 'package:anad_magicar/main.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
+
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 
 abstract class FireBaseMessageHandler<T> {
 
@@ -17,15 +22,20 @@ abstract class FireBaseMessageHandler<T> {
 
 
 
-  Future<T> myBackgroundMessageHandler(Map<String, dynamic> message) {
-    if (message.containsKey('data')) {
-      final dynamic data = message['data'];
-    }
-
-    if (message.containsKey('notification')) {
-      final dynamic notification = message['notification'];
-    }
-
+  Future _showNotificationWithDefaultSound(String title, String message) async {
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'anad_60', 'anad_channel', 'channel_description',
+        importance: Importance.Max, priority: Priority.High);
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      '$title',
+      '$message',
+      platformChannelSpecifics,
+      payload: 'Default_Sound',
+    );
   }
 
   Future<String> getClientToken() async {
@@ -48,13 +58,15 @@ abstract class FireBaseMessageHandler<T> {
       onMessage: (Map<String, dynamic> message) async {
         showMessage(message);
       },
-
-      //onBackgroundMessage: myBackgroundMessageHandler,
+      onBackgroundMessage: Platform.isIOS ? null : myBackgroundMessageHandler,
       onLaunch: (Map<String, dynamic> message) async {
        onLaunch(message);
+
+
       },
       onResume: (Map<String, dynamic> message) async {
         onResume(message);
+
       },
     );
   }

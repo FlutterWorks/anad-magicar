@@ -21,7 +21,7 @@ class MainPersistentTabBar extends StatelessWidget {
         appBar: AppBar(
           actions: actions,
           bottom: TabBar(
-            isScrollable: true,
+            isScrollable: false,
             tabs: [
               Tab(
                 icon: Icon(Icons.done_all),

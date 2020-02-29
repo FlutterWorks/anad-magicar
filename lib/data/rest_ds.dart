@@ -77,7 +77,7 @@ class RestDatasource extends BaseRest {
   static final BASE_CAR_TO_USER_URI_URL = "/main/CarToUser";
   static final BASE_SERVICETYPE_URL='/servicetype';
   static final BASE_ALARMTYPE_URL='/alarmtype';
-  //static final BASE_CARSERVICE_URL='/service';
+  static final BASE_ALARM_TYPE_TOUSER_URL='/AlarmTypeToUser';
 
 
   static final LOGIN_URL= BASE_URL+BASE_USER_URL+ "/Login";
@@ -157,6 +157,9 @@ class RestDatasource extends BaseRest {
   static final SendMessage_URL=BASE_URL+BASE_MESSAGE_URL+'/SendMessage';
   static final ForgetPassword_URL=BASE_URL+BASE_USER_URL+'/ForgotPassword';
   static final BUY_REQUEST_URL='http://anadgps.com/payline/api/invoices/request';
+  static final Get_Alalrm_Type_URL=BASE_URL+BASE_ALARMTYPE_URL+'/GetAlarmType';
+  static final GetUserAlarmAssign_URL=BASE_URL+BASE_ALARM_TYPE_TOUSER_URL+'/GetUserAlarmAssign';
+  static final SaveUser_ALARM_URL=BASE_URL+BASE_ALARM_TYPE_TOUSER_URL+'/SaveUserAlarm';
 
   RestDatasource();
 
@@ -403,17 +406,31 @@ class RestDatasource extends BaseRest {
     });
   }
 
-  /*Future<List<AlarmType>> GetAlarmType(){
-
+  Future<List<AlarmType>> GetAlarmType(){
+    return _netUtil.post(Get_Alalrm_Type_URL,).then(( res) {
+      if(res!=null)
+        return  res.map<AlarmType>((r)=> AlarmType.fromJson(r)).toList();
+      else
+        return null;
+    });
   }
-   Future<List<ServiceType>> GetService() {
 
-   }
-
-   Future<List<ApiRoute>> GetCurrentCarPorsition(List<int> carIds){
-
-  }*/
-
+  Future<List<AlarmType>> GetAlarmTypeByUser(){
+    return _netUtil.post(GetUserAlarmAssign_URL,).then(( res) {
+      if(res!=null)
+        return  res.map<AlarmType>((r)=> AlarmType.fromJson(r)).toList();
+      else
+        return null;
+    });
+  }
+  Future<List<AlarmType>> SaveUserAlarm(AlarmType model){
+    return _netUtil.post(SaveUser_ALARM_URL,body: model.toJson()).then(( res) {
+      if(res!=null)
+        return  res.map<AlarmType>((r)=> AlarmType.fromJson(r)).toList();
+      else
+        return null;
+    });
+  }
   Future<List<ApiRoute>> getLastPositionRoute(ApiRoute route) async{
     return _netUtil.post(Get_LASTPOSITION_URL,body: route.toJsonLastPosition()).then(( res) {
       if(res!=null)
@@ -629,14 +646,15 @@ class RestDatasource extends BaseRest {
     });
   }
   Future<ServiceResult> changeMessageStatus( int messageId,int status) async{
-    Map<String,dynamic> params={
-      "MessageId": messageId,
-      "targetStatus": status
+    Map<String,String> params={
+      "MessageId": messageId.toString(),
+      "targetStatus": status.toString()
     };
 
-    return _netUtil.post(ChanegMessageStatus_URL,body: params).then((res) {
+
+    return _netUtil.postWithParams(ChanegMessageStatus_URL,body: params).then((res) {
       try {
-        if (res != null && res.length>0)
+        if (res != null )
           return  ServiceResult.fromJson(res);
       }
       catch(error) {
@@ -644,6 +662,8 @@ class RestDatasource extends BaseRest {
       }
       return null;
     });
+
+
   }
 
   Future<ServiceResult> sendMessage( ApiMessage message) async{

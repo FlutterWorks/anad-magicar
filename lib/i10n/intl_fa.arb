@@ -450,7 +450,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "goToSettingsDescription": "goToSettingsDescription",
+  "goToSettingsDescription": "جهت افزودن الگوی اثر انگشت به تنظیمات بروید",
   "@goToSettingsDescription": {
     "description": "goToSettingsDescription",
     "type": "text",
@@ -1482,13 +1482,13 @@
     "type": "text",
     "placeholders": {}
   },
-  "done": "انجام شد",
+  "done": "انجام شده",
   "@done": {
     "description": "done",
     "type": "text",
     "placeholders": {}
   },
-  "notDone": "انجام نشد",
+  "notDone": "انجام نشده",
   "@notDone": {
     "description": "notDone",
     "type": "text",
@@ -1686,7 +1686,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "notDoneService": "انجام نشده",
+  "notDoneService": "عدم انجام",
   "@notDoneService": {
     "description": "notDoneService",
     "type": "text",
