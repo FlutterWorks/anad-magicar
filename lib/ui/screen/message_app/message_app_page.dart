@@ -86,14 +86,7 @@ class MessageAppPageState extends MainPage<MessageAppPage> {
   @override
   FloatingActionButton getFab() {
     // TODO: implement getFab
-    return FloatingActionButton(
-      onPressed: (){  },
-      child: Icon(Icons.add,color: Colors.white,
-        size: 30.0,),
-      backgroundColor: Colors.blueAccent,
-      elevation: 0.0,
-
-    );
+    return null;
   }
 
   @override

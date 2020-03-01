@@ -7,6 +7,7 @@ import 'package:anad_magicar/data/rxbus.dart';
 import 'package:anad_magicar/model/apis/api_service.dart';
 import 'package:anad_magicar/model/apis/service_type.dart';
 import 'package:anad_magicar/model/change_event.dart';
+import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/ui/screen/service/register_service_page.dart';
@@ -20,7 +21,8 @@ import '../../../translation_strings.dart';
 class ServicePageNotDone extends StatefulWidget {
   int carId;
   ServiceVM serviceVM;
-  ServicePageNotDone({Key key,this.carId,this.serviceVM}) : super(key: key);
+  NotyBloc<Message> filterNoty;
+  ServicePageNotDone({Key key,this.carId,this.serviceVM,this.filterNoty}) : super(key: key);
 
 
   @override
@@ -97,9 +99,23 @@ class ServicePageNotDoneState extends State<ServicePageNotDone> {
           if (snapshot.hasData && snapshot.data != null) {
             centerRepository.dismissDialog(context);
             servcies = snapshot.data;
+            List<ApiService> finalServices=new List();
             List<ApiService> newServices= servcies.where((s)=>s.ServiceStatusConstId==Constants.SERVICE_NOTDONE).toList();
+            finalServices=newServices;
             return
-              ServiceForm(carId: widget.serviceVM.carId, serviceVM: widget.serviceVM,servcies: newServices,);
+              StreamBuilder<Message>(
+                  stream: widget.filterNoty.noty,
+                  builder: (context,snapshot){
+                    if(snapshot.hasData && snapshot.data!=null){
+                      int stid=snapshot.data.index;
+                      finalServices=newServices.where((s)=>s.ServiceTypeId==stid).toList();
+                    }else{
+                      finalServices=newServices;
+                    }
+                    return
+              ServiceForm(carId: widget.serviceVM.carId, serviceVM: widget.serviceVM,servcies: finalServices,);
+                  }
+              );
           }
           else {
             if (widget.serviceVM != null && widget.serviceVM.refresh != null &&

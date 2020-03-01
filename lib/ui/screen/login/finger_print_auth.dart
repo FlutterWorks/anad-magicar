@@ -115,12 +115,12 @@ class _TouchIDState extends State<TouchID> {
               ),
               FlatButton(
                 child: Icon(Icons.fingerprint,size: 45.0,),
-                color: Colors.red,
+                color: Colors.pinkAccent,
                 onPressed: () { _authorize(); },
               ),
               FlatButton(
-                child: Button(title: Translations.current.loginWithPassword()),
-                color: Colors.red,
+                child: Button(title: Translations.current.loginWithPassword(),wid: 100.0,color: Colors.white.value,clr:Colors.pinkAccent,),
+               // color: Colors.red,
                 onPressed: () { Navigator.of(context).pushReplacementNamed('/login',arguments: LoginType.PASWWORD);
                 },
               )

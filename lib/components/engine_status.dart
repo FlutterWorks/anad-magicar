@@ -90,6 +90,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
   static bool temp_engineStatus=false;
   static bool confirm_engineStatus=false;
 
+  bool commandSuccess=false;
   bool isDark=false;
   bool trunk_status=false;
   bool caput_status=false;
@@ -114,8 +115,34 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
          /*widget.sendCommandNoty.updateValue(
              new SendingCommandVM(sending: false,
                  sent: true, hasError: false));*/
-         if(lastActionCode!=null)
+         commandSuccess=true;
+
+         if(lastActionCode!=null) {
+           if(lastActionCode==ActionsCommand.LockAndArm_Nano_CODE){
+             updateLockStatus(true);
+           }
+           else if(lastActionCode==ActionsCommand.UnlockAndDisArm_Nano_CODE){
+             updateLockStatus(false);
+           } else if(lastActionCode==ActionsCommand.RemoteTrunk_Release_CODE) {
+             updateTrunkStatus(true);
+           }else if(lastActionCode==ActionsCommand.DriveLock_ONOrOFF_Nano_CODE){
+             updateTrunkStatus(false);
+           } else if(lastActionCode==ActionsCommand.SirenOn_ON_TAG){
+             updateSirenStatus(true);
+           } else if(lastActionCode==ActionsCommand.SirenOn_OFF_TAG){
+             updateSirenStatus(false);
+           } else if(lastActionCode==ActionsCommand.AUX1_Output_ON_CODE){
+             updateAUX1Status(true);
+           }else if(lastActionCode==ActionsCommand.AUX1_Output_OFF_CODE){
+             updateAUX1Status(false);
+           }else if(lastActionCode==ActionsCommand.AUX2_Output_ON_CODE){
+             updateAUX2Status(true);
+           }else if(lastActionCode==ActionsCommand.AUX2_Output_OFF_CODE){
+             updateAUX1Status(false);
+           }
+
            play('', lastActionCode);
+         }
          updateCarStatusAfterCommands();
        }
      });
@@ -231,6 +258,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
           ServiceResult result = await restDS.sendCommand(sendCommand);
           if (result != null) {
             if (result.IsSuccessful) {
+              commandSuccess=false;
               lastActionCode=actionCode;
               widget.sendCommandNoty.updateValue(
                   new SendingCommandVM(sending: false,
@@ -263,6 +291,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
 
       }
       Future.delayed(new Duration(milliseconds: 3000)).then((value){
+
         widget.sendCommandNoty.updateValue(
             new SendingCommandVM(sending: false,
                 sent: false, hasError: false));
@@ -479,7 +508,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                         new GestureDetector(
                           onTap: () {
                            // listenerRepository.onLockTap(context, false);
-                            updateLockStatus(false);
+                           // updateLockStatus(false);
                             widget.carStateVM.isDoorOpen=true;
                            /* widget.carStateVM.setCarStatusImages();
                             centerRepository.setCarStateVMMap(widget.carStateVM);
@@ -542,10 +571,9 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                         new GestureDetector(
                           onTap: ()  {
                             //listenerRepository.onLockTap(context, true);
-                            updateLockStatus(true);
+                           // updateLockStatus(true);
                             widget.carStateVM.isDoorOpen=false;
                            sendCommand(ActionsCommand.LockAndArm_Nano_CODE);
-
                             //play(Constants.DOOR_LOCK_SOUND,);
                           },
                           child:
@@ -845,7 +873,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                         new GestureDetector(
                           onTap: ()  {
                             trunk_status = !trunk_status;
-                            updateTrunkStatus(trunk_status);
+                           // updateTrunkStatus(trunk_status);
                             /*listenerRepository.onTrunkTap(
                                 context, trunk_status);*/
                             widget.carStateVM.isTraunkOpen=trunk_status;
@@ -882,7 +910,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                               child: CircleAvatar(
                                 backgroundColor: Colors.transparent,
                                 //Colors.grey[100] ,
-                                child: trunk_status ? ImageNeonGlow(
+                                child: (trunk_status && commandSuccess ) ? ImageNeonGlow(
                                   imageUrl: 'assets/images/trunk.png',
                                   counter: _counter,
                                   color:_currentColor,) :
@@ -923,14 +951,14 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                             siren=!siren;
 
                             widget.carStateVM.siren=siren;
-                            updateSirenStatus(siren);
-                            sendCommand(siren ? ActionsCommand.SIREN_Nano_CODE :
-                            ActionsCommand.SIREN_Nano_CODE);
+                           // updateSirenStatus(siren);
+                            sendCommand(siren ? ActionsCommand.SirenOn_ON_TAG :
+                            ActionsCommand.SirenOn_OFF_TAG);
                           },
                           child:
                           AvatarGlow(
                             startDelay: Duration(milliseconds: 1000),
-                            glowColor: Colors.indigoAccent,
+                            glowColor: Colors.indigoAccent.withOpacity(0.5),
                             endRadius: 40.0,
                             duration: Duration(milliseconds: 2000),
                             repeat: true,
@@ -942,7 +970,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                               child: CircleAvatar(
                                 backgroundColor: Colors.transparent,
                                 //Colors.grey[100] ,
-                                child: // ImageNeonGlow(imageUrl: 'assets/images/find_car_2.png',counter: _counter,color: widget.color,),
+                                child: (siren && commandSuccess) ? ImageNeonGlow(imageUrl: 'assets/images/horn.png',counter: _counter,color: widget.color,) :
                                 Image.asset(
                                   'assets/images/horn.png', scale: 2.0,
                                   color: _currentColor,),
@@ -978,7 +1006,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                             aux2=!aux2;
 
                             widget.carStateVM.AUX2_On=aux2;
-                            updateAUX2Status(aux2);
+                           // updateAUX2Status(aux2);
                             sendCommand(aux2 ? ActionsCommand.AUX2_Output_ON_CODE :
                             ActionsCommand.AUX2_Output_OFF_CODE);
                           },
@@ -997,7 +1025,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                               child: CircleAvatar(
                                 backgroundColor: Colors.transparent,
                                 //Colors.grey[100] ,
-                                child: // ImageNeonGlow(imageUrl:'assets/images/aux2.png' ,counter: _counter,) ,
+                                child: (aux2 && commandSuccess) ? ImageNeonGlow(imageUrl:'assets/images/aux2.png' ,counter: _counter,color: widget.color,) :
                                 Image.asset(
                                   'assets/images/aux2.png', scale: 2.0,
                                   color: _currentColor,),
@@ -1006,7 +1034,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                               ),
                             ),
                             shape: BoxShape.circle,
-                            animate: false,
+                            animate: aux2,
                             curve: Curves.fastOutSlowIn,
                           ),
 
@@ -1084,14 +1112,14 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                             aux1=!aux1;
 
                             widget.carStateVM.AUX1_On=aux1;
-                            updateAUX1Status(aux1);
+                           // updateAUX1Status(aux1);
                             sendCommand(aux1 ? ActionsCommand.AUX1_Output_ON_CODE :
                             ActionsCommand.AUX1_Output_OFF_CODE);
                           },
                           child:
                           AvatarGlow(
                             startDelay: Duration(milliseconds: 1000),
-                            glowColor: Colors.white,
+                            glowColor: Colors.redAccent.withOpacity(0.5),
                             endRadius: 40.0,
                             duration: Duration(milliseconds: 2000),
                             repeat: true,
@@ -1103,7 +1131,8 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                               child: CircleAvatar(
                                 backgroundColor: Colors.transparent,
                                 //Colors.grey[100] ,
-                                child: Image.asset(
+                                child: (aux1 && commandSuccess) ? ImageNeonGlow(imageUrl:'assets/images/aux1.png' ,counter: _counter,color: widget.color,) :
+                                Image.asset(
                                   'assets/images/aux1.png', scale: 2.0,
                                   color: _currentColor,),
                                 radius: 24.0,
@@ -1111,7 +1140,7 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
                               ),
                             ),
                             shape: BoxShape.circle,
-                            animate: caput_status,
+                            animate: aux1,
                             curve: Curves.fastOutSlowIn,
                           ),
 

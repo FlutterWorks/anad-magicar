@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2020-02-26T08:11:46.627510",
+  "@@last_modified": "2020-03-01T07:52:01.968239",
   "confirm": "تایید",
   "@confirm": {
     "description": "Confirm Security Code",
@@ -1758,6 +1758,24 @@
       "type": "text",
       "placeholders": {}
     },
+     "messageCount": "تعداد پیام ها",
+      "@messageCount": {
+        "description": "messageCount",
+        "type": "text",
+        "placeholders": {}
+      },
+      "distanceDone": "کارکرد انجام",
+      "@distanceDone": {
+        "description": "distanceDone",
+        "type": "text",
+        "placeholders": {}
+      },
+      "serviceDoneDate": "تاریخ انجام سرویس",
+      "@serviceDoneDate": {
+        "description": "serviceDoneDate",
+        "type": "text",
+        "placeholders": {}
+      },
   "title": "MagiCar",
   "@title": {
     "description": "MagiCar Co.",

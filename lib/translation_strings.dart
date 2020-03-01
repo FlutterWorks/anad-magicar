@@ -634,6 +634,10 @@ class Translations {
       name: 'forGetChargeAmount', desc: 'forGetChargeAmount');
   String messageCount() => Intl.message('messageCount',
       name: 'messageCount', desc: 'messageCount');
+  String distanceDone() => Intl.message('distanceDone',
+      name: 'distanceDone', desc: 'distanceDone');
+  String serviceDoneDate() => Intl.message('serviceDoneDate',
+      name: 'serviceDoneDate', desc: 'serviceDoneDate');
   String title() => Intl.message('MagiCar',
       name: 'title', desc: 'MagiCar Co.');
 }

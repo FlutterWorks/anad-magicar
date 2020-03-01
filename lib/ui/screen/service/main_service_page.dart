@@ -1,6 +1,10 @@
+import 'package:anad_magicar/bloc/values/notify_value.dart';
+import 'package:anad_magicar/components/button.dart';
+import 'package:anad_magicar/components/flutter_form_builder/flutter_form_builder.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/api_service.dart';
 import 'package:anad_magicar/model/apis/service_type.dart';
+import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/model/viewmodel/reg_service_type_vm.dart';
 import 'package:anad_magicar/model/viewmodel/service_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
@@ -10,6 +14,7 @@ import 'package:anad_magicar/ui/screen/service/register_service_page.dart';
 import 'package:anad_magicar/ui/screen/service/service_page.dart';
 import 'package:anad_magicar/ui/screen/service/service_page_not_done.dart';
 import 'package:anad_magicar/ui/screen/service/service_type/service_type_page.dart';
+import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
 import 'package:anad_magicar/widgets/flash_bar/flash_helper.dart';
 
 import 'package:flutter/material.dart';
@@ -29,20 +34,33 @@ class MainPageService extends StatefulWidget {
 class MainPageServiceState extends MainPage<MainPageService> {
 
   static final String route='/servicepage';
-
-  Future<List<ApiService>> loadCarServices(int carId) async {
+  ServiceType _valueCarServiceType;
+  String tTtile='';
+  NotyBloc<Message> filterNoty;
+  List<ServiceType> serviceTypes=new List();
+  Future<List<ApiService>> loadCarServices(int carId,int stId) async {
     centerRepository.showProgressDialog(context, Translations.current.loadingdata());
     List<ApiService> result=await restDatasource.getCarService(widget.serviceVM.carId);
-    if(result!=null && result.length>0)
-      return result;
+    if(result!=null && result.length>0) {
+      if(stId!=null && stId>0) {
+          var newResult=result.where((s)=>s.ServiceTypeId==stId).toList();
+          return newResult;
+      }else {
+        return result;
+      }
+    }
     return null;
   }
 
   loadServiceTypes() async{
     List<ServiceType> sTypes=new List();
     sTypes=await restDatasource.getCarServiceTypes();
-    if(sTypes!=null && sTypes.length>0)
+    if(sTypes!=null && sTypes.length>0) {
+      if(serviceTypes==null)
+        serviceTypes=new List();
+      serviceTypes=sTypes;
       centerRepository.setServiceTypes(sTypes);
+    }
   }
 
   addService()  {
@@ -59,6 +77,73 @@ class MainPageServiceState extends MainPage<MainPageService> {
     }
   }
 
+  Widget _buildServiceTypesField(double width, List<ServiceType> types,StateSetter setState) {
+    /*if(_valueCarServiceType==null)
+      _valueCarServiceType=types[0];*/
+    return
+    Container(
+      height: 60.0,
+    width: MediaQuery.of(context).size.width*0.60,
+    child:
+      DropdownButton<ServiceType>(
+        itemHeight: 58.0,
+        isDense: true,
+          isExpanded: true,
+          items: types.map((ServiceType val) {
+            return new DropdownMenuItem<ServiceType>(
+              value: val,
+              child: new Text(val.ServiceTypeTitle),
+            );
+          }).toList(),
+          value: _valueCarServiceType ,
+          hint: Text("لطفا نوع سرویس را انتخاب کنید"),
+          onChanged: (newVal) {
+
+            setState(() {
+              tTtile=newVal.ServiceTypeTitle;
+              _valueCarServiceType = newVal;});
+          }),
+    );
+  }
+
+  _showBottomSheetListServiceTypes(BuildContext context,List<ServiceType> types) {
+    _valueCarServiceType=types[0];
+    showModalBottomSheetCustom(context: context ,
+        mHeight: 0.50,
+        builder: (BuildContext context)
+    {
+      return StatefulBuilder(
+          builder: (BuildContext context, StateSetter state) {
+            return
+              Column(
+                children: <Widget>[
+                  new Padding(padding: EdgeInsets.only(
+                      right: 10.0, left: 10.0, bottom: 20.0),
+                    child:
+                    _buildServiceTypesField(120.0, types,state),),
+                  FlatButton(
+                    child:
+                    Button(wid: 100.0,
+                      color: Colors.white.value,
+                      clr: Colors.pinkAccent,
+                      title: Translations.current.doFilter(),),
+                    onPressed: () {
+                      if (_valueCarServiceType != null)
+                        filterServices(_valueCarServiceType.ServiceTypeId);
+                    },
+                  )
+                ],
+              );
+          });
+    });
+  }
+
+  filterServices(int sTypeId) async {
+        //loadCarServices(carId, sTypeId);
+    filterNoty.updateValue(new Message(index: sTypeId));
+    Navigator.pop(context);
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -69,7 +154,12 @@ class MainPageServiceState extends MainPage<MainPageService> {
   List<Widget> actionIcons() {
     // TODO: implement actionIcons
     List<Widget> actions=[
-
+      IconButton(
+        icon: Icon(Icons.filter_list,color: Colors.indigoAccent,),
+        onPressed: (){
+          _showBottomSheetListServiceTypes(context, serviceTypes);
+        },
+      ),
       IconButton(
         icon: Icon(Icons.directions_car,color: Colors.indigoAccent,),
         onPressed: (){
@@ -77,6 +167,7 @@ class MainPageServiceState extends MainPage<MainPageService> {
              route: route) );
         },
       ),
+
       IconButton(
         icon: Icon(Icons.arrow_forward,color: Colors.indigoAccent,),
         onPressed: (){
@@ -108,6 +199,7 @@ class MainPageServiceState extends MainPage<MainPageService> {
   @override
   initialize() {
     // TODO: implement initialize
+    filterNoty=new NotyBloc<Message>();
     loadServiceTypes();
     return null;
   }
@@ -119,14 +211,21 @@ class MainPageServiceState extends MainPage<MainPageService> {
 
       actions: <Widget> [
         IconButton(
+          icon: Icon(Icons.filter_list,color: Colors.white,),
+          onPressed: (){
+            _showBottomSheetListServiceTypes(context, serviceTypes);
+          },
+        ),
+        IconButton(
           icon: Icon(Icons.directions_car,color: Colors.white,),
           onPressed: () {
             Navigator.of(context).pushNamed(ServiceTypePageState.route,arguments: widget.serviceVM.carId);
           },
         ),
+
       ],
-      page1: ServicePage(serviceVM: widget.serviceVM,),
-      page2: ServicePageNotDone(serviceVM: widget.serviceVM,),
+      page1: ServicePage(serviceVM: widget.serviceVM,filterNoty: filterNoty,),
+      page2: ServicePageNotDone(serviceVM: widget.serviceVM,filterNoty: filterNoty,),
     );
   }
 

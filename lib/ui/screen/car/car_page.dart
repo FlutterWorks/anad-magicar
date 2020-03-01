@@ -577,30 +577,7 @@ class CarPageState extends MainPage<CarPage> {
           ) :
           NoDataWidget(),
         ),
-       /* Positioned(
-          child:
-          new MagicarAppbar(
 
-            backgroundColorAppBar: Colors.transparent,
-            title: new MagicarAppbarTitle(
-              //image: Image.asset(name),
-              currentColor: Colors.indigoAccent,
-              actionIcon:null,// Icon(Icons.add_circle_outline,color: Colors.indigoAccent,size: 20.0,),
-              actionFunc: null,//() {_addCar(null,0,false);}
-            ),
-
-            actionsAppBar: hasInternet ? null : [
-              new Row(
-                children: <Widget>[
-                  Image.asset('assets/images/no_internet.png'),
-                ],
-              )
-            ],
-            elevationAppBar: 0.0,
-            iconMenuAppBar: Icon(Icons.arrow_back,color: Colors.indigoAccent,),
-            toggle: _toggle ,
-          ),
-        ),*/
       ],
     );
   }

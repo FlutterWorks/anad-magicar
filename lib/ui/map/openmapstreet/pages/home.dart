@@ -115,8 +115,8 @@ class MapPageState extends State<MapPage> {
   String mStopTime2='';
   PersianDatePickerWidget persianDatePicker;
   final String imageUrl = 'assets/images/user_profile.png';
-  final String markerRed='assets/images/m_red.png';
-  final String markerGreen='assets/images/m_green.png';
+  final String markerRed='assets/images/mark_red.png';
+  final String markerGreen='assets/images/mark_green.png';
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -676,8 +676,8 @@ class MapPageState extends State<MapPage> {
           //points..add(item);
 
             var marker = Marker(
-              width: 40.0,
-              height: 40.0,
+              width: 30.0,
+              height: 30.0,
               point: LatLng(lat,lng),
               builder: (ctx) {
                 return
@@ -687,10 +687,10 @@ class MapPageState extends State<MapPage> {
                         showSpeedDialog(speed);
                     },
                     child: Container(
-                        width: 38.0,
-                        height: 38.0,
+                        width: 30.0,
+                        height: 30.0,
                         child: CircleAvatar(
-                            radius: 38.0,
+                            radius: 30.0,
                             backgroundColor: Colors.transparent,
                             child: getMarkerOnSpeed(speed)
                             ,)
@@ -734,8 +734,8 @@ class MapPageState extends State<MapPage> {
         if(speed==null)
           speed=0;
         var marker = Marker(
-          width: 40.0,
-          height: 40.0,
+          width: 30.0,
+          height: 30.0,
           point: LatLng(lat1,lng1),
           builder: (ctx) {
             return
@@ -745,10 +745,10 @@ class MapPageState extends State<MapPage> {
                     showSpeedDialog(int.tryParse( speed.toString()));
                 },
                 child: Container(
-                    width: 38.0,
-                    height: 38.0,
+                    width: 30.0,
+                    height: 30.0,
                     child: CircleAvatar(
-                        radius: 38.0,
+                        radius: 30.0,
                         backgroundColor: Colors.transparent,
                         child: getMarkerOnSpeed(int.tryParse( speed.toString())),)
                 ),);}
@@ -756,8 +756,8 @@ class MapPageState extends State<MapPage> {
         markers.add(marker);
 
          marker = Marker(
-          width: 40.0,
-          height: 40.0,
+          width: 30.0,
+          height: 30.0,
           point: LatLng(lat2,lng2),
           builder: (ctx) {
             return
@@ -767,10 +767,10 @@ class MapPageState extends State<MapPage> {
                     showSpeedDialog(int.tryParse(speed.toString()));
                 },
                 child: Container(
-                    width: 38.0,
-                    height: 38.0,
+                    width: 30.0,
+                    height: 30.0,
                     child: CircleAvatar(
-                        radius: 38.0,
+                        radius: 30.0,
                         backgroundColor: Colors.transparent,
                         child:  getMarkerOnSpeed(int.tryParse( speed.toString())) ,)
                 ),);}
@@ -957,8 +957,8 @@ class MapPageState extends State<MapPage> {
                 if (diff > minDelay) {
 
                   var marker = Marker(
-                    width: 40.0,
-                    height: 40.0,
+                    width: 30.0,
+                    height: 30.0,
                     point: LatLng(lat, lng),
                     builder: (ctx) {
                       return
@@ -967,18 +967,18 @@ class MapPageState extends State<MapPage> {
                               showSpeedDialog(speed);
                           },
                           child: Container(
-                              width: 38.0,
-                              height: 38.0,
+                              width: 30.0,
+                              height: 30.0,
                               child: CircleAvatar(
-                                  radius: 38.0,
+                                  radius: 30.0,
                                   backgroundColor: Colors.transparent,
                                   child: getMarkerOnSpeed(speed),
                           ),),);} );
 
                   markers.add(marker);
                    marker = Marker(
-                    width: 40.0,
-                    height: 40.0,
+                    width: 30.0,
+                    height: 30.0,
                     point: LatLng(lat2, lng2),
                     builder: (ctx){
                       return
@@ -987,10 +987,10 @@ class MapPageState extends State<MapPage> {
                             showSpeedDialog(speed);
                           },
                           child: Container(
-                              width: 38.0,
-                              height: 38.0,
+                              width: 30.0,
+                              height: 30.0,
                               child: CircleAvatar(
-                                  radius: 38.0,
+                                  radius: 30.0,
                                   backgroundColor: Colors.transparent,
                                   child: Image.asset( markerRed
                                       , key: ObjectKey(Colors.red ),))
@@ -1976,6 +1976,66 @@ class MapPageState extends State<MapPage> {
     _showBottomSheetReport(context);
   }
 
+  _showMapGuid(BuildContext context) async {
+    _showBottomSheetGuid(context);
+  }
+
+  _showBottomSheetGuid(BuildContext context) {
+      double wid=MediaQuery.of(context).size.width*0.95;
+      showModalBottomSheetCustom(context: context ,
+          mHeight: 0.85,
+          builder: (BuildContext context) {
+            return new Padding(
+              padding: EdgeInsets.only(top: 10.0,right: 10.0),
+              child:
+              Container(
+            width: wid,
+            child:
+                new Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Text('نقاط قرمز برروی نقشه نشان از سرعت بالای 100 کیلومتر می باشد',softWrap: true,style: TextStyle(fontSize: 13.0),),
+                      //Text('نقاط زرد برروی نقشه نشان از سرعت زیر 30 کیلومتر می باشد',overflow: TextOverflow.visible,softWrap: true,style: TextStyle(fontSize: 15.0),),
+                     // Text('نقاط سبز برروی نقشه نشان از سرعت زیر 100 کیلومتر می باشد',overflow: TextOverflow.visible,softWrap: true,style: TextStyle(fontSize: 15.0),),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Text('نقاط زرد برروی نقشه نشان از سرعت زیر 30 کیلومتر می باشد',softWrap: true,style: TextStyle(fontSize: 13.0),),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Text('نقاط سبز برروی نقشه نشان از سرعت زیر 100 کیلومتر می باشد',softWrap: true,style: TextStyle(fontSize: 13.0),),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Text('با لمس هر نقطه اطلاعات سرعت و ... را مشاهده نمایید.',softWrap: true,style: TextStyle(fontSize: 13.0),),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Text('برای گزارش حرکت خودرو با انتخاب تاریخ تا تاریخ و انتخاب تاریخ مورد نظر ',softWrap: true,style: TextStyle(fontSize: 12.0),),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Text('و سپس لمس دکمه بستن در منوی زیرین گزارش مسیر با حرکت خودرو را انتخاب کنید',softWrap: true,style: TextStyle(fontSize: 10.0),),
+                    ],
+                  )
+                  ]
+            ),
+              ),
+            );
+            });
+  }
+
   showRouteCurrentToCar() async{
     if(lastCarIdSelected==null || lastCarIdSelected==0){
       centerRepository.showFancyToast('لطفا ابتدا خودرو را انتخاب نمایید');
@@ -2760,12 +2820,12 @@ class MapPageState extends State<MapPage> {
                         _showReportSheet(context);
                       },
                     ),
-                    null,
-                    /* MoreButtonModel(
-              icon: MaterialCommunityIcons.car_multiple,
-              label: 'خودرهای من',
-              onTap: () {},
-            ),*/
+                   
+                     MoreButtonModel(
+              icon: MaterialCommunityIcons.help_circle_outline,
+              label: 'راهنما',
+              onTap: () { _showMapGuid(context);},
+            ),
 
                     null,
                     /*MoreButtonModel(

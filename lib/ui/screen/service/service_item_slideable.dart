@@ -310,6 +310,12 @@ class HorizontalListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isDone=item.ServiceStatusConstId==Constants.SERVICE_DONE;
+    String dateTitle=Translations.current.serviceDate();
+    if(isDone){
+      dateTitle=Translations.current.serviceDoneDate();
+    }
+
     isDurational=item.serviceType.ServiceTypeConstId==Constants.SERVICE_TYPE_DURATIONALITY;
     if(isDurational) {
       serviceTypeTitle=Translations.current.serviceTypeIsDurational();
@@ -377,7 +383,8 @@ class HorizontalListItem extends StatelessWidget {
     ),
           ),
           ),
-          Expanded(
+         isDone ? Container() :
+         Expanded(
             child: Padding(
               padding: EdgeInsets.only(left: 10.0,right: 10.0),
               child:
@@ -398,12 +405,41 @@ class HorizontalListItem extends StatelessWidget {
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text(Translations.current.serviceDate(),style: TextStyle(fontSize: 15.0)),
-                  Text(DartHelper.isNullOrEmptyString(item.ServiceDate),style: TextStyle(fontSize: 15.0),),
+                  Text(dateTitle,style: TextStyle(fontSize: 15.0)),
+                  Text(DartHelper.isNullOrEmptyString(isDone ? item.ActionDate :  item.ServiceDate),style: TextStyle(fontSize: 15.0),),
                   ],
             ),
             ),
           ),
+       isDone ?   Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: 10.0,right: 10.0),
+              child:
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(Translations.current.description(),style: TextStyle(fontSize: 15.0)),
+                  Text(DartHelper.isNullOrEmptyString(  item.Description),style: TextStyle(fontSize: 15.0),),
+                ],
+              ),
+            ),
+          ) :
+           Container(),
+          isDone ?   Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: 10.0,right: 10.0),
+              child:
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(Translations.current.serviceCost(),style: TextStyle(fontSize: 15.0)),
+                  Text(DartHelper.isNullOrEmptyString(  item.ServiceCost.toString()),style: TextStyle(fontSize: 15.0),),
+                ],
+              ),
+            ),
+          ) :
+          Container(),
+
         ],
       ),
     );
