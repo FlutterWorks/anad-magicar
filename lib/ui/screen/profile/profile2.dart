@@ -122,14 +122,14 @@ loaduser(Future<User> usr) async
         bottomNavigationBar: CurvedNavigationBar(
           index: 2,
           height: 60.0,
-          color: !isDark ? Colors.black87 : Colors.white,
-          backgroundColor: !isDark ?  Colors.white : Colors.black87,
+          color: centerRepository.getBackNavThemeColor(!isDark),
+          backgroundColor: centerRepository.getBackNavThemeColor(isDark),
           items: <Widget>[
-            Icon(Icons.build, size: 30,color: Color(0xff455a64)),
-            Icon(Icons.pin_drop, size: 30,color: Color(0xff455a64)),
-            Icon(Icons.directions_car , size: 30,color:  Color(0xff455a64)),
-            Icon(Icons.message, size: 30,color: Color(0xff455a64)),
-            Icon(Icons.payment, size: 30,color: Color(0xff455a64),),
+            Icon(Icons.build, size: 30,color: Colors.indigoAccent),
+            Icon(Icons.pin_drop, size: 30,color: Colors.indigoAccent),
+            Icon(Icons.directions_car , size: 30,color:  Colors.indigoAccent),
+            Icon(Icons.message, size: 30,color: Colors.indigoAccent),
+            Icon(Icons.payment, size: 30,color: Colors.indigoAccent,),
           ],
           onTap: (index) {
             //Handle button tap

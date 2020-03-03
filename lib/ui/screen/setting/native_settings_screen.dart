@@ -820,11 +820,11 @@ class SettingsScreenState extends State<SettingsScreen> {
       color:  centerRepository.getBackNavThemeColor(!isDark),
       backgroundColor: centerRepository.getBackNavThemeColor(isDark),
     items: <Widget>[
-    Icon(Icons.build, size: 30,color: Color(0xff455a64)),
-    Icon(Icons.pin_drop, size: 30,color: Color(0xff455a64)),
-    Icon(Icons.directions_car , size: 30,color:  Color(0xff455a64)),
-    Icon(Icons.message, size: 30,color: Color(0xff455a64)),
-    Icon(Icons.payment, size: 30,color: Color(0xff455a64),),
+      Icon(Icons.build, size: 30,color: Colors.indigoAccent),
+      Icon(Icons.pin_drop, size: 30,color: Colors.indigoAccent),
+      Icon(Icons.directions_car , size: 30,color:  Colors.indigoAccent),
+      Icon(Icons.message, size: 30,color: Colors.indigoAccent),
+      Icon(Icons.payment, size: 30,color: Colors.indigoAccent,),
     ],
     onTap: (index) {
     //Handle button tap
@@ -882,22 +882,22 @@ class SettingsScreenState extends State<SettingsScreen> {
                       builder: (BuildContext context) => LanguagesScreen()));*/
                 },
               ),
-              SettingsTile(
+             /* SettingsTile(
                 title: 'زمان دریافت اطلاعات خودرو',
                 subtitle: 'تنظیمات اطلاعات دریافت',
                 leading: Icon(Icons.update),
                 onTap: () {
                   _showDefaultSettingsSheet(context, PERIODIC_TIME_TAG);
                 },
-              ),
-              SettingsTile(
+              ),*/
+             /* SettingsTile(
                 title: 'زمان دریافت وضعیت خودرو',
                 subtitle: 'تنظیمات وضعیت خودرو',
                 leading: Icon(Icons.update),
                 onTap: () {
                   _showDefaultSettingsSheet(context,PERIODIC_UPDTAE_TIME_TAG);
                 },
-              ),
+              ),*/
               /*SettingsTile(
                 title: 'تنظیمات سرعت',
                 subtitle: 'حداقل حداکثر سرعت',

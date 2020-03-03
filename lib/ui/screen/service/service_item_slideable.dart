@@ -158,7 +158,7 @@ class _ServiceItemSlideableState extends State<ServiceItemSlideable> {
           return HorizontalListItem(widget.serviceItem);},),
       actionDelegate: (widget.serviceItem.ServiceStatusConstId==Constants.SERVICE_DONE) ? null  :
       SlideActionBuilderDelegate(
-          actionCount: 3,
+          actionCount: 2,
           builder: (context, index, animation, renderingMode) {
             if(index==0){
               return IconSlideAction(
@@ -170,16 +170,7 @@ class _ServiceItemSlideableState extends State<ServiceItemSlideable> {
                 onTap: () {  _onUpdateService(item,context,false,Constants.SERVICE_DONE);},
               );
             }
-            else if(index==2){
-              return IconSlideAction(
-                  caption: Translations.current.cancelService(),
-                  color: renderingMode == SlidableRenderingMode.slide
-                      ? Colors.indigo.withOpacity(animation.value)
-                      : Colors.indigo,
-                  icon: Icons.cancel,
-                  onTap: ()  { _onUpdateService(item,context,false,Constants.SERVICE_CANCEL);},
-              );
-            }else {
+           else {
               return IconSlideAction(
                   caption: Translations.current.notDoneService(),
                   color: renderingMode == SlidableRenderingMode.slide
@@ -368,16 +359,21 @@ class HorizontalListItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
               Text(DartHelper.isNullOrEmptyString(serviceTypeTitle),style: TextStyle(fontSize: 15.0)),
-      CircleAvatar(
-
-        radius: 60.0,
-        backgroundColor: item.ServiceStatusConstId==Constants.SERVICE_DONE ? Colors.greenAccent :
+      Container(
+        width: 90.0,
+      height: 50.0,
+      decoration: BoxDecoration(
+        color: item.ServiceStatusConstId==Constants.SERVICE_DONE ? Colors.greenAccent :
         item.ServiceStatusConstId==Constants.SERVICE_NOTDONE ? Colors.pinkAccent :
         item.ServiceStatusConstId==Constants.SERVICE_CANCEL ? Colors.blueAccent :
         item.ServiceStatusConstId==Constants.SERVICE_NEAR ? Colors.amberAccent :
         Colors.white,
-        child: Text(DartHelper.isNullOrEmptyString( item.serviceType.ServiceTypeTitle),style: TextStyle(fontSize: 10.0,color: item.ServiceStatusConstId==Constants.SERVICE_NOTDONE ? Colors.black : Colors.white)),
-        foregroundColor: Colors.white,
+      ),
+
+        child: Text(DartHelper.isNullOrEmptyString( item.serviceType.ServiceTypeTitle),
+            overflow: TextOverflow.fade,softWrap: true,textAlign: TextAlign.center,
+             style: TextStyle(fontSize: 10.0,color: item.ServiceStatusConstId==Constants.SERVICE_NOTDONE ? Colors.white : Colors.white)),
+        //foregroundColor: Colors.white,
       ),
       ],
     ),

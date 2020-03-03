@@ -501,7 +501,7 @@ class _MyAppState extends State<MyApp>
                                               );
                                             case '/messageappdetail':
                                               return new MyCustomRoute(
-                                                builder: (_) => new NewMessageItem(messages: settings.arguments,),
+                                                builder: (_) => new NewMessageItem(detailVM: settings.arguments,),
                                                 settings: settings,
                                               );
                                             case '/servicepage':

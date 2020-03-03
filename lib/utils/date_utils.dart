@@ -225,6 +225,19 @@ class DateTimeUtils{
    return '';
  }
 
+
+ static Jalali convertIntoDateTimeJalali(String date){
+   if(date!=null && date.isNotEmpty) {
+     var fDate = date.split('/');
+     if (fDate != null && fDate.length == 3) {
+       Jalali j = Jalali(int.tryParse(fDate[0]),
+           int.tryParse(fDate[1]),
+           int.tryParse(fDate[2]));
+       return j;
+     }
+     return null;
+   }
+ }
 }
 
 

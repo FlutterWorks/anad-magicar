@@ -91,7 +91,12 @@ abstract class MainPage<T extends StatefulWidget> extends State<T> {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+    return new WillPopScope(
+        onWillPop: () async {
+      return false;
+    },
+    child:
+      Scaffold(
       key: _scaffoldKey,
       floatingActionButton: getFab()!=null ? getFab() : null,
       drawer: AppDrawer(carPageTap: onCarPageTap,userName: userName,imageUrl: imageUrl,currentRoute: getCurrentRoute(),carId: CenterRepository.getCurrentCarId(),),
@@ -151,6 +156,7 @@ abstract class MainPage<T extends StatefulWidget> extends State<T> {
             pageContent()
     ],
     ),
+      ),
     );
   }
 }

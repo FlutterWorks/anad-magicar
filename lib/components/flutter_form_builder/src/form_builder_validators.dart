@@ -1,10 +1,12 @@
+import 'package:anad_magicar/translation_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:validators/validators.dart';
 
 class FormBuilderValidators {
+ static var requiredDefault=Translations.current.allFieldsRequired();
   /// [FormFieldValidator] that requires the field have a non-empty value.
   static FormFieldValidator required({
-    String errorText = "This field cannot be empty.",
+    String errorText =  'ورود مقدار این فیلد الزامی است',
   }) {
     return (valueCandidate) {
       if (valueCandidate == null ||
@@ -92,7 +94,7 @@ class FormBuilderValidators {
     return (valueCandidate) {
       if (valueCandidate != null && valueCandidate.length > maxLength) {
         return errorText ??
-            "Value must have a length less than or equal to $maxLength";
+            "حداکثر طول مقدار ورودی باید  $maxLength"+" باشد ";
       }
       return null;
     };
@@ -148,7 +150,7 @@ class FormBuilderValidators {
 
   /// [FormFieldValidator] that requires the field's value to be a valid number.
   static FormFieldValidator numeric({
-    String errorText = "Value must be numeric.",
+    String errorText = "مقدار ورودی باید عدد باشد",
   }) {
     return (valueCandidate) {
       if (num.tryParse(valueCandidate) == null && valueCandidate.isNotEmpty)

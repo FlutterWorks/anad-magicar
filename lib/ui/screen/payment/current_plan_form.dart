@@ -1062,7 +1062,7 @@ class CurrentPlansForm extends StatelessWidget {
         new Container(
           margin: EdgeInsets.only(top: 10.0,right: 5.0,left: 5.0),
           constraints: new BoxConstraints.expand(
-            height: 260.0,
+            height: 120.0,
             width: MediaQuery.of(context).size.width*0.95,
           ),
           decoration: BoxDecoration(

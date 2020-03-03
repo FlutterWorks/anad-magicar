@@ -472,7 +472,14 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
     if(serviceTypes!=null && serviceTypes.length>0)
       {
         _valueCarServiceType=serviceTypes[0];
+        if(widget.editMode!=null && widget.editMode){
+          var st=serviceTypes.where((s)=>s.ServiceTypeId==widget.service.ServiceTypeId).toList();
+          if(st!=null && st.length>0){
+            _valueCarServiceType=st.first;
+          }
+        }
       }
+
 
     _authData['serviceTypeId']=_valueCarServiceType!=null ? _valueCarServiceType.ServiceTypeId.toString() : '0';
 
@@ -513,6 +520,21 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
 
     //mobileEditingController=new TextEditingController();
 
+    textEditingController.addListener(() {
+      alarmDate=getAlarmDate();
+    });
+
+    textEditingController3.addListener((){
+      if(alarmDate!=null && alarmDate.isNotEmpty) {
+        textEditingController3.value = textEditingController3.value.copyWith(
+          text: alarmDate,
+          selection:
+          TextSelection(
+              baseOffset: alarmDate.length, extentOffset: alarmDate.length),
+          composing: TextRange.empty,
+        );
+      }
+    });
   if(widget.editMode!=null && widget.editMode) {
     isDurational=widget.service.serviceType.ServiceTypeConstId==Constants.SERVICE_TYPE_DURATIONALITY;
 
@@ -693,15 +715,14 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         });
   }
 
-  Widget _buildServiceDateField(double width, CarServiceMessages messages) {
-    final auth = Provider.of<Auth>(context);
-    editMode=(widget.editMode!=null && widget.editMode);
+  String getServiceDate() {
     String serviceDate='';
     if(isDurational){
       int dv=_valueCarServiceType.DurationValue;
       if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_MONTH){
-          Jalali sj=Jalali.now().addMonths(dv);
-          serviceDate=DateTimeUtils.getDateJalaliThis(sj);
+
+        Jalali sj=Jalali.now().addMonths(dv);
+        serviceDate=DateTimeUtils.getDateJalaliThis(sj);
       }else if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_YEAR){
         Jalali sj=Jalali.now().addYears(dv);
         serviceDate=DateTimeUtils.getDateJalaliThis(sj);
@@ -709,6 +730,53 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
         Jalali sj=Jalali.now().addDays(dv);
         serviceDate=DateTimeUtils.getDateJalaliThis(sj);
       } }
+    return serviceDate;
+  }
+
+  String getAlarmDate() {
+    String serviceDate='';
+    String alarmDate='';
+    serviceDate=getServiceDate();
+    if(isDurational){
+      int dv=_valueCarServiceType.AlarmDurationDay;
+      if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_MONTH){
+
+        if(serviceDate!=null && serviceDate.isNotEmpty) {
+          Jalali sj=DateTimeUtils.convertIntoDateTimeJalali(serviceDate);
+          Jalali nowDate=sj.addDays(-dv);
+          alarmDate=DateTimeUtils.getDateJalaliThis(nowDate);
+        }
+
+      }else if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_YEAR){
+        if(serviceDate!=null && !serviceDate.isNotEmpty) {
+          Jalali sj=DateTimeUtils.convertIntoDateTimeJalali(serviceDate);
+          Jalali nowDate=sj.addDays(-dv);
+          alarmDate=DateTimeUtils.getDateJalaliThis(nowDate);
+        }
+      } else if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_DAY){
+        if(serviceDate!=null && !serviceDate.isNotEmpty) {
+          Jalali sj=DateTimeUtils.convertIntoDateTimeJalali(serviceDate);
+          Jalali nowDate=sj.addDays(-dv);
+          alarmDate=DateTimeUtils.getDateJalaliThis(nowDate);
+        }
+      }
+      if(!isDateEdited) {
+        textEditingController3.value = textEditingController3.value.copyWith(
+          text: alarmDate,
+          selection:
+          TextSelection(
+              baseOffset: alarmDate.length, extentOffset: alarmDate.length),
+          composing: TextRange.empty,
+        );
+      }
+    }
+    return alarmDate;
+  }
+  Widget _buildServiceDateField(double width, CarServiceMessages messages) {
+    final auth = Provider.of<Auth>(context);
+    editMode=(widget.editMode!=null && widget.editMode);
+    String serviceDate='';
+    serviceDate=getServiceDate();
     if(editMode){
       serviceDate=widget.service!=null ? widget.service.ServiceDate : '';
       if(serviceDate==null)
@@ -864,25 +932,17 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
   }
   Widget _buildAlarmDateField(double width, CarServiceMessages messages) {
     final auth = Provider.of<Auth>(context);
-    String serviceDate='';
-    if(isDurational){
-      int dv=_valueCarServiceType.AlarmDurationDay;
-      if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_MONTH){
-        Jalali sj=Jalali.now().addMonths(dv);
-        serviceDate=DateTimeUtils.getDateJalaliThis(sj);
-      }else if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_YEAR){
-        Jalali sj=Jalali.now().addYears(dv);
-        serviceDate=DateTimeUtils.getDateJalaliThis(sj);
-      } else if(_valueCarServiceType.DurationTypeConstId==Constants.SERVICE_DURATION_DAY){
-        Jalali sj=Jalali.now().addDays(dv);
-        serviceDate=DateTimeUtils.getDateJalaliThis(sj);
-      }
-      if(!isDateEdited) {
+
+    alarmDate=getAlarmDate();
+
+    if(!isDateEdited) {
+      if (widget.editMode != null && widget.editMode) {
+        //alarmDate = widget.service.AlarmDate;
         textEditingController3.value = textEditingController3.value.copyWith(
-          text: serviceDate,
+          text: alarmDate,
           selection:
           TextSelection(
-              baseOffset: serviceDate.length, extentOffset: serviceDate.length),
+              baseOffset: alarmDate.length, extentOffset: alarmDate.length),
           composing: TextRange.empty,
         );
       }
@@ -1060,7 +1120,7 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
                 SizedBox(height: 5),
                 isDurational ?  _buildServiceDateField(textFieldWidth, messages) : Container(),
                 SizedBox(height: 5),
-                (widget.editMode!=null && widget.editMode) ?  _buildActionDateField(textFieldWidth, messages) :
+                (widget.editMode!=null && widget.editMode && widget.service.ServiceStatusConstId==Constants.SERVICE_DONE) ?  _buildActionDateField(textFieldWidth, messages) :
                 Container(width: 0.0,height: 0.0,),
                 SizedBox(height: 5),
                 ((widget.editMode!=null && widget.editMode) || (isDurational)) ? _buildAlarmDateField(textFieldWidth, messages) :
@@ -1073,7 +1133,8 @@ class _CarCardState extends State<_CarCard> with TickerProviderStateMixin {
                 SizedBox(height: 5),
                !isDurational ? _buildDistanceField(textFieldWidth, messages) : Container(),
                 SizedBox(height: 5),
-                ((widget.editMode!=null && widget.editMode) && widget.service.ServiceStatusConstId==Constants.SERVICE_NOTDONE) ?  _buildDescriptionField(textFieldWidth, messages) :
+                ((widget.editMode!=null && widget.editMode) && (widget.service.ServiceStatusConstId==Constants.SERVICE_NOTDONE ||
+                    widget.service.ServiceStatusConstId==Constants.SERVICE_DONE)) ?  _buildDescriptionField(textFieldWidth, messages) :
                 Container(),
               ],
             ),

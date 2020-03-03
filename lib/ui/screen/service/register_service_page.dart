@@ -51,7 +51,7 @@ class RegisterServicePageState extends MainPage<RegisterServicePage> {
       IconButton(
         icon: Icon(Icons.arrow_forward,color: Colors.indigoAccent,),
         onPressed: (){
-          Navigator.pushNamed(context, MainPageServiceState.route);
+          Navigator.pushNamed(context, MainPageServiceState.route,arguments: widget.serviceVM);
         },
       ),
     ];

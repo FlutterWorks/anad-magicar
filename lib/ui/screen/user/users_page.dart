@@ -13,7 +13,7 @@ import 'package:anad_magicar/model/cars/car.dart';
 import 'package:anad_magicar/model/user/admin_car.dart';
 import 'package:anad_magicar/model/user/role.dart';
 import 'package:anad_magicar/model/viewmodel/accessable_action_vm.dart';
-import 'package:anad_magicar/model/viewmodel/add_car_vm.dart';
+
 import 'package:anad_magicar/model/viewmodel/car_info_vm.dart';
 import 'package:anad_magicar/model/viewmodel/init_data_vm.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
@@ -21,10 +21,7 @@ import 'package:anad_magicar/repository/pref_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/utils/dart_helper.dart';
 import 'package:anad_magicar/widgets/bottom_sheet_custom.dart';
-import 'package:anad_magicar/widgets/curved_navigation_bar.dart';
-import 'package:anad_magicar/widgets/flutter_offline/flutter_offline.dart';
-import 'package:anad_magicar/widgets/magicar_appbar.dart';
-import 'package:anad_magicar/widgets/magicar_appbar_title.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

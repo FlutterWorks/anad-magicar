@@ -697,7 +697,7 @@ return
    child:
   /* BounceAnimationBuilder(
                 child:*/
-              Image.asset('assets/images/alarm_off_3.png',
+              Image.asset('assets/images/horn.png',
                 scale: 1.5,fit: BoxFit.cover,
                   color: _currentColorRow) ,
    /*animationController: animController,
@@ -1128,19 +1128,9 @@ buildMapRow(BuildContext context,
                             Stack(
 
                               children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.only(top:0.0),
-                                  child:
-                                  Container(
-                height: 20.0,
-                                    child:
-                                    Center(
 
-                                    child: Text( DartHelper.isNullOrEmptyString( (carStateVM.battery_value/10).toString(),),textAlign: TextAlign.center,style: TextStyle(fontSize: 12.0),),
-                                  ),),
-                                ),
                 Padding(
-                padding: EdgeInsets.only(top:25.0),
+                padding: EdgeInsets.only(top:0.0),
                 child:
                                 new Align(
                                   alignment: Alignment.center,
@@ -1170,6 +1160,17 @@ buildMapRow(BuildContext context,
 
                                 ),
                 ),
+                                Padding(
+                                  padding: EdgeInsets.only(top:25.0),
+                                  child:
+                                  Container(
+                                    height: 20.0,
+                                    child:
+                                    Center(
+
+                                      child: Text( DartHelper.isNullOrEmptyString( (carStateVM.battery_value/10).toString(),),textAlign: TextAlign.center,style: TextStyle(fontSize: 12.0,color: _currentColorRow),),
+                                    ),),
+                                ),
                               ],
                             ),
                           ),
@@ -1181,17 +1182,9 @@ buildMapRow(BuildContext context,
                           Stack(
 
                             children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.only(top:0.0),
-                                child:
-                                Container(
-                                  height: 15.0,
-                                  child: Center(
 
-                child:Text(DartHelper.isNullOrEmptyString( carStateVM.tempreture.toString()),textAlign: TextAlign.center,style: TextStyle(fontSize: 12.0)),),
-                                ),),
                 Padding(
-                padding: EdgeInsets.only(top:25.0),
+                padding: EdgeInsets.only(top:0.0),
                 child:
                               new Align(
                                 alignment: Alignment.center,
@@ -1219,7 +1212,15 @@ buildMapRow(BuildContext context,
                                 ),
                               ),
                               ),
+                              Padding(
+                                padding: EdgeInsets.only(top:25.0),
+                                child:
+                                Container(
+                                  height: 15.0,
+                                  child: Center(
 
+                                    child:Text(DartHelper.isNullOrEmptyString( carStateVM.tempreture.toString()),textAlign: TextAlign.center,style: TextStyle(fontSize: 12.0,color: _currentColorRow)),),
+                                ),),
                             ],
                           ),
                         ),

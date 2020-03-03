@@ -423,6 +423,15 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
     _loopActive = false;
   }
 
+  setEngineImage(bool status){
+    if(status) {
+      engineImageUrl = 'assets/images/start_engine.png';
+    }
+    else
+    {
+      engineImageUrl='assets/images/stop_engine.png';
+    }
+  }
 
   Widget buildControlRow(BuildContext context,
       String startImgPath,
@@ -456,702 +465,743 @@ class _EngineStatusState extends State<EngineStatus> with SingleTickerProviderSt
 
           }
         }
-        return
-          Stack(
-            alignment: new Alignment(0, 0),
-            overflow: Overflow.visible,
-            children: <Widget>[
-              new Padding(padding: EdgeInsets.only(top: 2.0),
-                child:
-                Container(
-                  //alignment: Alignment.topCenter,
-                  width: MediaQuery
-                      .of(context)
-                      .size
-                      .width ,
-                  height: h,
-                  child: new Card(
-                    margin: new EdgeInsets.only(
-                        left: 2.0, right: 2.0, top: 4.0, bottom: 1.0),
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                          color: !isDark ? Color(0xFF000000) :  Color(0xFFFFFFFF), width: 1.0/*MediaQuery
+        return  StreamBuilder<CarStateVM>(
+          stream: widget.carStateNoty.noty,
+          initialData: widget.carStateVM,
+          builder: (BuildContext c, AsyncSnapshot<CarStateVM> data)
+        {
+          if (data != null && data.hasData) {
+            CarStateVM carState = data.data;
+            //currentState2=carState;
+            lock_status = !carState.isDoorOpen;
+            trunk_status = carState.isTraunkOpen;
+            commandSuccess=true;
+            temp_engineStatus =
+            carState.isPowerOn != null ? carState.isPowerOn : false;
+              setEngineImage(temp_engineStatus);
+          }
+          return
+            Stack(
+              alignment: new Alignment(0, 0),
+              overflow: Overflow.visible,
+              children: <Widget>[
+                new Padding(padding: EdgeInsets.only(top: 2.0),
+                  child:
+                  Container(
+                    //alignment: Alignment.topCenter,
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width,
+                    height: h,
+                    child: new Card(
+                      margin: new EdgeInsets.only(
+                          left: 2.0, right: 2.0, top: 4.0, bottom: 1.0),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color: !isDark ? Color(0xFF000000) : Color(
+                                0xFFFFFFFF), width: 1.0 /*MediaQuery
                           .of(context)
                           .size
                           .width / 500*/),
-                      borderRadius: new BorderRadius.all(
-                          Radius.elliptical(10, 10)),
+                        borderRadius: new BorderRadius.all(
+                            Radius.elliptical(10, 10)),
+                      ),
+                      color: !isDark ? Color(0xFFeceff1) : Color(0xFF212121),
+                      elevation: 0.0,
+                      child: Text(''),
                     ),
-                    color: !isDark ? Color(0xFFeceff1) : Color(0xFF212121),
-                    elevation: 0.0,
-                    child: Text(''),
                   ),
                 ),
-              ),
-              new Positioned(
-                left: 1.0,
-                top: -20.0,
-                child:
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
+                new Positioned(
+                  left: 1.0,
+                  top: -20.0,
+                  child:
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
 
 
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child:
-                      new Container(
-                        margin: EdgeInsets.only(left: 25.0, top: 10.0),
-                        //width: 64.0,
+                      Align(
+                        alignment: Alignment.topLeft,
                         child:
-                        new GestureDetector(
-                          onTap: () {
-                           // listenerRepository.onLockTap(context, false);
-                           // updateLockStatus(false);
-                            widget.carStateVM.isDoorOpen=true;
-                           /* widget.carStateVM.setCarStatusImages();
+                        new Container(
+                          margin: EdgeInsets.only(left: 25.0, top: 10.0),
+                          //width: 64.0,
+                          child:
+                          new GestureDetector(
+                            onTap: () {
+                              // listenerRepository.onLockTap(context, false);
+                              // updateLockStatus(false);
+                              widget.carStateVM.isDoorOpen = true;
+                              /* widget.carStateVM.setCarStatusImages();
                             centerRepository.setCarStateVMMap(widget.carStateVM);
                             widget.carStateNoty.updateValue(widget.carStateVM);*/
-                           // play(Constants.DOOR_OPEN_SOUND);
-                           sendCommand(ActionsCommand.UnlockAndDisArm_Nano_CODE);
-
-                          },
-                          child:
-                          AvatarGlow(
-                            startDelay: Duration(milliseconds: 1000),
-                            glowColor: Colors.redAccent,
-                            endRadius: 40.0,
-                            duration: Duration(milliseconds: 2000),
-                            repeat: true,
-                            showTwoGlows: true,
-                            repeatPauseDuration: Duration(milliseconds: 100),
-                            child: Material(
-                              elevation: 0.0,
-                              shape: CircleBorder(),
-                              child: CircleAvatar(
-                                backgroundColor:Colors.white12 /*Colors.black12.withOpacity(
+                              // play(Constants.DOOR_OPEN_SOUND);
+                              sendCommand(
+                                  ActionsCommand.UnlockAndDisArm_Nano_CODE);
+                            },
+                            child:
+                            AvatarGlow(
+                              startDelay: Duration(milliseconds: 1000),
+                              glowColor: Colors.redAccent,
+                              endRadius: 40.0,
+                              duration: Duration(milliseconds: 2000),
+                              repeat: true,
+                              showTwoGlows: true,
+                              repeatPauseDuration: Duration(milliseconds: 100),
+                              child: Material(
+                                elevation: 0.0,
+                                shape: CircleBorder(),
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.white12 /*Colors.black12.withOpacity(
                                     0.0)*/,
-                                //Colors.grey[100] ,
-                                child: lock_status ? Image.asset(
-                                  'assets/images/unlock_22.png',
-                                  color: _currentColor,scale: 2.5,) :
-                                ImageNeonGlow(
-                                  imageUrl: 'assets/images/unlock_22.png',
-                                  counter: _counter,
-                                  color: _currentColor,),
+                                  //Colors.grey[100] ,
+                                  child: lock_status ? Image.asset(
+                                    'assets/images/unlock_22.png',
+                                    color: _currentColor, scale: 2.5,) :
+                                  ImageNeonGlow(
+                                    imageUrl: 'assets/images/unlock_22.png',
+                                    counter: _counter,
+                                    color: _currentColor,),
 
-                                radius: 24.0,
-                                //shape: BoxShape.circle
+                                  radius: 24.0,
+                                  //shape: BoxShape.circle
+                                ),
                               ),
+                              shape: BoxShape.circle,
+                              animate: !lock_status,
+                              curve: Curves.fastOutSlowIn,
                             ),
-                            shape: BoxShape.circle,
-                            animate: !lock_status,
-                            curve: Curves.fastOutSlowIn,
-                          ),
 
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              new Positioned(
-                right: 1.0,
-                top: -20.0,
-                child:
-                Row(
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.topRight,
-                      child:
-                      new Container(
-                        margin: EdgeInsets.only(right: 25.0, top: 10),
+                new Positioned(
+                  right: 1.0,
+                  top: -20.0,
+                  child:
+                  Row(
+                    children: <Widget>[
+                      Align(
+                        alignment: Alignment.topRight,
                         child:
-                        new GestureDetector(
-                          onTap: ()  {
-                            //listenerRepository.onLockTap(context, true);
-                           // updateLockStatus(true);
-                            widget.carStateVM.isDoorOpen=false;
-                           sendCommand(ActionsCommand.LockAndArm_Nano_CODE);
-                            //play(Constants.DOOR_LOCK_SOUND,);
-                          },
+                        new Container(
+                          margin: EdgeInsets.only(right: 25.0, top: 10),
                           child:
-                          AvatarGlow(
-                            startDelay: Duration(milliseconds: 1000),
-                            glowColor: Colors.redAccent,
-                            endRadius: 40.0,
-                            duration: Duration(milliseconds: 2000),
-                            repeat: true,
-                            showTwoGlows: true,
-                            repeatPauseDuration: Duration(milliseconds: 100),
-                            child: Material(
-                              elevation: 0.0,
-                              shape: CircleBorder(),
-                              child: CircleAvatar(
-                                backgroundColor: Colors.transparent/*Colors.black12.withOpacity(
+                          new GestureDetector(
+                            onTap: () {
+                              //listenerRepository.onLockTap(context, true);
+                              // updateLockStatus(true);
+                              widget.carStateVM.isDoorOpen = false;
+                              sendCommand(ActionsCommand.LockAndArm_Nano_CODE);
+                              //play(Constants.DOOR_LOCK_SOUND,);
+                            },
+                            child:
+                            AvatarGlow(
+                              startDelay: Duration(milliseconds: 1000),
+                              glowColor: Colors.redAccent,
+                              endRadius: 40.0,
+                              duration: Duration(milliseconds: 2000),
+                              repeat: true,
+                              showTwoGlows: true,
+                              repeatPauseDuration: Duration(milliseconds: 100),
+                              child: Material(
+                                elevation: 0.0,
+                                shape: CircleBorder(),
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.transparent /*Colors.black12.withOpacity(
                                     0.0)*/,
-                                //Colors.grey[100] ,
-                                child: lock_status ?
-                                ImageNeonGlow(
-                                  imageUrl: 'assets/images/lock_11.png',
-                                  counter: _counter,
-                                  color: _currentColor,) :
-                                Image.asset(
-                                  'assets/images/lock_11.png', scale: 2.0,
-                                  color: _currentColor,),
-                                radius: 24.0,
+                                  //Colors.grey[100] ,
+                                  child: lock_status ?
+                                  ImageNeonGlow(
+                                    imageUrl: 'assets/images/lock_11.png',
+                                    counter: _counter,
+                                    color: _currentColor,) :
+                                  Image.asset(
+                                    'assets/images/lock_11.png', scale: 2.0,
+                                    color: _currentColor,),
+                                  radius: 24.0,
 
+                                ),
                               ),
+                              shape: BoxShape.circle,
+                              animate: lock_status,
+                              curve: Curves.fastOutSlowIn,
                             ),
-                            shape: BoxShape.circle,
-                            animate: lock_status,
-                            curve: Curves.fastOutSlowIn,
-                          ),
 
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              new Positioned(
-                left: 0.0,
-                right: 0.0,
-                top: -20.0,
-                bottom: 0.0,
-                child:
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child:
-                      Padding(
-                        padding: EdgeInsets.only(
-                          top: 4.0, left: 0.0, right: 25.0,),
+                new Positioned(
+                  left: 0.0,
+                  right: 0.0,
+                  top: -20.0,
+                  bottom: 0.0,
+                  child:
+                  Row(
+                    children: <Widget>[
+                      Expanded(
                         child:
-                        Container(
-                          height: 0.5,
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: 4.0, left: 0.0, right: 25.0,),
+                          child:
+                          Container(
+                            height: 0.5,
 
-                          color: Colors.black26,),),
-                    ),
-                    new GestureDetector(
+                            color: Colors.black26,),),
+                      ),
+                      new GestureDetector(
 
-                      onTapDown: (details) {
-                        /* _buttonPressed=true;
+                        onTapDown: (details) {
+                          /* _buttonPressed=true;
                       _decreaseCounterWhilePressed();*/
-                      },
+                        },
 
-                      onLongPress: () {
-                        percentage_compeleted=1.0;
-                        _buttonPressed = true;
-                       // play(Constants.POWER_ENGINE_SOUND);
-                        _decreaseCounterWhilePressed();
-                      },
+                        onLongPress: () {
+                          percentage_compeleted = 1.0;
+                          _buttonPressed = true;
+                          // play(Constants.POWER_ENGINE_SOUND);
+                          _decreaseCounterWhilePressed();
+                        },
 
-                      onTapCancel: () {
-                        _buttonPressed = false;
-                        //stop(Constants.POWER_ENGINE_SOUND);
-                        if (controller.isAnimating) {
-                          controller.stop();
-                        }
-                        else {
-                          controller.stop();
-                        }
-                        if (percentage < 1.0) {
-                          setState(() {
-                            percentage = 0.0;
+                        onTapCancel: () {
+                          _buttonPressed = false;
+                          //stop(Constants.POWER_ENGINE_SOUND);
+                          if (controller.isAnimating) {
+                            controller.stop();
+                          }
+                          else {
+                            controller.stop();
+                          }
+                          if (percentage < 1.0) {
+                            setState(() {
+                              percentage = 0.0;
+                            });
+                            RxBus.post(new ChangeEvent(
+                                message: 'UPDATE_PROGRESS',
+                                amount: percentage));
+                          }
+                        },
+                        onLongPressUp: () {
+                          // stop(Constants.POWER_ENGINE_SOUND);
+                          _buttonPressed = false;
+                          percentage_compeleted = 1.0;
+                          if (controller.isAnimating) {
+                            controller.stop();
+                          }
+                          else {
+                            controller.stop();
+                          }
+                          if (percentage < 1.0) {
+                            setState(() {
+                              percentage = 0.0;
+                              percentage_compeleted = 1.0;
+                            });
+                            RxBus.post(new ChangeEvent(
+                                message: 'UPDATE_PROGRESS',
+                                amount: percentage));
+                          }
+                        },
+                        onTapUp: (details) {
+                          _buttonPressed = false;
+                          if (controller.isAnimating) {
+                            controller.stop();
+                          }
+                          else {
+                            controller.stop();
+                          }
+                          if (percentage < 1.0) {
+                            setState(() {
+                              percentage = 0.0;
+                              percentage_compeleted = 1.0;
+                            });
+                            RxBus.post(new ChangeEvent(
+                                message: 'UPDATE_PROGRESS',
+                                amount: percentage));
+                          }
+                        },
+                        child:
+                        new Stack(
+                          alignment: Alignment.center,
+                          children: <Widget>[
 
-                          });
-                          RxBus.post(new ChangeEvent(
-                              message: 'UPDATE_PROGRESS',
-                              amount: percentage));
-                        }
-                      },
-                      onLongPressUp: () {
-                       // stop(Constants.POWER_ENGINE_SOUND);
-                        _buttonPressed = false;
-                        percentage_compeleted=1.0;
-                        if (controller.isAnimating) {
-                          controller.stop();
-                        }
-                        else {
-                          controller.stop();
-                        }
-                        if (percentage < 1.0) {
-                          setState(() {
-                            percentage = 0.0;
-                            percentage_compeleted=1.0;
-
-                          });
-                          RxBus.post(new ChangeEvent(
-                              message: 'UPDATE_PROGRESS',
-                              amount: percentage));
-                        }
-                      },
-                      onTapUp: (details) {
-                        _buttonPressed = false;
-                        if (controller.isAnimating) {
-                          controller.stop();
-                        }
-                        else {
-                          controller.stop();
-                        }
-                        if (percentage < 1.0) {
-                          setState(() {
-                            percentage = 0.0;
-                            percentage_compeleted=1.0;
-
-                          });
-                          RxBus.post(new ChangeEvent(
-                              message: 'UPDATE_PROGRESS',
-                              amount: percentage));
-                        }
-
-                      },
-                      child:
-                      new Stack(
-                        alignment: Alignment.center,
-                        children: <Widget>[
-
-                          AvatarGlow(
-                            startDelay: Duration(milliseconds: 1000),
-                            glowColor: Colors.pink,
-                            endRadius: MediaQuery
-                                .of(context)
-                                .size
-                                .width * 0.2,
-                            duration: Duration(milliseconds: 2000),
-                            repeat: true,
-                            showTwoGlows: true,
-                            repeatPauseDuration: Duration(milliseconds: 100),
-                            child: Material(
-                              elevation: 0.0,
-                              shape: CircleBorder(),
-                              child: CircleAvatar(
-                                backgroundColor: Colors.transparent,
-                                //Colors.grey[100] ,
-                                child: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 700),
-                                  transitionBuilder: (Widget child,
-                                      Animation<double> animation) {
-                                    return ScaleTransition(
-                                        child: child, scale: animation);
-                                  },
-                                  child:
-                                  new Container(
-                                    width: h*0.85,
-                                    height: h*0.85,
-                                    key: ValueKey<int>(_counter),
-                                    child: !temp_engineStatus ?
-                                    Image.asset(startImgPath, scale: 1,
-                                    ) :
-                                    Container(
-                                      key: ValueKey(_counter),
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              150),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.pinkAccent
-                                                  .withAlpha(80),
-                                              blurRadius: 7.0,
-                                              spreadRadius: 0.0,
-                                              offset: Offset(
-                                                0.0,
-                                                6.0,
+                            AvatarGlow(
+                              startDelay: Duration(milliseconds: 1000),
+                              glowColor: Colors.pink,
+                              endRadius: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width * 0.2,
+                              duration: Duration(milliseconds: 2000),
+                              repeat: true,
+                              showTwoGlows: true,
+                              repeatPauseDuration: Duration(milliseconds: 100),
+                              child: Material(
+                                elevation: 0.0,
+                                shape: CircleBorder(),
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.transparent,
+                                  //Colors.grey[100] ,
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 700),
+                                    transitionBuilder: (Widget child,
+                                        Animation<double> animation) {
+                                      return ScaleTransition(
+                                          child: child, scale: animation);
+                                    },
+                                    child:
+                                    new Container(
+                                      width: h * 0.85,
+                                      height: h * 0.85,
+                                      key: ValueKey<int>(_counter),
+                                      child: !temp_engineStatus ?
+                                      Image.asset(startImgPath, scale: 1,
+                                      ) :
+                                      Container(
+                                        key: ValueKey(_counter),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                                150),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.pinkAccent
+                                                    .withAlpha(80),
+                                                blurRadius: 7.0,
+                                                spreadRadius: 0.0,
+                                                offset: Offset(
+                                                  0.0,
+                                                  6.0,
+                                                ),
                                               ),
-                                            ),
-                                          ]), child:
-                                    Container(
-                                      key: ValueKey(_counter),
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              200),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.pinkAccent
-                                                  .withAlpha(80),
-                                              blurRadius: 7.0,
-                                              spreadRadius: 0.0,
-                                              offset: Offset(
-                                                0.0,
-                                                6.0,
+                                            ]), child:
+                                      Container(
+                                        key: ValueKey(_counter),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                                200),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.pinkAccent
+                                                    .withAlpha(80),
+                                                blurRadius: 7.0,
+                                                spreadRadius: 0.0,
+                                                offset: Offset(
+                                                  0.0,
+                                                  6.0,
+                                                ),
                                               ),
-                                            ),
-                                          ]), child:
-                                    Image.asset(startImgPath, scale: 1,),
-                                    ),
+                                            ]), child:
+                                      Image.asset(startImgPath, scale: 1,),
+                                      ),
+                                      ),
                                     ),
                                   ),
+                                  radius: h * 1.1,
+                                  //shape: BoxShape.circle
                                 ),
-                                radius: h*1.1,
-                                //shape: BoxShape.circle
                               ),
+                              shape: BoxShape.circle,
+                              animate: engineStatus,
+                              curve: Curves.fastOutSlowIn,
                             ),
-                            shape: BoxShape.circle,
-                            animate: engineStatus,
-                            curve: Curves.fastOutSlowIn,
-                          ),
-                          AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 700),
-                              transitionBuilder: (Widget child,
-                                  Animation<double> animation) {
-                                return ScaleTransition(
-                                    child: child, scale: animation);
-                              },
-                              child:
-                              !temp_engineStatus ? Text(''
-                                /*Translations.current.engineStart()*/,
-                                key: ValueKey(_counter),
-                                style: TextStyle(fontWeight: FontWeight.w700,
-                                    fontSize: 25.0,
-                                    color: Colors.black26.withOpacity(0.5)),) :
-                              Container(
+                            AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 700),
+                                transitionBuilder: (Widget child,
+                                    Animation<double> animation) {
+                                  return ScaleTransition(
+                                      child: child, scale: animation);
+                                },
+                                child:
+                                !temp_engineStatus
+                                    ? Text(''
+                                  /*Translations.current.engineStart()*/,
                                   key: ValueKey(_counter),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(50),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.pinkAccent.withOpacity(0.6),
-                                          blurRadius: 6.0,
-                                          spreadRadius: 0.0,
-                                          offset: Offset(
-                                            0.0,
-                                            3.0,
+                                  style: TextStyle(fontWeight: FontWeight.w700,
+                                      fontSize: 25.0,
+                                      color: Colors.black26.withOpacity(0.5)),)
+                                    :
+                                Container(
+                                    key: ValueKey(_counter),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(50),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.pinkAccent
+                                                .withOpacity(0.6),
+                                            blurRadius: 6.0,
+                                            spreadRadius: 0.0,
+                                            offset: Offset(
+                                              0.0,
+                                              3.0,
+                                            ),
                                           ),
-                                        ),
-                                      ]),
-                                  child: Text(''
-                                    /*Translations.current.engineStart()*/,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 25.0,
-                                        color: Colors.greenAccent.withOpacity(
-                                            1.0)),))
-                          ),
-                          //),
-                          new Align(
-                            alignment: Alignment.center,
-                            child:
-                      new ProgressCard(width: MediaQuery
-                             .of(context)
-                             .size
-                             .width * 0.4,isOn: isEngineOn,isOff: isEngineOff,) ,),
-                        ],
+                                        ]),
+                                    child: Text(''
+                                      /*Translations.current.engineStart()*/,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 25.0,
+                                          color: Colors.greenAccent.withOpacity(
+                                              1.0)),))
+                            ),
+                            //),
+                            new Align(
+                              alignment: Alignment.center,
+                              child:
+                              new ProgressCard(width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width * 0.4,
+                                isOn: isEngineOn,
+                                isOff: isEngineOff,),),
+                          ],
+                        ),
+                        // ),
+
                       ),
-                      // ),
 
-                    ),
-
-                    Expanded(
-                      child:
-                      Padding(
-                        padding: EdgeInsets.only(
-                          top: 4.0, left: 25.0, right: 0.0,),
+                      Expanded(
                         child:
-                        Container(
-                          height: 0.5,
-                          color: Colors.black26,),),
-                    ),
-                  ],
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: 4.0, left: 25.0, right: 0.0,),
+                          child:
+                          Container(
+                            height: 0.5,
+                            color: Colors.black26,),),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              new Positioned(
-                right: -10.0,
-                bottom: h * 0.26,
-                child:
-                Row(
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.topRight,
-                      child:
-                      new Container(
-                        margin: EdgeInsets.only(
-                            right: 25.0, bottom: 5, top: 1.0),
+                new Positioned(
+                  right: -10.0,
+                  bottom: h * 0.26,
+                  child:
+                  Row(
+                    children: <Widget>[
+                      Align(
+                        alignment: Alignment.topRight,
                         child:
-                        new GestureDetector(
-                          onTap: ()  {
-                            trunk_status = !trunk_status;
-                           // updateTrunkStatus(trunk_status);
-                            /*listenerRepository.onTrunkTap(
+                        new Container(
+                          margin: EdgeInsets.only(
+                              right: 25.0, bottom: 5, top: 1.0),
+                          child:
+                          new GestureDetector(
+                            onTap: () {
+                              trunk_status = !trunk_status;
+                              // updateTrunkStatus(trunk_status);
+                              /*listenerRepository.onTrunkTap(
                                 context, trunk_status);*/
-                            widget.carStateVM.isTraunkOpen=trunk_status;
+                              widget.carStateVM.isTraunkOpen = trunk_status;
 
-                            /*widget.carStateVM.setCarStatusImages();
+                              /*widget.carStateVM.setCarStatusImages();
                             centerRepository.setCarStateVMMap(widget.carStateVM);
                             widget.carStateNoty.updateValue(widget.carStateVM);*/
-                            if(trunk_status) {
-                              //play(Constants.TRUNK_OPEN_SOUND);
-                             sendCommand(ActionsCommand.RemoteTrunk_Release_CODE);
-
-
-
-                            }
-                            else {
-                              //play(Constants.TRUNK_CLOSE_SOUND);
-                              sendCommand(ActionsCommand.DriveLock_ONOrOFF_Nano_CODE);
-
-                            }
-
-                          },
-                          child:
-                          AvatarGlow(
-                            startDelay: Duration(milliseconds: 1000),
-                            glowColor: Colors.white,
-                            endRadius: 40.0,
-                            duration: Duration(milliseconds: 2000),
-                            repeat: true,
-                            showTwoGlows: true,
-                            repeatPauseDuration: Duration(milliseconds: 100),
-                            child: Material(
-                              elevation: 0.0,
-                              shape: CircleBorder(),
-                              child: CircleAvatar(
-                                backgroundColor: Colors.transparent,
-                                //Colors.grey[100] ,
-                                child: (trunk_status && commandSuccess ) ? ImageNeonGlow(
-                                  imageUrl: 'assets/images/trunk.png',
-                                  counter: _counter,
-                                  color:_currentColor,) :
-                                Image.asset(
-                                  'assets/images/trunk.png', scale: 2.0,
-                                  color: _currentColor,),
-                                radius: 24.0,
-                                //shape: BoxShape.circle
+                              if (trunk_status) {
+                                //play(Constants.TRUNK_OPEN_SOUND);
+                                sendCommand(
+                                    ActionsCommand.RemoteTrunk_Release_CODE);
+                              }
+                              else {
+                                //play(Constants.TRUNK_CLOSE_SOUND);
+                                sendCommand(
+                                    ActionsCommand.DriveLock_ONOrOFF_Nano_CODE);
+                              }
+                            },
+                            child:
+                            AvatarGlow(
+                              startDelay: Duration(milliseconds: 1000),
+                              glowColor: Colors.white,
+                              endRadius: 40.0,
+                              duration: Duration(milliseconds: 2000),
+                              repeat: true,
+                              showTwoGlows: true,
+                              repeatPauseDuration: Duration(milliseconds: 100),
+                              child: Material(
+                                elevation: 0.0,
+                                shape: CircleBorder(),
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.transparent,
+                                  //Colors.grey[100] ,
+                                  child: (trunk_status && commandSuccess)
+                                      ? ImageNeonGlow(
+                                    imageUrl: 'assets/images/trunk.png',
+                                    counter: _counter,
+                                    color: _currentColor,)
+                                      :
+                                  Image.asset(
+                                    'assets/images/trunk.png', scale: 2.0,
+                                    color: _currentColor,),
+                                  radius: 24.0,
+                                  //shape: BoxShape.circle
+                                ),
                               ),
+                              shape: BoxShape.circle,
+                              animate: trunk_status,
+                              curve: Curves.fastOutSlowIn,
                             ),
-                            shape: BoxShape.circle,
-                            animate: trunk_status,
-                            curve: Curves.fastOutSlowIn,
-                          ),
 
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              new Positioned(
-                left: -10.0,
-                bottom: h * 0.26,
-                child:
-                Row(
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.topRight,
-                      child:
-                      new Container(
-                        margin: EdgeInsets.only(
-                            left: 25.0, bottom: 5, top: 10.0),
+                new Positioned(
+                  left: -10.0,
+                  bottom: h * 0.26,
+                  child:
+                  Row(
+                    children: <Widget>[
+                      Align(
+                        alignment: Alignment.topRight,
                         child:
-                        new GestureDetector(
-                          onTap: () {
-                            //listenerRepository.onTap(context, true);
-                            siren=!siren;
-
-                            widget.carStateVM.siren=siren;
-                           // updateSirenStatus(siren);
-                            sendCommand(siren ? ActionsCommand.SirenOn_ON_TAG :
-                            ActionsCommand.SirenOn_OFF_TAG);
-                          },
+                        new Container(
+                          margin: EdgeInsets.only(
+                              left: 25.0, bottom: 5, top: 10.0),
                           child:
-                          AvatarGlow(
-                            startDelay: Duration(milliseconds: 1000),
-                            glowColor: Colors.indigoAccent.withOpacity(0.5),
-                            endRadius: 40.0,
-                            duration: Duration(milliseconds: 2000),
-                            repeat: true,
-                            showTwoGlows: true,
-                            repeatPauseDuration: Duration(milliseconds: 100),
-                            child: Material(
-                              elevation: 0.0,
-                              shape: CircleBorder(),
-                              child: CircleAvatar(
-                                backgroundColor: Colors.transparent,
-                                //Colors.grey[100] ,
-                                child: (siren && commandSuccess) ? ImageNeonGlow(imageUrl: 'assets/images/horn.png',counter: _counter,color: widget.color,) :
-                                Image.asset(
-                                  'assets/images/horn.png', scale: 2.0,
-                                  color: _currentColor,),
-                                radius: 24.0,
-                              ),
-                            ),
-                            shape: BoxShape.circle,
-                            animate: siren,
-                            curve: Curves.fastOutSlowIn,
-                          ),
+                          new GestureDetector(
+                            onTap: () {
+                              //listenerRepository.onTap(context, true);
+                              siren = !siren;
 
+                              widget.carStateVM.siren = siren;
+                              // updateSirenStatus(siren);
+                              sendCommand(
+                                  siren ? ActionsCommand.SirenOn_ON_TAG :
+                                  ActionsCommand.SirenOn_OFF_TAG);
+                            },
+                            child:
+                            AvatarGlow(
+                              startDelay: Duration(milliseconds: 1000),
+                              glowColor: Colors.indigoAccent.withOpacity(0.5),
+                              endRadius: 40.0,
+                              duration: Duration(milliseconds: 2000),
+                              repeat: true,
+                              showTwoGlows: true,
+                              repeatPauseDuration: Duration(milliseconds: 100),
+                              child: Material(
+                                elevation: 0.0,
+                                shape: CircleBorder(),
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.transparent,
+                                  //Colors.grey[100] ,
+                                  child: (siren && commandSuccess)
+                                      ? ImageNeonGlow(
+                                    imageUrl: 'assets/images/horn.png',
+                                    counter: _counter,
+                                    color: widget.color,)
+                                      :
+                                  Image.asset(
+                                    'assets/images/horn.png', scale: 2.0,
+                                    color: _currentColor,),
+                                  radius: 24.0,
+                                ),
+                              ),
+                              shape: BoxShape.circle,
+                              animate: siren,
+                              curve: Curves.fastOutSlowIn,
+                            ),
+
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              new Positioned(
-                right: 35.0,
-                bottom: 0.0,
-                child:
-                Row(
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child:
-                      new Container(
-                        margin: EdgeInsets.only(
-                            left: 25.0, bottom: 5, top: 1.0),
+                new Positioned(
+                  right: 35.0,
+                  bottom: 0.0,
+                  child:
+                  Row(
+                    children: <Widget>[
+                      Align(
+                        alignment: Alignment.bottomRight,
                         child:
-                        new GestureDetector(
-                          onTap: () {
-                            aux2=!aux2;
-
-                            widget.carStateVM.AUX2_On=aux2;
-                           // updateAUX2Status(aux2);
-                            sendCommand(aux2 ? ActionsCommand.AUX2_Output_ON_CODE :
-                            ActionsCommand.AUX2_Output_OFF_CODE);
-                          },
+                        new Container(
+                          margin: EdgeInsets.only(
+                              left: 25.0, bottom: 5, top: 1.0),
                           child:
-                          AvatarGlow(
-                            startDelay: Duration(milliseconds: 1000),
-                            glowColor: Colors.redAccent.withOpacity(0.5),
-                            endRadius: 40.0,
-                            duration: Duration(milliseconds: 2000),
-                            repeat: true,
-                            showTwoGlows: true,
-                            repeatPauseDuration: Duration(milliseconds: 100),
-                            child: Material(
-                              elevation: 0.0,
-                              shape: CircleBorder(),
-                              child: CircleAvatar(
-                                backgroundColor: Colors.transparent,
-                                //Colors.grey[100] ,
-                                child: (aux2 && commandSuccess) ? ImageNeonGlow(imageUrl:'assets/images/aux2.png' ,counter: _counter,color: widget.color,) :
-                                Image.asset(
-                                  'assets/images/aux2.png', scale: 2.0,
-                                  color: _currentColor,),
-                                radius: 24.0,
-                                //shape: BoxShape.circle
-                              ),
-                            ),
-                            shape: BoxShape.circle,
-                            animate: aux2,
-                            curve: Curves.fastOutSlowIn,
-                          ),
+                          new GestureDetector(
+                            onTap: () {
+                              aux2 = !aux2;
 
+                              widget.carStateVM.AUX2_On = aux2;
+                              // updateAUX2Status(aux2);
+                              sendCommand(
+                                  aux2 ? ActionsCommand.AUX2_Output_ON_CODE :
+                                  ActionsCommand.AUX2_Output_OFF_CODE);
+                            },
+                            child:
+                            AvatarGlow(
+                              startDelay: Duration(milliseconds: 1000),
+                              glowColor: Colors.redAccent.withOpacity(0.5),
+                              endRadius: 40.0,
+                              duration: Duration(milliseconds: 2000),
+                              repeat: true,
+                              showTwoGlows: true,
+                              repeatPauseDuration: Duration(milliseconds: 100),
+                              child: Material(
+                                elevation: 0.0,
+                                shape: CircleBorder(),
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.transparent,
+                                  //Colors.grey[100] ,
+                                  child: (aux2 && commandSuccess)
+                                      ? ImageNeonGlow(
+                                    imageUrl: 'assets/images/aux2.png',
+                                    counter: _counter,
+                                    color: widget.color,)
+                                      :
+                                  Image.asset(
+                                    'assets/images/aux2.png', scale: 2.0,
+                                    color: _currentColor,),
+                                  radius: 24.0,
+                                  //shape: BoxShape.circle
+                                ),
+                              ),
+                              shape: BoxShape.circle,
+                              animate: aux2,
+                              curve: Curves.fastOutSlowIn,
+                            ),
+
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              new Positioned(
-                //left: 0.0,
-                bottom: -25.0,
-                child:
-                Row(
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child:
-                      new Container(
-                        margin: EdgeInsets.only(
-                            right: 0.0, bottom: 0, top:0.0),
+                new Positioned(
+                  //left: 0.0,
+                  bottom: -25.0,
+                  child:
+                  Row(
+                    children: <Widget>[
+                      Align(
+                        alignment: Alignment.bottomCenter,
                         child:
-                        new GestureDetector(
-                          onTap: () {
-
-                          },
+                        new Container(
+                          margin: EdgeInsets.only(
+                              right: 0.0, bottom: 0, top: 0.0),
                           child:
-                          AvatarGlow(
-                            startDelay: Duration(milliseconds: 1000),
-                            glowColor: Colors.white,
-                            endRadius: 40.0,
-                            duration: Duration(milliseconds: 2000),
-                            repeat: true,
-                            showTwoGlows: true,
-                            repeatPauseDuration: Duration(milliseconds: 100),
-                            child: Material(
-                              elevation: 0.0,
-                              shape: CircleBorder(
-                                side: BorderSide(width: 2.0,color: Colors.indigoAccent)
-                              ),
-                              child: CircleAvatar(
-                                backgroundColor: Colors.indigoAccent.withOpacity(0.5),
-                                //Colors.grey[100] ,
-                                child:Padding(padding: EdgeInsets.all(1.0), child: Text('Cut Off',style: TextStyle(color: Colors.white,fontSize: 10.0),)),
-                                radius: 24.0,
-                                //shape: BoxShape.circle
-                              ),
-                            ),
-                            shape: BoxShape.circle,
-                            animate: caput_status,
-                            curve: Curves.fastOutSlowIn,
-                          ),
+                          new GestureDetector(
+                            onTap: () {
 
+                            },
+                            child:
+                            AvatarGlow(
+                              startDelay: Duration(milliseconds: 1000),
+                              glowColor: Colors.white,
+                              endRadius: 40.0,
+                              duration: Duration(milliseconds: 2000),
+                              repeat: true,
+                              showTwoGlows: true,
+                              repeatPauseDuration: Duration(milliseconds: 100),
+                              child: Material(
+                                elevation: 0.0,
+                                shape: CircleBorder(
+                                    side: BorderSide(
+                                        width: 2.0, color: Colors.indigoAccent)
+                                ),
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.indigoAccent
+                                      .withOpacity(0.5),
+                                  //Colors.grey[100] ,
+                                  child: Padding(padding: EdgeInsets.all(1.0),
+                                      child: Text('Cut Off', style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10.0),)),
+                                  radius: 24.0,
+                                  //shape: BoxShape.circle
+                                ),
+                              ),
+                              shape: BoxShape.circle,
+                              animate: caput_status,
+                              curve: Curves.fastOutSlowIn,
+                            ),
+
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              new Positioned(
-                left: 35.0,
-                bottom: 0.0,
-                child:
-                Row(
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child:
-                      new Container(
-                        margin: EdgeInsets.only(
-                            right: 25.0, bottom: 5, top: 1.0),
+                new Positioned(
+                  left: 35.0,
+                  bottom: 0.0,
+                  child:
+                  Row(
+                    children: <Widget>[
+                      Align(
+                        alignment: Alignment.bottomRight,
                         child:
-                        new GestureDetector(
-                          onTap: () {
-                            aux1=!aux1;
-
-                            widget.carStateVM.AUX1_On=aux1;
-                           // updateAUX1Status(aux1);
-                            sendCommand(aux1 ? ActionsCommand.AUX1_Output_ON_CODE :
-                            ActionsCommand.AUX1_Output_OFF_CODE);
-                          },
+                        new Container(
+                          margin: EdgeInsets.only(
+                              right: 25.0, bottom: 5, top: 1.0),
                           child:
-                          AvatarGlow(
-                            startDelay: Duration(milliseconds: 1000),
-                            glowColor: Colors.redAccent.withOpacity(0.5),
-                            endRadius: 40.0,
-                            duration: Duration(milliseconds: 2000),
-                            repeat: true,
-                            showTwoGlows: true,
-                            repeatPauseDuration: Duration(milliseconds: 100),
-                            child: Material(
-                              elevation: 0.0,
-                              shape: CircleBorder(),
-                              child: CircleAvatar(
-                                backgroundColor: Colors.transparent,
-                                //Colors.grey[100] ,
-                                child: (aux1 && commandSuccess) ? ImageNeonGlow(imageUrl:'assets/images/aux1.png' ,counter: _counter,color: widget.color,) :
-                                Image.asset(
-                                  'assets/images/aux1.png', scale: 2.0,
-                                  color: _currentColor,),
-                                radius: 24.0,
-                                //shape: BoxShape.circle
-                              ),
-                            ),
-                            shape: BoxShape.circle,
-                            animate: aux1,
-                            curve: Curves.fastOutSlowIn,
-                          ),
+                          new GestureDetector(
+                            onTap: () {
+                              aux1 = !aux1;
 
+                              widget.carStateVM.AUX1_On = aux1;
+                              // updateAUX1Status(aux1);
+                              sendCommand(
+                                  aux1 ? ActionsCommand.AUX1_Output_ON_CODE :
+                                  ActionsCommand.AUX1_Output_OFF_CODE);
+                            },
+                            child:
+                            AvatarGlow(
+                              startDelay: Duration(milliseconds: 1000),
+                              glowColor: Colors.redAccent.withOpacity(0.5),
+                              endRadius: 40.0,
+                              duration: Duration(milliseconds: 2000),
+                              repeat: true,
+                              showTwoGlows: true,
+                              repeatPauseDuration: Duration(milliseconds: 100),
+                              child: Material(
+                                elevation: 0.0,
+                                shape: CircleBorder(),
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.transparent,
+                                  //Colors.grey[100] ,
+                                  child: (aux1 && commandSuccess)
+                                      ? ImageNeonGlow(
+                                    imageUrl: 'assets/images/aux1.png',
+                                    counter: _counter,
+                                    color: widget.color,)
+                                      :
+                                  Image.asset(
+                                    'assets/images/aux1.png', scale: 2.0,
+                                    color: _currentColor,),
+                                  radius: 24.0,
+                                  //shape: BoxShape.circle
+                                ),
+                              ),
+                              shape: BoxShape.circle,
+                              animate: aux1,
+                              curve: Curves.fastOutSlowIn,
+                            ),
+
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
+              ],
+            );
+        },
+        );
       },
         );
     }

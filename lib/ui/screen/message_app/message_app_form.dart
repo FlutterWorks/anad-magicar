@@ -1,9 +1,11 @@
 import 'dart:collection';
 
+import 'package:anad_magicar/bloc/values/notify_value.dart';
 import 'package:anad_magicar/components/no_data_widget.dart';
 import 'package:anad_magicar/components/pull_refresh/pull_to_refresh.dart';
 import 'package:anad_magicar/data/rest_ds.dart';
 import 'package:anad_magicar/model/apis/api_message.dart';
+import 'package:anad_magicar/model/message.dart';
 import 'package:anad_magicar/repository/center_repository.dart';
 import 'package:anad_magicar/translation_strings.dart';
 import 'package:anad_magicar/ui/screen/message_app/message_app_item.dart';
@@ -20,6 +22,7 @@ class MessageAppForm extends StatefulWidget {
 }
 
 class _MessageAppFormState extends State<MessageAppForm> {
+
 
   RefreshController _refreshController = RefreshController(initialRefresh: false);
   List<int> senderIds=new List();
@@ -52,6 +55,7 @@ class _MessageAppFormState extends State<MessageAppForm> {
   @override
   void initState() {
     super.initState();
+
     fMessages=getMessages();
   }
 
@@ -89,7 +93,6 @@ class _MessageAppFormState extends State<MessageAppForm> {
               _refreshController.refreshCompleted();
           },
           onLoading:() async {
-            //monitor fetch data from network
             await Future.delayed(Duration(milliseconds: 1000));
             var result= await refreshMessageApp();
             if (mounted) setState(() {});
@@ -133,7 +136,12 @@ class _MessageAppFormState extends State<MessageAppForm> {
         var uri=apiMsgs.where((m)=>m.MessageStatusConstId!=ApiMessage.MESSAGE_STATUS_AS_READ_TAG).toList();
         unReadItems=uri==null ? 0 : uri.length;
 
-        return MessageAppItem(carId: widget.carId,message: apiMessage,messagesCount: unReadItems,messageList: apiMsgs,senderId: senderId,);
+        return
+            MessageAppItem(carId: widget.carId,
+              message: apiMessage,
+              messagesCount: unReadItems,
+              messageList: apiMsgs,
+              senderId: senderId,);
         },
     ),
     ),
